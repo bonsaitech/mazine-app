@@ -185,7 +185,7 @@ input[type="date"].field-input::-webkit-calendar-picker-indicator { filter: inve
 .video-item:last-child { border-bottom: none; padding-bottom: 0; }
 .v-rank { font-weight: 200; font-size: 1.2rem; color: var(--teal); opacity: 0.45; width: 1.5rem; flex-shrink: 0; line-height: 1; padding-top: 2px; }
 .v-body { flex: 1; min-width: 0; }
-.v-title { font-size: 0.82rem; color: var(--cream); margin-bottom: 0.3rem; line-height: 1.4; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.v-title { font-size: 0.82rem; color: var(--cream); margin-bottom: 0.3rem; line-height: 1.4; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
 .v-why { font-family: 'Lora', serif; font-style: italic; font-size: 0.74rem; color: var(--teal); line-height: 1.5; margin-bottom: 0.45rem; }
 .v-stats { display: flex; gap: 0.75rem; flex-wrap: wrap; }
 .v-stat { font-size: 0.67rem; color: rgba(239,214,177,0.4); }
@@ -289,119 +289,187 @@ input[type="date"].field-input::-webkit-calendar-picker-indicator { filter: inve
 /* ── MOBILE (max 640px) ── */
 @media (max-width:640px) {
 
-  /* Header */
+  /* ── Header : logo gauche, bouton droit, badge client en dessous ── */
   header {
-    padding: 0.85rem 1.1rem;
-    flex-wrap: wrap;
-    gap: 0.5rem;
+    padding: 0.75rem 1rem;
+    flex-wrap: nowrap;
+    align-items: center;
   }
-  .logo { font-size: 1.15rem; letter-spacing: 0.2em; }
-  .badge { display: none; } /* hide AI ANALYTICS badge on mobile */
-  .current-client-badge { font-size: 0.58rem; padding: 0.25rem 0.65rem; max-width: 140px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-  .btn-logout { font-size: 0.58rem; padding: 0.25rem 0.65rem; }
+  header > div:first-child { gap: 0.5rem; flex-shrink: 0; }
+  header > div:last-child { gap: 0.4rem; flex-shrink: 0; }
+  .logo { font-size: 1.1rem; letter-spacing: 0.18em; }
+  .badge { display: none; }
+  /* Client badge : truncate long names */
+  .current-client-badge {
+    font-size: 0.55rem; padding: 0.2rem 0.55rem;
+    max-width: 110px; overflow: hidden;
+    text-overflow: ellipsis; white-space: nowrap;
+  }
+  /* "Déconnexion" → "↙" icon only */
+  .btn-logout { font-size: 0; padding: 0.3rem 0.6rem; }
+  .btn-logout::before { content: '←'; font-size: 0.75rem; }
 
-  /* Month bar */
+  /* ── Month bar : horizontal scroll, no wrap ── */
   .month-bar {
-    padding: 0.6rem 1rem;
-    top: 52px; /* adjusted for smaller header */
-    gap: 0.35rem;
+    padding: 0.5rem 1rem;
+    top: 46px;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    gap: 0.4rem;
   }
+  .month-bar::-webkit-scrollbar { display: none; }
   .month-bar-label { display: none; }
-  .month-pill { font-size: 0.58rem; padding: 0.25rem 0.6rem; }
+  .month-pill { font-size: 0.58rem; padding: 0.22rem 0.55rem; flex-shrink: 0; }
 
-  /* Upload screen */
-  #screen-upload, .client-wrap { padding: 1.25rem 1rem; }
-  .upload-hero { padding: 1.5rem 0 2rem; }
-  .hero-title { font-size: clamp(1.6rem, 8vw, 2.2rem); letter-spacing: 0.08em; }
-  .drop-grid { grid-template-columns: repeat(2, 1fr); gap: 0.6rem; }
-  .drop-zone { padding: 1rem 0.75rem; }
-  .dz-icon { width: 28px; height: 28px; font-size: 13px; margin-bottom: 0.6rem; }
-  .dz-name { font-size: 0.65rem; }
-  .dz-hint { font-size: 0.6rem; }
+  /* ── Upload screen ── */
+  #screen-upload, .client-wrap { padding: 1rem; }
+  .upload-hero { padding: 1.25rem 0 1.5rem; }
+  .hero-title { font-size: clamp(1.5rem, 7vw, 2rem); letter-spacing: 0.06em; }
+  .hero-sub { font-size: 0.82rem; }
+
+  /* Drop zones : 2 cols, compact but readable */
+  .drop-grid { grid-template-columns: repeat(2, 1fr); gap: 0.5rem; margin-bottom: 1.25rem; }
+  .drop-zone { padding: 0.85rem 0.6rem; }
+  .dz-icon { width: 26px; height: 26px; font-size: 12px; margin-bottom: 0.5rem; }
+  .dz-name { font-size: 0.63rem; letter-spacing: 0.04em; margin-bottom: 0.2rem; }
+  .dz-hint { font-size: 0.58rem; }
+
+  /* Spacing fix : gap between banner and files label */
+  .files-label { margin-top: 0.25rem; margin-bottom: 0.85rem; }
+
   .guide-steps { grid-template-columns: 1fr; }
   .form-row { grid-template-columns: 1fr; }
   .client-grid { grid-template-columns: 1fr; }
+  .client-card { padding: 1rem; }
 
-  /* Dashboard */
-  #screen-dashboard { padding: 1.1rem 1rem; }
-  .dash-title { font-size: 1.3rem; letter-spacing: 0.06em; }
-  .dash-top { margin-bottom: 1.1rem; }
-  .dash-top > div:last-child { width: 100%; display: flex; gap: 0.5rem; }
-  .btn-reset, .btn-export { flex: 1; text-align: center; font-size: 0.62rem; padding: 0.4rem 0.5rem; }
-  .dash-actions { width: 100%; }
-  .existing-data-banner-inner { flex-direction: column; align-items: flex-start; }
-  .existing-data-banner-inner > div:last-child { width: 100%; display: flex; flex-direction: column; gap: 0.5rem; }
-  .existing-data-banner-inner button { width: 100%; }
+  /* ── Dashboard ── */
+  #screen-dashboard { padding: 1rem; }
+  .dash-title { font-size: 1.2rem; letter-spacing: 0.05em; }
+  .dash-client { font-size: 0.52rem; }
+  .dash-period { font-size: 0.75rem; }
+  .dash-top { margin-bottom: 1rem; gap: 0.5rem; }
+  .dash-actions { width: 100%; display: flex; gap: 0.4rem; }
+  .btn-reset, .btn-export { flex: 1; text-align: center; font-size: 0.6rem; padding: 0.38rem 0.4rem; letter-spacing: 0.07em; }
+
+  /* Existing data banner */
+  .existing-data-banner-inner { flex-direction: column; align-items: flex-start; padding: 0.9rem 1rem; }
+  .existing-data-banner-inner > div:last-child { width: 100%; display: flex; flex-direction: column; gap: 0.4rem; }
+  .existing-data-banner-inner button { width: 100%; font-size: 0.68rem; padding: 0.55rem 0.75rem; }
 
   /* Mazine impact */
-  .mazine-impact { padding: 1rem; }
-  .impact-header { flex-direction: column; align-items: flex-start; gap: 0.6rem; }
-  .impact-kpis { grid-template-columns: 1fr; gap: 0.6rem; }
-  .kpi-row { flex-wrap: wrap; }
+  .mazine-impact { padding: 0.9rem 1rem; margin-bottom: 1rem; }
+  .impact-header { flex-direction: column; align-items: flex-start; gap: 0.5rem; }
+  .impact-kpis { grid-template-columns: 1fr; gap: 0.5rem; }
+  .impact-kpi { padding: 0.75rem; }
+  .kpi-after { font-size: 1.2rem; }
+  .kpi-before { font-size: 0.95rem; }
+  .kpi-delta { font-size: 0.6rem; }
+  .kpi-sub { font-size: 0.55rem; }
 
-  /* Metrics */
-  .metrics-row { grid-template-columns: repeat(2,1fr); gap: 0.5rem; margin-bottom: 1rem; }
-  .m-value { font-size: 1.25rem; }
+  /* Metrics — 2×2 + 1 full */
+  .metrics-row {
+    grid-template-columns: repeat(2,1fr);
+    gap: 0.45rem; margin-bottom: 0.85rem;
+  }
+  .metrics-row .m-card:last-child { grid-column: span 2; }
+  .m-value { font-size: 1.2rem; }
+  .m-label { font-size: 0.5rem; }
+  .m-sub { font-size: 0.58rem; }
+  .m-card { padding: 0.75rem; }
 
-  /* MoM / YoY */
-  .delta-row { grid-template-columns: 1fr; }
+  /* MoM/YoY */
+  .delta-row { grid-template-columns: 1fr; gap: 0.5rem; }
+  .delta-card { padding: 0.75rem; }
 
   /* AI banners */
-  .ai-banner { flex-direction: column; gap: 0.65rem; padding: 1rem; }
-  .ai-trigger-banner { flex-direction: column; align-items: flex-start; gap: 0.65rem; padding: 1rem; }
+  .ai-banner { flex-direction: column; gap: 0.5rem; padding: 0.9rem 1rem; margin-bottom: 0.85rem; }
+  .ai-text { font-size: 0.82rem; }
+  .ai-trigger-banner { flex-direction: column; align-items: flex-start; gap: 0.5rem; padding: 0.9rem 1rem; margin-bottom: 0.85rem; }
   .ai-trigger-banner > div:last-child { width: 100%; }
-  .btn-ai { width: 100%; text-align: center; }
+  .btn-ai { width: 100%; text-align: center; padding: 0.6rem 1rem; }
+
+  /* Section padding */
+  .section { padding: 0.9rem; margin-bottom: 0.75rem; }
+  .sec-label { margin-bottom: 0.65rem; }
 
   /* Diagnostic */
-  .two-col-inner { grid-template-columns: 1fr; }
+  .two-col-inner { grid-template-columns: 1fr; gap: 0.75rem; }
 
   /* Layouts */
-  .two-col { grid-template-columns: 1fr; }
+  .two-col { grid-template-columns: 1fr; gap: 0.75rem; }
   .reco-grid { grid-template-columns: 1fr; }
   .brief-grid { grid-template-columns: 1fr; }
   .comp-grid { grid-template-columns: 1fr; }
 
-  /* Videos */
-  .v-title { font-size: 0.78rem; }
-  .v-stats { gap: 0.5rem; }
-  .v-stat { font-size: 0.62rem; }
+  /* Videos — 2-line clamp */
+  .v-title { font-size: 0.75rem; -webkit-line-clamp: 2; white-space: normal !important; }
+  .v-body { min-width: 0; max-width: calc(100% - 3.5rem); }
+  .v-stats { gap: 0.35rem; }
+  .v-stat { font-size: 0.59rem; }
+  .v-eng-val { font-size: 0.95rem; }
+  .v-eng { flex-shrink: 0; min-width: 2.5rem; }
+  .video-item { gap: 0.5rem; padding: 0.65rem 0; align-items: flex-start; }
 
   /* Charts */
-  .chart-wrap { height: 130px; }
+  .chart-wrap { height: 120px; }
 
-  /* Heatmap — keep 24 cols but smaller cells */
-  .time-cell { height: 20px; border-radius: 2px; }
+  /* Heatmap */
+  .time-cell { height: 18px; border-radius: 2px; }
   .time-grid { gap: 2px; }
-  .time-labels { gap: 2px; }
-  .time-lbl { font-size: 0.4rem; }
+  .time-labels { gap: 2px; margin-top: 4px; }
+  .time-lbl { font-size: 0.38rem; }
+  .best-time { font-size: 0.65rem; margin-top: 0.5rem; }
 
   /* Toast */
   .toast {
-    white-space: normal;
-    text-align: center;
+    white-space: normal; text-align: center;
     max-width: calc(100vw - 2rem);
-    bottom: 1.25rem;
-    font-size: 0.72rem;
-    padding: 0.65rem 1.1rem;
+    bottom: 1rem; font-size: 0.7rem;
+    padding: 0.6rem 1rem; border-radius: 1rem;
   }
+
+  /* Reco cards */
+  .reco-card { padding: 0.85rem; }
+  .reco-text { font-size: 0.78rem; }
+
+  /* Brief */
+  .brief-item { padding: 0.75rem; }
+  .brief-text { font-size: 0.78rem; }
+
+  /* Sections */
+  .section { padding: 1rem; }
+  .mazine-impact { padding: 1rem; }
+  .bar-label { width: 3.5rem; font-size: 0.63rem; }
+  .bar-pct { width: 2.2rem; font-size: 0.6rem; }
+  .gender-val { font-size: 1.1rem; }
+  .kpi-before { font-size: 0.9rem; }
+  .kpi-after { font-size: 1.1rem; }
+  .delta-card { padding: 0.85rem; }
+  .delta-val { font-size: 0.95rem; }
+  .ai-trigger-desc { font-size: 0.75rem; }
+  .ai-text { font-size: 0.82rem; }
+  .sec-label { margin-bottom: 0.65rem; }
 }
 
 /* ── SMALL PHONES (max 380px) ── */
 @media (max-width:380px) {
   .drop-grid { grid-template-columns: 1fr; }
+  .hero-title { font-size: 1.3rem; }
+  .metrics-row .m-card:last-child { grid-column: span 1; }
   .metrics-row { grid-template-columns: 1fr 1fr; }
-  .hero-title { font-size: 1.4rem; }
 }
 </style>
 </head>
 <body>
 
 <header>
-  <div style="display:flex;align-items:center;gap:1rem;">
+  <div style="display:flex;align-items:center;gap:0.85rem;min-width:0;">
     <div class="logo">Ma<span>zine</span></div>
     <div class="badge">AI Analytics</div>
   </div>
-  <div style="display:flex;align-items:center;gap:0.75rem;">
+  <div style="display:flex;align-items:center;gap:0.5rem;flex-shrink:0;">
     <div id="current-client-badge" style="display:none;" class="current-client-badge" onclick="goToClients()"></div>
     <button class="btn-logout" id="btn-logout" style="display:none;" onclick="logout()">Déconnexion</button>
   </div>
@@ -462,7 +530,7 @@ input[type="date"].field-input::-webkit-calendar-picker-indicator { filter: inve
     </div>
 
     <!-- Existing data banner (shown when DB has data for this client) -->
-    <div id="existing-data-banner" class="existing-data-banner-inner">
+    <div id="existing-data-banner" style="display:none;margin-bottom:1.25rem;"><div class="existing-data-banner-inner">
       <div style="display:flex;align-items:center;gap:0.85rem;">
         <div style="width:28px;height:28px;background:rgba(97,143,155,0.2);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;color:var(--teal);flex-shrink:0;">↑</div>
         <div>
@@ -474,9 +542,9 @@ input[type="date"].field-input::-webkit-calendar-picker-indicator { filter: inve
         <button onclick="loadFromDB()" style="background:var(--teal);color:var(--dark);border:none;padding:0.55rem 1.1rem;font-family:'Plus Jakarta Sans',sans-serif;font-size:0.7rem;letter-spacing:0.12em;text-transform:uppercase;border-radius:2rem;cursor:pointer;">Utiliser ces données →</button>
         <button onclick="document.getElementById('existing-data-banner').style.display='none'" style="background:transparent;border:0.5px solid rgba(239,214,177,0.15);color:rgba(239,214,177,0.4);padding:0.55rem 1.1rem;font-family:'Plus Jakarta Sans',sans-serif;font-size:0.7rem;letter-spacing:0.12em;text-transform:uppercase;border-radius:2rem;cursor:pointer;">Uploader de nouveaux fichiers</button>
       </div>
-    </div>
+    </div></div>
 
-    <p class="files-label">Fichiers TikTok Analytics</p>
+    <p class="files-label" style="margin-top:1.5rem;">Fichiers TikTok Analytics</p>
     <div class="drop-grid" id="drop-grid"></div>
     <div class="progress-row">
       <div class="progress-track"><div class="progress-fill" id="progress-fill" style="width:0%"></div></div>
@@ -839,7 +907,7 @@ async function checkExistingData(clientId) {
       const contCount = data.content?.length || 0;
       document.getElementById('existing-data-desc').textContent =
         `${ovCount} jours d'overview, ${folCount} jours de followers, ${contCount} vidéos — dernier import disponible.`;
-      banner.style.display = 'flex';
+      banner.style.display = 'block';
     } else {
       window._dbData = null;
       banner.style.display = 'none';

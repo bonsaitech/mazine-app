@@ -972,17 +972,13 @@ iframe#userpilot-resource-centre-frame {
   <div class="drop-grid" id="drop-grid"></div>
 
   <div class="progress-row">
-
-  <div class="progress-row">
     <div class="progress-track"><div class="progress-fill" id="progress-fill" style="width:0%"></div></div>
     <span class="progress-label" id="progress-label">0 / 7 fichiers</span>
   </div>
 
-  <div class="api-key-row">
-    <div class="api-key-wrap" style="flex:1">
-      <label class="api-key-label" for="client-start-date">Mazine travaille avec ce client depuis</label>
-      <input type="date" id="client-start-date" class="api-key-input" style="color-scheme:dark" data-np-checked="1">
-    </div>
+  <div style="margin-bottom:0.75rem;">
+    <label class="api-key-label" for="client-start-date">Mazine travaille avec ce client depuis</label>
+    <input type="date" id="client-start-date" class="api-key-input" style="color-scheme:dark;width:100%">
   </div>
 
   <button class="btn-analyze" id="btn-analyze" onclick="startAnalysis()">Générer le rapport IA →</button>

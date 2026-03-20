@@ -53,61 +53,77 @@ app.post('/api/analyze', (req, res) => {
   if (!data) return res.status(400).json({ error: 'Données manquantes.' });
 
   const {
-    totalViews, followers, followerGrowth, avgEng, totalVideos,
-    top5, avgShareRate, avgLikeRate, startDate, beforeAfter
+    analyseMonth, monthViews, monthLikes, monthShares, monthVideos,
+    totalViewsFull, followers, followerGrowthFull,
+    avgEng, avgShareRate, avgLikeRate,
+    startDate, beforeAfter, monthVsPrev,
+    top5
   } = data;
 
-  const systemPrompt = `Tu es l'IA analytique senior de Mazine.mu, une agence de création de contenu TikTok basée à Maurice. 
-Tu analyses les performances TikTok de nos clients avec un regard stratégique et éditorial. 
+  const systemPrompt = `Tu es l'IA analytique senior de Mazine.mu, une agence de création de contenu TikTok basée à Maurice.
+Tu analyses les performances TikTok de nos clients avec un regard stratégique et éditorial.
 Ton rôle est de transformer la data brute en insights actionnables qui démontrent la valeur du partenariat Mazine.
-Tu connais les spécificités du marché mauricien : audience bilingue créole/français, forte affinité mobile, pics d'activité en soirée, sensibilité aux promotions locales.
+Tu connais les spécificités du marché mauricien : audience bilingue créole/français, forte affinité mobile, pics d'activité en soirée, sensibilité aux promotions locales et événements (fêtes, ramadan, vacances scolaires).
 Réponds uniquement en JSON valide, sans markdown, sans backticks.`;
 
-  const userPrompt = `Analyse les performances TikTok du client avec ces données :
+  const userPrompt = `Produis le rapport mensuel TikTok de ${analyseMonth || 'la période sélectionnée'}.
 
-MÉTRIQUES GLOBALES
-- Total vues : ${totalViews}
-- Vidéos publiées : ${totalVideos}
+━━━ CONTEXTE GLOBAL (365 jours) ━━━
+- Total vues sur l'année : ${totalViewsFull || 'N/A'}
 - Abonnés actuels : ${followers || 'N/A'}
-${followerGrowth ? `- Croissance abonnés (période) : +${followerGrowth}` : ''}
+${followerGrowthFull ? `- Croissance totale abonnés : +${followerGrowthFull}` : ''}
+${beforeAfter ? `- Impact partenariat Mazine (depuis ${startDate}) : ${beforeAfter}` : ''}
+
+━━━ MÉTRIQUES DU MOIS : ${analyseMonth || 'période'} ━━━
+- Vues : ${monthViews}
+- Likes : ${monthLikes}
+- Partages : ${monthShares}
+- Vidéos publiées ce mois : ${monthVideos}
 - Engagement moyen (top vidéos) : ${avgEng}%
-- Taux de partage moyen : ${avgShareRate}% (partages/vues — indicateur de viralité)
-- Taux de like moyen : ${avgLikeRate}% (likes/vues — indicateur d'affinité)
+- Taux de viralité moyen (partages/vues) : ${avgShareRate}%
+- Taux d'affinité moyen (likes/vues) : ${avgLikeRate}%
+${monthVsPrev ? `- Tendance : ${monthVsPrev}` : ''}
 
-${beforeAfter ? `IMPACT DEPUIS LE DÉBUT DU PARTENARIAT MAZINE (${startDate})
-${beforeAfter}` : ''}
+━━━ TOP 5 VIDÉOS DU MOIS ━━━
+${top5.map((v, i) => `${i+1}. "${v.title}"
+   Vues : ${v.views} | Likes : ${v.likes} | Commentaires : ${v.comments} | Partages : ${v.shares}
+   Engagement : ${v.engRate}% | Viralité : ${v.shareRate}% | Publié : ${v.postTime || 'N/A'}`).join('\n\n')}
 
-TOP 5 VIDÉOS (classées par score de performance)
-${top5.map((v, i) => `
-${i+1}. "${v.title}"
-   - Vues : ${v.views} | Likes : ${v.likes} | Commentaires : ${v.comments} | Partages : ${v.shares}
-   - Engagement : ${v.engRate}% | Ratio partages/vues : ${v.shareRate}%
-   - Publié le : ${v.postTime || 'N/A'}`).join('\n')}
-
-Produis une analyse JSON avec cette structure exacte :
+Produis le rapport JSON suivant. Chaque champ doit être précis, chiffré quand possible, et directement utile pour une réunion client :
 {
-  "synthese": "3-4 phrases d'analyse stratégique. Identifie les patterns dominants, la signature éditoriale qui performe, et l'impact mesurable du partenariat Mazine si applicable. Ton direct, chiffré, professionnel.",
-  
+  "synthese": "3-4 phrases. Résume les faits saillants du mois avec des chiffres concrets. Compare vs mois précédent si disponible. Mentionne l'impact Mazine si pertinent. Ton direct et professionnel.",
+
   "diagnostic": {
-    "points_forts": ["Point fort 1 appuyé par la data", "Point fort 2", "Point fort 3"],
-    "points_amelioration": ["Levier de croissance 1", "Levier de croissance 2"]
+    "points_forts": [
+      "Point fort 1 — appuyé par un chiffre précis du mois",
+      "Point fort 2",
+      "Point fort 3"
+    ],
+    "points_amelioration": [
+      "Levier de croissance 1 — concret et actionnable",
+      "Levier de croissance 2"
+    ]
   },
-  
-  "analyse_viralite": "1-2 phrases sur le ratio partages/likes. Un ratio partages élevé = contenu que les gens veulent montrer à leurs proches. Explique ce que ça révèle sur l'audience.",
-  
+
+  "analyse_viralite": "2 phrases max. Interprète le ratio partages/vues de ce mois. Un ratio élevé = contenu que les gens veulent montrer. Qu'est-ce que ça révèle sur ce qui résonne avec l'audience mauricienne ce mois-ci ?",
+
   "videos": [
-    {"rank": 1, "format": "Type de contenu (ex: démonstration produit, UGC reply, promo, storytelling, behind-the-scenes)", "pourquoi": "1 phrase précise sur le facteur clé de succès de cette vidéo spécifique"}
+    {
+      "rank": 1,
+      "format": "Catégorie précise : démonstration produit / UGC reply / promotion / storytelling / behind-the-scenes / tutoriel / contenu saisonnier",
+      "pourquoi": "1 phrase sur le facteur clé de succès — qu'est-ce qui a déclenché la performance ?"
+    }
   ],
-  
+
   "brief_prochain_contenu": {
-    "angle_prioritaire": "Le thème/angle qui devrait dominer les prochaines publications basé sur la data",
-    "format_recommande": "Format précis à reproduire (durée, structure, style)",
-    "accroche_type": "Type d'accroche qui performe pour ce client (question, chiffre choc, before/after, etc.)",
-    "a_eviter": "Ce qui ne performe pas ou risque de saturer l'audience"
+    "angle_prioritaire": "Le thème dominant à poursuivre le mois prochain, basé sur ce qui a performé",
+    "format_recommande": "Format exact : durée cible, structure narrative, style visuel",
+    "accroche_type": "Type d'accroche à privilégier (question, chiffre choc, before/after, défi, réponse commentaire…)",
+    "a_eviter": "Ce qui n'a pas performé ce mois ou ce qui risque de saturer — avec justification"
   },
-  
+
   "recommandations": [
-    "Recommandation 1 — très concrète et actionnable, avec contexte chiffré si possible",
+    "Recommandation 1 — ultra concrète, avec données du mois si possible",
     "Recommandation 2",
     "Recommandation 3",
     "Recommandation 4"

@@ -592,20 +592,44 @@ async function loadClients() {
       grid.innerHTML = '<p style="font-family:Lora,serif;font-style:italic;font-size:0.82rem;color:rgba(239,214,177,0.3)">Aucun client encore — créez-en un ci-dessous.</p>';
       return;
     }
+    // Store clients in a map for safe access by id
+    window._clientsMap = {};
+    data.clients.forEach(c => window._clientsMap[c.id] = c);
+
     grid.innerHTML = data.clients.map(c => `
-      <div class="client-card" onclick="selectClient(${c.id}, ${JSON.stringify(JSON.stringify(c))})">
+      <div class="client-card" data-client-id="${c.id}">
         <div>
           <p class="client-name">${esc(c.name)}</p>
           <p class="client-since">${c.mazine_start_date ? 'Depuis le '+formatClientDate(c.mazine_start_date) : 'Date partenariat non définie'}</p>
         </div>
         <div style="display:flex;align-items:center;gap:0.5rem;">
-          <div class="client-actions" onclick="event.stopPropagation()">
-            <button class="btn-client-edit" onclick="editClient(${c.id},'${esc(c.name)}','${c.mazine_start_date||''}')" title="Modifier">✎</button>
-            <button class="btn-client-del" onclick="deleteClient(${c.id},'${esc(c.name)}')" title="Supprimer">✕</button>
+          <div class="client-actions">
+            <button class="btn-client-edit" data-edit-id="${c.id}" title="Modifier">✎</button>
+            <button class="btn-client-del" data-del-id="${c.id}" title="Supprimer">✕</button>
           </div>
           <span class="client-arrow">→</span>
         </div>
       </div>`).join('');
+
+    // Attach events safely after rendering
+    grid.querySelectorAll('.client-card').forEach(card => {
+      const id = +card.dataset.clientId;
+      card.addEventListener('click', () => selectClient(id, window._clientsMap[id]));
+    });
+    grid.querySelectorAll('.btn-client-edit').forEach(btn => {
+      btn.addEventListener('click', e => {
+        e.stopPropagation();
+        const c = window._clientsMap[+btn.dataset.editId];
+        editClient(c.id, c.name, c.mazine_start_date||'');
+      });
+    });
+    grid.querySelectorAll('.btn-client-del').forEach(btn => {
+      btn.addEventListener('click', e => {
+        e.stopPropagation();
+        const c = window._clientsMap[+btn.dataset.delId];
+        deleteClient(c.id, c.name);
+      });
+    });
   } catch(err) {
     console.error('loadClients error:', err);
     grid.innerHTML = '<p style="color:#f0a0a0;font-family:Lora,serif;font-style:italic;font-size:0.82rem;">Erreur : ' + err.message + '</p>';
@@ -650,8 +674,8 @@ function editClient(id, name, date) {
   }).then(()=>{ showToast('Client mis à jour'); loadClients(); }).catch(()=>showToast('Erreur','error'));
 }
 
-function selectClient(id, clientJSON) {
-  currentClient = JSON.parse(clientJSON);
+function selectClient(id, clientObj) {
+  currentClient = typeof clientObj === 'string' ? JSON.parse(clientObj) : clientObj;
   // Set the mazine start date from client record
   if (currentClient.mazine_start_date) {
     document.getElementById('client-start-date').value = currentClient.mazine_start_date.split('T')[0];

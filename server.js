@@ -1,24 +1,52 @@
 const express = require('express');
 const path = require('path');
 const crypto = require('crypto');
+const { Pool } = require('pg');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-app.use(express.json({ limit: '2mb' }));
+app.use(express.json({ limit: '4mb' }));
 app.use(express.static(path.join(__dirname, 'public')));
 
-// Simple in-memory session store (token → expiry)
-const sessions = new Map();
-const SESSION_TTL = 8 * 60 * 60 * 1000; // 8 hours
+// ── DATABASE ──────────────────────────────────────────
+const pool = new Pool({
+  connectionString: process.env.DATABASE_URL,
+  ssl: { rejectUnauthorized: false }
+});
 
-function createToken() {
-  return crypto.randomBytes(32).toString('hex');
+async function initDB() {
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS clients (
+      id SERIAL PRIMARY KEY,
+      name TEXT NOT NULL,
+      mazine_start_date DATE,
+      created_at TIMESTAMPTZ DEFAULT NOW()
+    );
+
+    CREATE TABLE IF NOT EXISTS reports (
+      id SERIAL PRIMARY KEY,
+      client_id INTEGER REFERENCES clients(id) ON DELETE CASCADE,
+      month_key TEXT NOT NULL,           -- 'all' or 'YYYY-MM'
+      ai_result JSONB,
+      created_at TIMESTAMPTZ DEFAULT NOW(),
+      updated_at TIMESTAMPTZ DEFAULT NOW(),
+      UNIQUE(client_id, month_key)
+    );
+  `);
+  console.log('DB ready');
 }
 
+initDB().catch(err => console.error('DB init error:', err));
+
+// ── SESSION ───────────────────────────────────────────
+const sessions = new Map();
+const SESSION_TTL = 8 * 60 * 60 * 1000;
+
+function createToken() { return crypto.randomBytes(32).toString('hex'); }
+
 function isAuthenticated(req) {
-  const auth = req.headers['authorization'] || '';
-  const token = auth.replace('Bearer ', '').trim();
+  const token = (req.headers['authorization'] || '').replace('Bearer ', '').trim();
   if (!token) return false;
   const expiry = sessions.get(token);
   if (!expiry || Date.now() > expiry) { sessions.delete(token); return false; }
@@ -29,7 +57,7 @@ function isAuthenticated(req) {
 app.post('/api/login', (req, res) => {
   const { password } = req.body;
   const expected = process.env.APP_PASSWORD;
-  if (!expected) return res.status(500).json({ error: 'APP_PASSWORD not configured on server.' });
+  if (!expected) return res.status(500).json({ error: 'APP_PASSWORD not configured.' });
   if (password !== expected) return res.status(401).json({ error: 'Mot de passe incorrect.' });
   const token = createToken();
   sessions.set(token, Date.now() + SESSION_TTL);
@@ -37,17 +65,106 @@ app.post('/api/login', (req, res) => {
 });
 
 app.post('/api/logout', (req, res) => {
-  const auth = req.headers['authorization'] || '';
-  sessions.delete(auth.replace('Bearer ', '').trim());
+  sessions.delete((req.headers['authorization'] || '').replace('Bearer ', '').trim());
   res.json({ ok: true });
 });
 
-// ── OPENAI PROXY ──────────────────────────────────────
+// ── CLIENTS ───────────────────────────────────────────
+// GET all clients
+app.get('/api/clients', async (req, res) => {
+  if (!isAuthenticated(req)) return res.status(401).json({ error: 'Non authentifié.' });
+  try {
+    const { rows } = await pool.query(
+      'SELECT id, name, mazine_start_date FROM clients ORDER BY name ASC'
+    );
+    res.json({ clients: rows });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// POST create client
+app.post('/api/clients', async (req, res) => {
+  if (!isAuthenticated(req)) return res.status(401).json({ error: 'Non authentifié.' });
+  const { name, mazine_start_date } = req.body;
+  if (!name?.trim()) return res.status(400).json({ error: 'Nom requis.' });
+  try {
+    const { rows } = await pool.query(
+      'INSERT INTO clients (name, mazine_start_date) VALUES ($1, $2) RETURNING id, name, mazine_start_date',
+      [name.trim(), mazine_start_date || null]
+    );
+    res.json({ client: rows[0] });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// PUT update client
+app.put('/api/clients/:id', async (req, res) => {
+  if (!isAuthenticated(req)) return res.status(401).json({ error: 'Non authentifié.' });
+  const { name, mazine_start_date } = req.body;
+  try {
+    const { rows } = await pool.query(
+      'UPDATE clients SET name=$1, mazine_start_date=$2 WHERE id=$3 RETURNING id, name, mazine_start_date',
+      [name.trim(), mazine_start_date || null, req.params.id]
+    );
+    if (!rows.length) return res.status(404).json({ error: 'Client introuvable.' });
+    res.json({ client: rows[0] });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// DELETE client
+app.delete('/api/clients/:id', async (req, res) => {
+  if (!isAuthenticated(req)) return res.status(401).json({ error: 'Non authentifié.' });
+  try {
+    await pool.query('DELETE FROM clients WHERE id=$1', [req.params.id]);
+    res.json({ ok: true });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// ── REPORTS ───────────────────────────────────────────
+// GET all reports for a client
+app.get('/api/clients/:id/reports', async (req, res) => {
+  if (!isAuthenticated(req)) return res.status(401).json({ error: 'Non authentifié.' });
+  try {
+    const { rows } = await pool.query(
+      'SELECT month_key, ai_result, updated_at FROM reports WHERE client_id=$1 ORDER BY month_key',
+      [req.params.id]
+    );
+    res.json({ reports: rows });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// POST save/update a report for a client+month
+app.post('/api/clients/:id/reports', async (req, res) => {
+  if (!isAuthenticated(req)) return res.status(401).json({ error: 'Non authentifié.' });
+  const { month_key, ai_result } = req.body;
+  if (!month_key) return res.status(400).json({ error: 'month_key requis.' });
+  try {
+    await pool.query(`
+      INSERT INTO reports (client_id, month_key, ai_result, updated_at)
+      VALUES ($1, $2, $3, NOW())
+      ON CONFLICT (client_id, month_key)
+      DO UPDATE SET ai_result=$3, updated_at=NOW()
+    `, [req.params.id, month_key, JSON.stringify(ai_result)]);
+    res.json({ ok: true });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// ── AI PROXY ──────────────────────────────────────────
 app.post('/api/analyze', (req, res) => {
   if (!isAuthenticated(req)) return res.status(401).json({ error: 'Non authentifié.' });
 
   const apiKey = process.env.OPENAI_API_KEY;
-  if (!apiKey) return res.status(500).json({ error: 'OPENAI_API_KEY not configured on server.' });
+  if (!apiKey) return res.status(500).json({ error: 'OPENAI_API_KEY not configured.' });
 
   const { data } = req.body;
   if (!data) return res.status(400).json({ error: 'Données manquantes.' });
@@ -56,8 +173,7 @@ app.post('/api/analyze', (req, res) => {
     analyseMonth, monthViews, monthLikes, monthShares, monthVideos,
     totalViewsFull, followers, followerGrowthFull,
     avgEng, avgShareRate, avgLikeRate,
-    startDate, beforeAfter, monthVsPrev,
-    top5
+    startDate, beforeAfter, monthVsPrev, top5
   } = data;
 
   const systemPrompt = `Tu es l'IA analytique senior de Mazine.mu, une agence de création de contenu TikTok basée à Maurice.
@@ -89,45 +205,22 @@ ${top5.map((v, i) => `${i+1}. "${v.title}"
    Vues : ${v.views} | Likes : ${v.likes} | Commentaires : ${v.comments} | Partages : ${v.shares}
    Engagement : ${v.engRate}% | Viralité : ${v.shareRate}% | Publié : ${v.postTime || 'N/A'}`).join('\n\n')}
 
-Produis le rapport JSON suivant. Chaque champ doit être précis, chiffré quand possible, et directement utile pour une réunion client :
+Produis le rapport JSON suivant :
 {
-  "synthese": "3-4 phrases. Résume les faits saillants du mois avec des chiffres concrets. Compare vs mois précédent si disponible. Mentionne l'impact Mazine si pertinent. Ton direct et professionnel.",
-
+  "synthese": "3-4 phrases. Résume les faits saillants du mois avec des chiffres concrets.",
   "diagnostic": {
-    "points_forts": [
-      "Point fort 1 — appuyé par un chiffre précis du mois",
-      "Point fort 2",
-      "Point fort 3"
-    ],
-    "points_amelioration": [
-      "Levier de croissance 1 — concret et actionnable",
-      "Levier de croissance 2"
-    ]
+    "points_forts": ["Point fort 1 — appuyé par un chiffre", "Point fort 2", "Point fort 3"],
+    "points_amelioration": ["Levier 1 — concret et actionnable", "Levier 2"]
   },
-
-  "analyse_viralite": "2 phrases max. Interprète le ratio partages/vues de ce mois. Un ratio élevé = contenu que les gens veulent montrer. Qu'est-ce que ça révèle sur ce qui résonne avec l'audience mauricienne ce mois-ci ?",
-
-  "videos": [
-    {
-      "rank": 1,
-      "format": "Catégorie précise : démonstration produit / UGC reply / promotion / storytelling / behind-the-scenes / tutoriel / contenu saisonnier",
-      "pourquoi": "1 phrase sur le facteur clé de succès — qu'est-ce qui a déclenché la performance ?"
-    }
-  ],
-
+  "analyse_viralite": "2 phrases max. Interprète le ratio partages/vues.",
+  "videos": [{"rank": 1, "format": "Catégorie précise", "pourquoi": "1 phrase sur le facteur clé de succès"}],
   "brief_prochain_contenu": {
-    "angle_prioritaire": "Le thème dominant à poursuivre le mois prochain, basé sur ce qui a performé",
-    "format_recommande": "Format exact : durée cible, structure narrative, style visuel",
-    "accroche_type": "Type d'accroche à privilégier (question, chiffre choc, before/after, défi, réponse commentaire…)",
-    "a_eviter": "Ce qui n'a pas performé ce mois ou ce qui risque de saturer — avec justification"
+    "angle_prioritaire": "Thème dominant à poursuivre",
+    "format_recommande": "Format exact",
+    "accroche_type": "Type d'accroche à privilégier",
+    "a_eviter": "Ce qui n'a pas performé — avec justification"
   },
-
-  "recommandations": [
-    "Recommandation 1 — ultra concrète, avec données du mois si possible",
-    "Recommandation 2",
-    "Recommandation 3",
-    "Recommandation 4"
-  ]
+  "recommandations": ["Recommandation 1", "Recommandation 2", "Recommandation 3", "Recommandation 4"]
 }`;
 
   fetch('https://api.openai.com/v1/chat/completions', {
@@ -157,6 +250,4 @@ app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
-app.listen(PORT, () => {
-  console.log(`Mazine Analytics running on port ${PORT}`);
-});
+app.listen(PORT, () => console.log(`Mazine Analytics running on port ${PORT}`));

@@ -33,6 +33,25 @@ header { display: flex; align-items: center; justify-content: space-between; pad
 .login-wrap { max-width: 400px; margin: 0 auto; padding: 5rem 2rem; text-align: center; }
 .login-box { text-align: left; background: var(--cream-faint); border: 0.5px solid rgba(239,214,177,0.1); border-radius: 1rem; padding: 1.75rem; }
 .login-error { font-size: 0.75rem; color: #f0a0a0; margin-top: 0.5rem; min-height: 1rem; font-family: 'Lora', serif; font-style: italic; }
+/* ── CLIENTS ── */
+.client-wrap { max-width: 640px; margin: 0 auto; padding: 3rem 2rem; }
+.client-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 0.85rem; margin: 1.5rem 0 2rem; }
+.client-card { background: var(--cream-faint); border: 0.5px solid rgba(239,214,177,0.1); border-radius: 1rem; padding: 1.25rem 1.5rem; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; justify-content: space-between; gap: 1rem; }
+.client-card:hover { border-color: var(--teal); background: var(--teal-dim); }
+.client-name { font-size: 0.95rem; font-weight: 400; color: var(--cream); margin-bottom: 0.2rem; }
+.client-since { font-family: "Lora", serif; font-style: italic; font-size: 0.72rem; color: var(--teal); }
+.client-arrow { font-size: 1rem; color: rgba(239,214,177,0.2); flex-shrink: 0; }
+.client-card:hover .client-arrow { color: var(--teal); }
+.client-actions { display: flex; gap: 0.5rem; flex-shrink: 0; }
+.btn-client-edit { background: transparent; border: 0.5px solid rgba(239,214,177,0.1); color: rgba(239,214,177,0.3); width: 28px; height: 28px; border-radius: 50%; cursor: pointer; font-size: 0.7rem; transition: all 0.2s; display: flex; align-items: center; justify-content: center; }
+.btn-client-edit:hover { border-color: var(--teal); color: var(--teal); }
+.btn-client-del { background: transparent; border: 0.5px solid rgba(239,214,177,0.1); color: rgba(239,214,177,0.2); width: 28px; height: 28px; border-radius: 50%; cursor: pointer; font-size: 0.7rem; transition: all 0.2s; display: flex; align-items: center; justify-content: center; }
+.btn-client-del:hover { border-color: rgba(192,90,90,0.5); color: #f0a0a0; }
+.client-new-form { background: var(--cream-faint); border: 0.5px solid rgba(239,214,177,0.1); border-radius: 1rem; padding: 1.5rem; margin-top: 1rem; }
+.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; margin-bottom: 0.75rem; }
+.current-client-badge { display: inline-flex; align-items: center; gap: 0.5rem; background: var(--teal-dim); border: 0.5px solid var(--teal-border); border-radius: 2rem; padding: 0.3rem 0.85rem; font-size: 0.65rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--teal); cursor: pointer; transition: all 0.2s; }
+.current-client-badge:hover { background: rgba(97,143,155,0.2); }
+
 
 /* ── UPLOAD ── */
 .upload-hero { text-align: center; padding: 2.5rem 0 3rem; }
@@ -266,7 +285,10 @@ input[type="date"].field-input::-webkit-calendar-picker-indicator { filter: inve
     <div class="logo">Ma<span>zine</span></div>
     <div class="badge">AI Analytics</div>
   </div>
-  <button class="btn-logout" id="btn-logout" style="display:none;" onclick="logout()">Déconnexion</button>
+  <div style="display:flex;align-items:center;gap:0.75rem;">
+    <div id="current-client-badge" style="display:none;" class="current-client-badge" onclick="goToClients()"></div>
+    <button class="btn-logout" id="btn-logout" style="display:none;" onclick="logout()">Déconnexion</button>
+  </div>
 </header>
 
 <!-- LOGIN -->
@@ -279,6 +301,37 @@ input[type="date"].field-input::-webkit-calendar-picker-indicator { filter: inve
       <input class="field-input" type="password" id="login-password" placeholder="••••••••" onkeydown="if(event.key==='Enter') doLogin()">
       <p class="login-error" id="login-error"></p>
       <button id="btn-login" onclick="doLogin()" style="margin-top:1rem;width:100%;background:var(--teal);color:var(--dark);border:none;padding:0.85rem 2rem;font-family:'Plus Jakarta Sans',sans-serif;font-size:0.8rem;letter-spacing:0.15em;text-transform:uppercase;border-radius:2rem;cursor:pointer;">Accéder →</button>
+    </div>
+  </div>
+</div>
+
+
+<!-- CLIENTS -->
+<div class="screen" id="screen-clients">
+  <div class="client-wrap">
+    <p class="eyebrow" style="margin-bottom:0.5rem;">Sélectionner un client</p>
+    <h2 style="font-weight:200;font-size:1.6rem;letter-spacing:0.1em;text-transform:uppercase;margin-bottom:0.25rem;">Clients</h2>
+    <p style="font-family:'Lora',serif;font-style:italic;font-size:0.82rem;color:var(--cream-dim);margin-bottom:0;">Choisissez un client pour accéder à son rapport.</p>
+
+    <div class="client-grid" id="client-grid">
+      <p style="font-family:'Lora',serif;font-style:italic;font-size:0.82rem;color:rgba(239,214,177,0.3);">Chargement…</p>
+    </div>
+
+    <div>
+      <p class="files-label">Nouveau client</p>
+      <div class="client-new-form">
+        <div class="form-row">
+          <div>
+            <label class="field-label" for="new-client-name">Nom du client</label>
+            <input type="text" id="new-client-name" class="field-input" placeholder="Ex: Restaurant Jade">
+          </div>
+          <div>
+            <label class="field-label" for="new-client-date">Date début partenariat</label>
+            <input type="date" id="new-client-date" class="field-input">
+          </div>
+        </div>
+        <button onclick="createClient()" style="background:var(--teal);color:var(--dark);border:none;padding:0.7rem 1.5rem;font-family:'Plus Jakarta Sans',sans-serif;font-size:0.78rem;letter-spacing:0.12em;text-transform:uppercase;border-radius:2rem;cursor:pointer;transition:all 0.2s;">Créer le client →</button>
+      </div>
     </div>
   </div>
 </div>
@@ -332,7 +385,7 @@ input[type="date"].field-input::-webkit-calendar-picker-indicator { filter: inve
 
     <div class="dash-top">
       <div>
-        <p class="dash-client">Mazine Analytics</p>
+        <p class="dash-client" id="dash-client-name">Mazine Analytics</p>
         <h2 class="dash-title">Performance TikTok</h2>
         <p class="dash-period" id="dash-period"></p>
       </div>
@@ -456,9 +509,14 @@ input[type="date"].field-input::-webkit-calendar-picker-indicator { filter: inve
 
 <script>
 // ═══════════════════════════════════════════════════
-// AUTH
+// STATE
 // ═══════════════════════════════════════════════════
 let authToken = sessionStorage.getItem('mz_token') || null;
+let currentClient = null; // { id, name, mazine_start_date }
+
+// ═══════════════════════════════════════════════════
+// AUTH
+// ═══════════════════════════════════════════════════
 
 async function doLogin() {
   const pw = document.getElementById('login-password').value;
@@ -473,7 +531,7 @@ async function doLogin() {
     authToken = data.token;
     sessionStorage.setItem('mz_token', authToken);
     document.getElementById('btn-logout').style.display = 'block';
-    showScreen('screen-upload');
+    await goToClients();
   } catch { errEl.textContent = 'Erreur de connexion.'; }
   btn.textContent = 'Accéder →'; btn.style.opacity = '1';
 }
@@ -481,7 +539,9 @@ async function doLogin() {
 async function logout() {
   if (authToken) fetch('/api/logout', {method:'POST', headers:{'Authorization':'Bearer '+authToken}});
   authToken = null; sessionStorage.removeItem('mz_token');
+  currentClient = null;
   document.getElementById('btn-logout').style.display = 'none';
+  document.getElementById('current-client-badge').style.display = 'none';
   document.getElementById('month-bar').style.display = 'none';
   document.getElementById('login-password').value = '';
   showScreen('screen-login');
@@ -490,12 +550,130 @@ async function logout() {
 window.addEventListener('DOMContentLoaded', async () => {
   if (authToken) {
     try {
-      const res = await fetch('/api/analyze', {method:'POST', headers:{'Content-Type':'application/json','Authorization':'Bearer '+authToken}, body:JSON.stringify({data:null})});
-      if (res.status===400) { document.getElementById('btn-logout').style.display='block'; showScreen('screen-upload'); return; }
-      if (res.status===401) { authToken=null; sessionStorage.removeItem('mz_token'); }
+      const res = await fetch('/api/clients', { headers:{'Authorization':'Bearer '+authToken} });
+      if (res.status===401) { authToken=null; sessionStorage.removeItem('mz_token'); return; }
+      document.getElementById('btn-logout').style.display = 'block';
+      await goToClients();
     } catch {}
   }
 });
+
+// ═══════════════════════════════════════════════════
+// CLIENTS
+// ═══════════════════════════════════════════════════
+async function goToClients() {
+  currentClient = null;
+  document.getElementById('current-client-badge').style.display = 'none';
+  document.getElementById('month-bar').style.display = 'none';
+  showScreen('screen-clients');
+  await loadClients();
+}
+
+async function loadClients() {
+  try {
+    const res = await fetch('/api/clients', { headers:{'Authorization':'Bearer '+authToken} });
+    const data = await res.json();
+    const grid = document.getElementById('client-grid');
+    if (!data.clients?.length) {
+      grid.innerHTML = '<p style="font-family:'Lora',serif;font-style:italic;font-size:0.82rem;color:rgba(239,214,177,0.3);">Aucun client encore — créez-en un ci-dessous.</p>';
+      return;
+    }
+    grid.innerHTML = data.clients.map(c => `
+      <div class="client-card" onclick="selectClient(${c.id}, ${JSON.stringify(JSON.stringify(c))})">
+        <div>
+          <p class="client-name">${esc(c.name)}</p>
+          <p class="client-since">${c.mazine_start_date ? 'Depuis le '+formatClientDate(c.mazine_start_date) : 'Date partenariat non définie'}</p>
+        </div>
+        <div style="display:flex;align-items:center;gap:0.5rem;">
+          <div class="client-actions" onclick="event.stopPropagation()">
+            <button class="btn-client-edit" onclick="editClient(${c.id},'${esc(c.name)}','${c.mazine_start_date||''}')" title="Modifier">✎</button>
+            <button class="btn-client-del" onclick="deleteClient(${c.id},'${esc(c.name)}')" title="Supprimer">✕</button>
+          </div>
+          <span class="client-arrow">→</span>
+        </div>
+      </div>`).join('');
+  } catch(err) { showToast('Erreur chargement clients', 'error'); }
+}
+
+async function createClient() {
+  const name = document.getElementById('new-client-name').value.trim();
+  const date = document.getElementById('new-client-date').value;
+  if (!name) { showToast('Entrez un nom de client', 'warn'); return; }
+  try {
+    const res = await fetch('/api/clients', {
+      method:'POST', headers:{'Content-Type':'application/json','Authorization':'Bearer '+authToken},
+      body: JSON.stringify({ name, mazine_start_date: date||null })
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error);
+    document.getElementById('new-client-name').value = '';
+    document.getElementById('new-client-date').value = '';
+    showToast('Client créé !');
+    await loadClients();
+  } catch(err) { showToast('Erreur : '+err.message, 'error'); }
+}
+
+async function deleteClient(id, name) {
+  if (!confirm('Supprimer "'+name+'" et tous ses rapports ?')) return;
+  try {
+    await fetch('/api/clients/'+id, { method:'DELETE', headers:{'Authorization':'Bearer '+authToken} });
+    showToast('Client supprimé');
+    await loadClients();
+  } catch(err) { showToast('Erreur suppression', 'error'); }
+}
+
+function editClient(id, name, date) {
+  const newName = prompt('Nouveau nom :', name);
+  if (!newName?.trim()) return;
+  const newDate = prompt('Date partenariat (YYYY-MM-DD) :', date||'');
+  fetch('/api/clients/'+id, {
+    method:'PUT', headers:{'Content-Type':'application/json','Authorization':'Bearer '+authToken},
+    body: JSON.stringify({ name:newName.trim(), mazine_start_date:newDate||null })
+  }).then(()=>{ showToast('Client mis à jour'); loadClients(); }).catch(()=>showToast('Erreur','error'));
+}
+
+function selectClient(id, clientJSON) {
+  currentClient = JSON.parse(clientJSON);
+  // Set the mazine start date from client record
+  if (currentClient.mazine_start_date) {
+    document.getElementById('client-start-date').value = currentClient.mazine_start_date.split('T')[0];
+  } else {
+    document.getElementById('client-start-date').value = '';
+  }
+  // Show client badge in header
+  const badge = document.getElementById('current-client-badge');
+  badge.style.display = 'inline-flex';
+  badge.textContent = '← ' + currentClient.name;
+  showScreen('screen-upload');
+  // Auto-load saved AI reports from DB
+  loadSavedReports(id);
+}
+
+async function loadSavedReports(clientId) {
+  try {
+    const res = await fetch('/api/clients/'+clientId+'/reports', { headers:{'Authorization':'Bearer '+authToken} });
+    const data = await res.json();
+    (data.reports||[]).forEach(r => {
+      if (r.ai_result) aiCache[r.month_key] = r.ai_result;
+    });
+    if (data.reports?.length) showToast(data.reports.length+' rapport(s) IA chargé(s) depuis la base');
+  } catch {}
+}
+
+async function saveReportToDB(monthKey, aiResult) {
+  if (!currentClient) return;
+  try {
+    await fetch('/api/clients/'+currentClient.id+'/reports', {
+      method:'POST', headers:{'Content-Type':'application/json','Authorization':'Bearer '+authToken},
+      body: JSON.stringify({ month_key: monthKey, ai_result: aiResult })
+    });
+  } catch(err) { console.warn('Save report failed:', err); }
+}
+
+function formatClientDate(d) {
+  if (!d) return '';
+  return new Date(d).toLocaleDateString('fr-FR',{day:'numeric',month:'long',year:'numeric'});
+}
 
 // ═══════════════════════════════════════════════════
 // FILES
@@ -950,6 +1128,10 @@ function renderDashboard(month) {
     viewers:   filterByMonth(parsed.viewers, month),
   };
 
+  // Client name in header
+  const clientNameEl = document.getElementById('dash-client-name');
+  if (clientNameEl) clientNameEl.textContent = currentClient ? currentClient.name : 'Mazine Analytics';
+
   // Period label
   const src = fp.overview.length ? fp.overview : fp.followers;
   if (src.length) {
@@ -1224,7 +1406,11 @@ async function generateAI() {
   const spinner=document.getElementById('ai-spinner');
   btn.disabled=true; spinner.classList.add('on');
   const ai = await callBackend(G.parsed, G.top5, G.scored, currentMonth);
-  if (ai) { aiCache[currentMonth]=ai; renderDashboard(currentMonth); }
+  if (ai) {
+    aiCache[currentMonth]=ai;
+    await saveReportToDB(currentMonth, ai); // persist to PostgreSQL
+    renderDashboard(currentMonth);
+  }
   else { btn.disabled=false; spinner.classList.remove('on'); }
 }
 
@@ -1388,7 +1574,13 @@ function reset() {
   document.getElementById('btn-analyze').classList.remove('ready');
   document.getElementById('month-bar').style.display='none';
   document.getElementById('month-pills').innerHTML='';
-  showScreen('screen-upload');
+  // Reload saved reports for current client
+  if (currentClient) {
+    loadSavedReports(currentClient.id);
+    showScreen('screen-upload');
+  } else {
+    showScreen('screen-clients');
+  }
 }
 </script>
 </body>

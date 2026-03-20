@@ -219,6 +219,37 @@ input[type="date"].field-input::-webkit-calendar-picker-indicator { filter: inve
 .dash-footer { text-align: center; padding: 2rem 0; border-top: 0.5px solid rgba(239,214,177,0.06); margin-top: 1.5rem; }
 .footer-text { font-size: 0.6rem; letter-spacing: 0.25em; text-transform: uppercase; color: rgba(239,214,177,0.15); }
 
+/* TOAST */
+.toast { position: fixed; bottom: 2rem; left: 50%; transform: translateX(-50%); background: rgba(19,30,33,0.97); border: 0.5px solid var(--teal-border); border-radius: 2rem; padding: 0.7rem 1.5rem; font-size: 0.78rem; color: var(--cream-dim); font-family: 'Plus Jakarta Sans',sans-serif; z-index: 999; opacity: 0; transition: opacity 0.3s; pointer-events: none; white-space: nowrap; }
+.toast.error { border-color: rgba(192,90,90,0.5); color: #f0a0a0; }
+.toast.warn { border-color: rgba(239,180,80,0.4); color: rgba(239,214,177,0.7); }
+.toast.show { opacity: 1; pointer-events: all; }
+
+/* EXPORT PDF BUTTON */
+.btn-export { background: transparent; border: 0.5px solid rgba(239,214,177,0.15); color: rgba(239,214,177,0.4); padding: 0.45rem 1rem; border-radius: 2rem; font-family: 'Plus Jakarta Sans', sans-serif; font-size: 0.7rem; letter-spacing: 0.1em; cursor: pointer; transition: all 0.2s; text-transform: uppercase; }
+.btn-export:hover { border-color: var(--teal); color: var(--teal); }
+
+/* PRINT */
+@media print {
+  .month-bar, .btn-reset, .btn-export, .ai-trigger-banner, .btn-ai, header .btn-logout, .guide { display: none !important; }
+  body { background: #fff !important; color: #111 !important; }
+  header { background: #fff !important; border-bottom: 1px solid #ddd !important; position: relative !important; }
+  .logo { color: #111 !important; }
+  .logo span { color: #618F9B !important; }
+  .badge { border-color: #618F9B !important; color: #618F9B !important; }
+  .mazine-impact, .section, .m-card, .delta-card, .reco-card, .impact-kpi, .brief-item { background: #f8f8f8 !important; border-color: #ddd !important; }
+  .m-value, .dash-title, .ai-text, .reco-text, .brief-text, .v-title, .kpi-after { color: #111 !important; }
+  .m-label, .sec-label, .dash-client, .v-eng-lbl, .delta-metric, .delta-period { color: #666 !important; }
+  .m-sub, .dash-period, .ai-badge, .best-time, .v-why, .diag-pos li { color: #618F9B !important; }
+  .cream-dim, .v-stat, .bar-pct, .delta-na { color: #555 !important; }
+  .ai-banner { background: rgba(97,143,155,0.08) !important; border-color: #618F9B !important; }
+  .impact-verdict { background: rgba(97,143,155,0.1) !important; }
+  #screen-dashboard { padding: 1rem !important; max-width: 100% !important; }
+  .two-col, .main-row { gap: 0.5rem !important; }
+  .chart-wrap { height: 120px !important; }
+  @page { margin: 1.5cm; size: A4; }
+}
+
 @media(max-width:700px){
   .metrics-row,.delta-row,.impact-kpis{grid-template-columns:repeat(2,1fr);}
   .two-col,.main-row,.two-col-inner,.reco-grid,.brief-grid{grid-template-columns:1fr;}
@@ -305,7 +336,10 @@ input[type="date"].field-input::-webkit-calendar-picker-indicator { filter: inve
         <h2 class="dash-title">Performance TikTok</h2>
         <p class="dash-period" id="dash-period"></p>
       </div>
-      <button class="btn-reset" onclick="reset()">← Nouvelle analyse</button>
+      <div style="display:flex;gap:0.5rem;align-items:center;flex-wrap:wrap;">
+        <button class="btn-export" onclick="exportPDF()">↓ Exporter PDF</button>
+        <button class="btn-reset" onclick="reset()">← Nouvelle analyse</button>
+      </div>
     </div>
 
     <!-- MAZINE IMPACT (top, conditionnel) -->
@@ -542,6 +576,18 @@ async function startAnalysis() {
   showScreen('screen-loading');
   setStep('Lecture des fichiers…'); await sleep(300);
   const parsed = parseAll();
+
+  // ── Error guard ──
+  if (!parsed.content?.length) {
+    showScreen('screen-upload');
+    showToast('⚠ Fichier Content illisible — vérifie le format (.xlsx ou .csv TikTok)', 'error');
+    return;
+  }
+  const hasData = parsed.overview?.length || parsed.followers?.length;
+  if (!hasData) {
+    showToast('⚠ Aucune donnée temporelle détectée dans Overview / Followers — les graphes seront vides', 'warn');
+  }
+
   setStep('Calcul des performances…'); await sleep(300);
   const scored = scoreVideos(parsed.content||[]);
   const top5 = scored.slice(0,5);
@@ -688,14 +734,20 @@ function parseAll() {
     r.overview = fixYears(raw);
   }
   if (loaded.content) {
-    r.content = parseRows(loaded.content).map(row=>({
-      title: String(row['Video title']||row['Title']||Object.values(row)[0]||'').substring(0,100),
-      views: nv(row['Total views']||row['Views']),
-      likes: nv(row['Total likes']||row['Likes']),
-      comments: nv(row['Total comments']||row['Comments']),
-      shares: nv(row['Total shares']||row['Shares']),
-      postTime: row['Post time']||row['Post Time']||'',
-    }));
+    r.content = parseRows(loaded.content).map(row=>{
+      const postRaw = row['Post time']||row['Post Time']||'';
+      const postDate = parseDate(postRaw);
+      return {
+        title: String(row['Video title']||row['Title']||Object.values(row)[0]||'').substring(0,100),
+        views: nv(row['Total views']||row['Views']),
+        likes: nv(row['Total likes']||row['Likes']),
+        comments: nv(row['Total comments']||row['Comments']),
+        shares: nv(row['Total shares']||row['Shares']),
+        postTime: postRaw,
+        postDate,
+        dk: dateKey(postDate),
+      };
+    });
   }
   if (loaded.followers) {
     const raw = parseRows(loaded.followers).map(row=>{
@@ -931,14 +983,14 @@ function renderDashboard(month) {
   const totalShares = sumMetric(fp.overview,'shares');
   const lastFol     = fp.followers.length ? fp.followers[fp.followers.length-1].followers : null;
   const follGain    = sumMetric(fp.followers,'diff');
-  const avgEng      = top5.length ? (top5.reduce((s,v)=>s+v.engRate,0)/top5.length).toFixed(1) : '—';
+  const avgEng      = G.top5.length ? (G.top5.reduce((s,v)=>s+v.engRate,0)/G.top5.length).toFixed(1) : '—';
 
   document.getElementById('metrics-row').innerHTML = [
     { label:'Total vues',       value:fmt(totalViews),             sub: month==='all'?'365 jours':monthLabel(month) },
     { label:'Abonnés',          value:lastFol?fmt(lastFol):'—',    sub: follGain>0?`+${fmt(follGain)} abonnés`:''},
     { label:'Total likes',      value:fmt(totalLikes),             sub:'' },
     { label:'Total partages',   value:fmt(totalShares),            sub:'' },
-    { label:'Engagement moyen', value:avgEng+'%',                  sub:'top 5 global' },
+    { label:'Engagement moyen', value:avgEng+'%',                  sub: month==='all'?'top 5 global':'top 5 du mois' },
   ].map(m=>`<div class="m-card"><p class="m-label">${m.label}</p><p class="m-value">${m.value}</p>${m.sub?`<p class="m-sub">${m.sub}</p>`:''}</div>`).join('');
 
   // ── MOM / YOY ──
@@ -993,9 +1045,24 @@ function renderDashboard(month) {
     hideAISections();
   }
 
-  // ── VIDEOS (global top5) ──
-  renderVideos(top5, ai);
-  document.getElementById('video-note').textContent = '— classement global, toute la période';
+  // ── VIDEOS — filtered by month when postDate available, else global ──
+  const hasPostDates = G.scored.filter(v=>v.dk).length > G.scored.length * 0.3;
+  let displayTop5 = G.top5;
+  let videoNote = '— classement global, toute la période';
+  if (month !== 'all' && hasPostDates) {
+    const monthScored = G.scored.filter(v=>v.dk===month);
+    if (monthScored.length >= 1) {
+      displayTop5 = monthScored.slice(0,5);
+      videoNote = `— top vidéos publiées en ${monthLabel(month)}`;
+    } else {
+      videoNote = `— aucune vidéo publiée en ${monthLabel(month)}, classement global`;
+    }
+  }
+  renderVideos(displayTop5, ai);
+  document.getElementById('video-note').textContent = videoNote;
+
+  // Engagement moyen sur les vidéos affichées
+  const engDisplay = displayTop5.length ? (displayTop5.reduce((s,v)=>s+v.engRate,0)/displayTop5.length).toFixed(1) : avgEng;
 
   // ── GENDER ──
   const genEl = document.getElementById('gender-row');
@@ -1032,8 +1099,47 @@ function renderDashboard(month) {
 // ═══════════════════════════════════════════════════
 // CHART BUILDERS
 // ═══════════════════════════════════════════════════
-function chartOpts() {
-  return { responsive:true, maintainAspectRatio:false, plugins:{legend:{display:false}},
+function richTooltip(unit='') {
+  return {
+    tooltip: {
+      backgroundColor: 'rgba(19,30,33,0.95)',
+      borderColor: 'rgba(97,143,155,0.3)',
+      borderWidth: 0.5,
+      titleColor: 'rgba(239,214,177,0.5)',
+      bodyColor: '#EFD6B1',
+      titleFont: { family: "'Plus Jakarta Sans', sans-serif", size: 9, weight: '400' },
+      bodyFont: { family: "'Plus Jakarta Sans', sans-serif", size: 11 },
+      padding: 10,
+      cornerRadius: 8,
+      callbacks: {
+        title: items => items[0]?.label || '',
+        label: item => {
+          const val = item.raw || 0;
+          const ds = item.dataset.data;
+          const idx = item.dataIndex;
+          const prev = idx > 0 ? ds[idx-1] : null;
+          let line = `  ${item.dataset.label ? item.dataset.label+' : ' : ''}${fmtFull(val)}${unit}`;
+          if (prev && prev > 0) {
+            const chg = ((val - prev) / prev * 100).toFixed(1);
+            line += `  ${+chg >= 0 ? '▲' : '▼'} ${Math.abs(chg)}% vs j-1`;
+          }
+          return line;
+        }
+      }
+    }
+  };
+}
+
+function fmtFull(n) {
+  n = parseInt(n)||0;
+  if (n >= 1000000) return (n/1000000).toFixed(2)+'M';
+  if (n >= 1000) return n.toLocaleString('fr-FR');
+  return n.toString();
+}
+
+function chartOpts(extraPlugins) {
+  return { responsive:true, maintainAspectRatio:false,
+    plugins:{ legend:{display:false}, ...richTooltip(), ...(extraPlugins||{}) },
     scales:{
       x:{ticks:{color:'rgba(239,214,177,0.3)',font:{size:9},maxTicksLimit:8}, grid:{color:'rgba(239,214,177,0.04)'}, border:{color:'rgba(239,214,177,0.07)'}},
       y:{ticks:{color:'rgba(239,214,177,0.3)',font:{size:9},callback:v=>fmt(v)}, grid:{color:'rgba(239,214,177,0.04)'}, border:{color:'rgba(239,214,177,0.07)'}}
@@ -1099,7 +1205,7 @@ function buildViewersChart(data) {
       {label:'Nouveaux', data:filt.map(r=>r.newV), backgroundColor:'rgba(97,143,155,0.7)', borderRadius:2},
       {label:'Récurrents', data:filt.map(r=>r.returning), backgroundColor:'rgba(239,214,177,0.18)', borderRadius:2}
     ]},
-    options:{...chartOpts(), plugins:{legend:{display:true, labels:{color:'rgba(239,214,177,0.4)',font:{size:9}}}}}
+    options:{...chartOpts({legend:{display:true, labels:{color:'rgba(239,214,177,0.4)',font:{size:9}}}})}
   }));
 }
 
@@ -1242,6 +1348,23 @@ function monthLabel(m) {
   if(!m||m==='all') return 'Vue globale';
   const [y,mo]=m.split('-');
   return new Date(+y,+mo-1,1).toLocaleDateString('fr-FR',{month:'long',year:'numeric'});
+}
+
+// TOAST
+let toastTimer = null;
+function showToast(msg, type='info') {
+  let el = document.getElementById('toast');
+  if (!el) { el=document.createElement('div'); el.id='toast'; el.className='toast'; document.body.appendChild(el); }
+  el.textContent = msg;
+  el.className = 'toast '+type+' show';
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(()=>{ el.classList.remove('show'); }, 4000);
+}
+
+// EXPORT PDF
+function exportPDF() {
+  showToast('Ouverture de la fenêtre d\'impression…');
+  setTimeout(()=>window.print(), 400);
 }
 
 function reset() {

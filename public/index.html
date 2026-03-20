@@ -524,15 +524,27 @@ async function doLogin() {
   const btn = document.getElementById('btn-login');
   if (!pw) return;
   btn.textContent = 'Connexion…'; btn.style.opacity = '0.6';
+  errEl.textContent = '';
   try {
+    // Step 1: authenticate
     const res = await fetch('/api/login', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({password:pw}) });
     const data = await res.json();
     if (!res.ok) { errEl.textContent = data.error||'Erreur.'; btn.textContent='Accéder →'; btn.style.opacity='1'; return; }
     authToken = data.token;
     sessionStorage.setItem('mz_token', authToken);
     document.getElementById('btn-logout').style.display = 'block';
-    await goToClients();
-  } catch { errEl.textContent = 'Erreur de connexion.'; }
+    // Step 2: load clients — if it fails, go to upload directly
+    try {
+      await goToClients();
+    } catch(clientErr) {
+      console.error('goToClients failed:', clientErr);
+      errEl.textContent = 'Clients inaccessibles : ' + clientErr.message;
+      showScreen('screen-upload');
+    }
+  } catch(err) {
+    console.error('Login error:', err);
+    errEl.textContent = 'Erreur de connexion : ' + err.message;
+  }
   btn.textContent = 'Accéder →'; btn.style.opacity = '1';
 }
 
@@ -570,10 +582,12 @@ async function goToClients() {
 }
 
 async function loadClients() {
+  const grid = document.getElementById('client-grid');
+  grid.innerHTML = '<p style="font-family:'Lora',serif;font-style:italic;font-size:0.82rem;color:rgba(239,214,177,0.3);">Chargement…</p>';
   try {
     const res = await fetch('/api/clients', { headers:{'Authorization':'Bearer '+authToken} });
+    if (!res.ok) throw new Error('Erreur serveur HTTP ' + res.status);
     const data = await res.json();
-    const grid = document.getElementById('client-grid');
     if (!data.clients?.length) {
       grid.innerHTML = '<p style="font-family:'Lora',serif;font-style:italic;font-size:0.82rem;color:rgba(239,214,177,0.3);">Aucun client encore — créez-en un ci-dessous.</p>';
       return;
@@ -592,7 +606,11 @@ async function loadClients() {
           <span class="client-arrow">→</span>
         </div>
       </div>`).join('');
-  } catch(err) { showToast('Erreur chargement clients', 'error'); }
+  } catch(err) {
+    console.error('loadClients error:', err);
+    grid.innerHTML = '<p style="color:#f0a0a0;font-family:'Lora',serif;font-style:italic;font-size:0.82rem;">Erreur : ' + err.message + '</p>';
+    throw err; // propagate so doLogin can catch it
+  }
 }
 
 async function createClient() {

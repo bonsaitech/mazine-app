@@ -583,13 +583,13 @@ async function goToClients() {
 
 async function loadClients() {
   const grid = document.getElementById('client-grid');
-  grid.innerHTML = '<p style="font-family:'Lora',serif;font-style:italic;font-size:0.82rem;color:rgba(239,214,177,0.3);">Chargement…</p>';
+  grid.innerHTML = '<p style="font-family:Lora,serif;font-style:italic;font-size:0.82rem;color:rgba(239,214,177,0.3)">Chargement…</p>';
   try {
     const res = await fetch('/api/clients', { headers:{'Authorization':'Bearer '+authToken} });
     if (!res.ok) throw new Error('Erreur serveur HTTP ' + res.status);
     const data = await res.json();
     if (!data.clients?.length) {
-      grid.innerHTML = '<p style="font-family:'Lora',serif;font-style:italic;font-size:0.82rem;color:rgba(239,214,177,0.3);">Aucun client encore — créez-en un ci-dessous.</p>';
+      grid.innerHTML = '<p style="font-family:Lora,serif;font-style:italic;font-size:0.82rem;color:rgba(239,214,177,0.3)">Aucun client encore — créez-en un ci-dessous.</p>';
       return;
     }
     grid.innerHTML = data.clients.map(c => `
@@ -608,7 +608,7 @@ async function loadClients() {
       </div>`).join('');
   } catch(err) {
     console.error('loadClients error:', err);
-    grid.innerHTML = '<p style="color:#f0a0a0;font-family:'Lora',serif;font-style:italic;font-size:0.82rem;">Erreur : ' + err.message + '</p>';
+    grid.innerHTML = '<p style="color:#f0a0a0;font-family:Lora,serif;font-style:italic;font-size:0.82rem;">Erreur : ' + err.message + '</p>';
     throw err; // propagate so doLogin can catch it
   }
 }

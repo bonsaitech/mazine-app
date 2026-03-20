@@ -624,12 +624,33 @@ function parseDate(raw) {
   return isNaN(native) ? null : native;
 }
 
-// Guess year when not provided (assume last 12 months window)
+// Guess year when not provided — simple fallback, corrected by fixYears()
 function guessYear(month, day) {
   const now = new Date();
   const cy = now.getFullYear(), cm = now.getMonth();
-  if (month > cm) return cy - 1; // that month hasn't come yet this year
+  if (month > cm) return cy - 1;
   return cy;
+}
+
+// Post-process an array of {date} objects: fix year rollovers when month names have no year.
+// Walks chronologically; when month goes backward by >3 months, we crossed a year boundary.
+function fixYears(arr) {
+  if (!arr || arr.length < 2) return arr;
+  let yearOffset = 0;
+  for (let i = 1; i < arr.length; i++) {
+    const prev = arr[i-1].date, cur = arr[i].date;
+    if (!prev || !cur) continue;
+    const prevM = prev.getMonth(), curM = cur.getMonth();
+    // Month dropped by more than 3 → year rolled over
+    if (prevM - curM > 3) {
+      yearOffset++;
+    }
+    if (yearOffset > 0) {
+      arr[i].date = new Date(cur.getFullYear() + yearOffset, cur.getMonth(), cur.getDate());
+      arr[i].dk = dateKey(arr[i].date);
+    }
+  }
+  return arr;
 }
 
 function dateKey(d) { // "YYYY-MM"
@@ -657,13 +678,14 @@ function nv(v) { return parseFloat(String(v??'').replace(/[^0-9.-]/g,''))||0; }
 function parseAll() {
   const r = {};
   if (loaded.overview) {
-    r.overview = parseRows(loaded.overview).map(row=>{
+    const raw = parseRows(loaded.overview).map(row=>{
       const dateRaw = row['Date']||Object.values(row)[0];
       const d = parseDate(dateRaw);
       return { dateRaw, date: d, dk: dateKey(d),
         views: nv(row['Video Views']||row['Video views']||row['Views']),
         likes: nv(row['Likes']), comments: nv(row['Comments']), shares: nv(row['Shares']) };
     }).filter(r=>r.date&&r.views>=0);
+    r.overview = fixYears(raw);
   }
   if (loaded.content) {
     r.content = parseRows(loaded.content).map(row=>({
@@ -676,24 +698,33 @@ function parseAll() {
     }));
   }
   if (loaded.followers) {
-    r.followers = parseRows(loaded.followers).map(row=>{
+    const raw = parseRows(loaded.followers).map(row=>{
       const d = parseDate(row['Date']);
       return { dateRaw: row['Date'], date: d, dk: dateKey(d),
         followers: nv(row['Followers']),
         diff: nv(row['Difference in followers from previous day']||row['Diff']||row['Change']||row['Net new followers']) };
     }).filter(r=>r.date&&r.followers>0);
+    r.followers = fixYears(raw);
   }
   if (loaded.gender) {
-    r.gender = parseRows(loaded.gender).map(row=>({
+    const rows = parseRows(loaded.gender).map(row=>({
       gender: String(row['Gender']||Object.values(row)[0]||''),
       dist: nv(row['Distribution']||Object.values(row)[1])
     })).filter(g=>g.gender&&g.dist>0);
+    // TikTok sometimes exports decimals (0.55) instead of percentages (55)
+    const maxDist = Math.max(...rows.map(g=>g.dist));
+    if (maxDist <= 1) rows.forEach(g=>g.dist = +(g.dist*100).toFixed(1));
+    r.gender = rows;
   }
   if (loaded.territories) {
-    r.territories = parseRows(loaded.territories).map(row=>({
+    const rows = parseRows(loaded.territories).map(row=>({
       territory: String(row['Top territories']||row['Territory']||Object.values(row)[0]||''),
       dist: nv(row['Distribution']||Object.values(row)[1])
     })).filter(t=>t.territory&&t.territory!=='Others'&&t.dist>0);
+    // Same decimal normalization
+    const maxDist = Math.max(...rows.map(t=>t.dist));
+    if (maxDist <= 1) rows.forEach(t=>t.dist = +(t.dist*100).toFixed(2));
+    r.territories = rows;
   }
   if (loaded.activity) {
     r.activity = parseRows(loaded.activity).map(row=>{

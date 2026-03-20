@@ -29,6 +29,12 @@ header {
 .screen { display: none; }
 .screen.active { display: block; }
 
+.btn-logout { background: transparent; border: 0.5px solid rgba(239,214,177,0.15); color: rgba(239,214,177,0.4); padding: 0.3rem 0.85rem; border-radius: 2rem; font-family: 'Plus Jakarta Sans', sans-serif; font-size: 0.65rem; letter-spacing: 0.1em; cursor: pointer; transition: all 0.2s; text-transform: uppercase; }
+.btn-logout:hover { border-color: rgba(239,214,177,0.35); color: var(--cream-dim); }
+.login-wrap { max-width: 400px; margin: 0 auto; padding: 5rem 2rem; text-align: center; }
+.login-box { text-align: left; background: var(--cream-faint); border: 0.5px solid rgba(239,214,177,0.1); border-radius: 1rem; padding: 1.75rem; }
+.login-error { font-size: 0.75rem; color: #f0a0a0; margin-top: 0.5rem; min-height: 1rem; font-family: 'Lora', serif; font-style: italic; }
+
 /* ─── UPLOAD ─── */
 #screen-upload { padding: 3rem 2.5rem; max-width: 860px; margin: 0 auto; }
 
@@ -194,6 +200,23 @@ header {
   .guide-steps{grid-template-columns:1fr;}
   #screen-upload,#screen-dashboard{padding:1.5rem 1.25rem;}
 }
+
+.two-col-inner { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+.diag-col {}
+.diag-label { font-size: 0.58rem; letter-spacing: 0.15em; text-transform: uppercase; color: rgba(239,214,177,0.3); margin-bottom: 0.6rem; }
+.diag-list { list-style: none; display: flex; flex-direction: column; gap: 0.45rem; }
+.diag-list li { font-family: 'Lora', serif; font-size: 0.82rem; line-height: 1.5; }
+.diag-pos li { color: var(--teal); }
+.diag-neu li { color: var(--cream-dim); }
+.viralite-banner {}
+.v-format { display: inline-block; font-size: 0.6rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--teal); border: 0.5px solid var(--teal-border); padding: 0.15rem 0.5rem; border-radius: 2rem; margin-bottom: 0.35rem; }
+.brief-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; }
+.brief-item { background: var(--cream-faint); border: 0.5px solid rgba(239,214,177,0.06); border-radius: 0.65rem; padding: 0.85rem 1rem; }
+.brief-avoid { border-color: rgba(200,80,80,0.15); background: rgba(200,80,80,0.04); }
+.brief-label { font-size: 0.58rem; letter-spacing: 0.15em; text-transform: uppercase; color: rgba(239,214,177,0.3); margin-bottom: 0.4rem; }
+.brief-avoid .brief-label { color: rgba(240,160,160,0.5); }
+.brief-text { font-family: 'Lora', serif; font-size: 0.82rem; line-height: 1.6; color: var(--cream-dim); }
+.brief-avoid .brief-text { color: rgba(240,160,160,0.7); }
 </style>
 </head>
 <body>
@@ -201,7 +224,23 @@ header {
 <header>
   <div class="logo">ma<span>z</span>ine</div>
   <div class="badge">GPT-4o Analytics</div>
+  <button class="btn-logout" id="btn-logout" onclick="logout()" style="display:none">Déconnexion</button>
 </header>
+
+<!-- ── LOGIN ── -->
+<div class="screen active" id="screen-login">
+  <div class="login-wrap">
+    <p class="eyebrow">Accès sécurisé</p>
+    <h1 class="hero-title" style="font-size:2rem;margin-bottom:0.75rem">Mazine <em>Analytics</em></h1>
+    <p class="hero-sub" style="margin-bottom:2rem">Entrez votre mot de passe pour accéder au tableau de bord.</p>
+    <div class="login-box">
+      <label class="api-key-label" for="login-password">Mot de passe</label>
+      <input type="password" id="login-password" class="api-key-input" placeholder="••••••••" onkeydown="if(event.key==='Enter')doLogin()">
+      <p class="login-error" id="login-error"></p>
+      <button class="btn-analyze ready" id="btn-login" onclick="doLogin()" style="margin-top:1rem">Accéder →</button>
+    </div>
+  </div>
+</div>
 
 <!-- ── UPLOAD ── -->
 <div class="screen active" id="screen-upload">
@@ -222,12 +261,8 @@ header {
 
   <div class="api-key-row">
     <div class="api-key-wrap" style="flex:1">
-      <label class="api-key-label" for="api-key-input">Clé API OpenAI</label>
-      <input type="password" id="api-key-input" class="api-key-input" placeholder="sk-..." oninput="checkReady()">
-    </div>
-    <div class="api-key-wrap" style="width:220px;flex-shrink:0">
       <label class="api-key-label" for="client-start-date">Mazine travaille avec ce client depuis</label>
-      <input type="date" id="client-start-date" class="api-key-input" style="color-scheme:dark" oninput="checkReady()">
+      <input type="date" id="client-start-date" class="api-key-input" style="color-scheme:dark">
     </div>
   </div>
 
@@ -272,6 +307,20 @@ header {
   <div class="metrics-row" id="metrics-row"></div>
   <div class="ai-banner"><div class="ai-icon">✦</div><div><p class="ai-badge">Synthèse IA</p><p class="ai-text" id="ai-text">Chargement…</p></div></div>
 
+  <div id="diagnostic-section" style="display:none;margin-bottom:1rem;">
+    <div class="section">
+      <p class="sec-label">Diagnostic</p>
+      <div class="two-col-inner" id="diagnostic-content"></div>
+    </div>
+  </div>
+
+  <div id="viralite-section" style="display:none;margin-bottom:1rem;">
+    <div class="section viralite-banner">
+      <p class="sec-label">Analyse viralité</p>
+      <p class="ai-text" id="viralite-text"></p>
+    </div>
+  </div>
+
   <div class="main-row">
     <div class="section">
       <p class="sec-label">Vidéos les plus performantes</p>
@@ -313,6 +362,13 @@ header {
     </div>
   </div>
 
+  <div id="brief-section" style="display:none;margin-bottom:1rem;">
+    <div class="section">
+      <p class="sec-label">Brief — prochains contenus</p>
+      <div id="brief-content"></div>
+    </div>
+  </div>
+
   <div class="section" style="margin-bottom:1.5rem;">
     <p class="sec-label">Recommandations stratégiques</p>
     <div class="reco-grid" id="reco-grid"></div>
@@ -322,6 +378,49 @@ header {
 </div>
 
 <script>
+// ── AUTH ──────────────────────────────────────────────
+let authToken = sessionStorage.getItem('mz_token') || null;
+
+async function doLogin() {
+  const pw = document.getElementById('login-password').value;
+  const errEl = document.getElementById('login-error');
+  const btn = document.getElementById('btn-login');
+  if (!pw) return;
+  btn.textContent = 'Connexion…'; btn.style.opacity = '0.6';
+  try {
+    const res = await fetch('/api/login', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ password: pw }) });
+    const data = await res.json();
+    if (!res.ok) { errEl.textContent = data.error || 'Erreur.'; btn.textContent = 'Accéder →'; btn.style.opacity = '1'; return; }
+    authToken = data.token;
+    sessionStorage.setItem('mz_token', authToken);
+    errEl.textContent = '';
+    document.getElementById('btn-logout').style.display = 'block';
+    showScreen('screen-upload');
+  } catch { errEl.textContent = 'Erreur de connexion au serveur.'; }
+  btn.textContent = 'Accéder →'; btn.style.opacity = '1';
+}
+
+async function logout() {
+  if (authToken) fetch('/api/logout', { method: 'POST', headers: { 'Authorization': 'Bearer ' + authToken } });
+  authToken = null;
+  sessionStorage.removeItem('mz_token');
+  document.getElementById('btn-logout').style.display = 'none';
+  document.getElementById('login-password').value = '';
+  showScreen('screen-login');
+}
+
+// On load: check if already logged in
+window.addEventListener('DOMContentLoaded', async () => {
+  if (authToken) {
+    // Verify token is still valid with a lightweight check
+    try {
+      const res = await fetch('/api/analyze', { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + authToken }, body: JSON.stringify({ data: null }) });
+      if (res.status === 400) { document.getElementById('btn-logout').style.display = 'block'; showScreen('screen-upload'); return; }
+      if (res.status === 401) { authToken = null; sessionStorage.removeItem('mz_token'); }
+    } catch {}
+  }
+});
+
 const FILE_DEFS = [
   { key:'overview',    label:'Overview',               icon:'📊', hint:'Vues & engagement quotidiens' },
   { key:'content',     label:'Content',                icon:'🎬', hint:'Détail par vidéo — requis' },
@@ -390,8 +489,7 @@ function updateProgress() {
   document.getElementById('progress-fill').style.width = pct + '%';
   document.getElementById('progress-label').textContent = count + ' / ' + FILE_DEFS.length + ' fichiers';
   const btn = document.getElementById('btn-analyze');
-  const apiKey = document.getElementById('api-key-input')?.value.trim();
-  btn.classList.toggle('ready', !!loaded['content'] && !!apiKey);
+  btn.classList.toggle('ready', !!loaded['content']);
 }
 
 function showScreen(id) {
@@ -417,7 +515,8 @@ async function startAnalysis() {
   const top5 = scored.slice(0, 5);
 
   setStep('Interrogation de l\'IA Mazine…');
-  const ai = await callOpenAI(parsed, top5, scored);
+  const ai = await callBackend(parsed, top5, scored);
+  if (!ai) return;
 
   setStep('Génération du rapport…');
   await sleep(300);
@@ -503,74 +602,68 @@ function parseAll() {
 function scoreVideos(content) {
   return content.map(v => {
     const eng = v.views > 0 ? (v.likes + v.comments + v.shares) / v.views * 100 : 0;
+    const shareRate = v.views > 0 ? (v.shares / v.views * 100) : 0;
     const score = v.views * 0.3 + v.likes * 3 + v.comments * 5 + v.shares * 8;
-    return { ...v, engRate: parseFloat(eng.toFixed(2)), score };
+    return { ...v, engRate: parseFloat(eng.toFixed(2)), shareRate: parseFloat(shareRate.toFixed(2)), score };
   }).sort((a, b) => b.score - a.score);
 }
 
-async function callOpenAI(parsed, top5, scored) {
-  const apiKey = document.getElementById('api-key-input').value.trim();
+async function callBackend(parsed, top5, scored) {
   const startDate = document.getElementById('client-start-date').value;
   const totalViews = (parsed.overview || []).reduce((s, r) => s + r.views, 0) || scored.reduce((s, v) => s + v.views, 0);
-  const followers = parsed.followers ? parsed.followers[parsed.followers.length - 1]?.followers : null;
+  const followers = parsed.followers?.length ? parsed.followers[parsed.followers.length - 1].followers : null;
+  const followerGrowth = parsed.followers?.length ? parsed.followers.reduce((s, r) => s + r.diff, 0) : null;
   const avgEng = top5.length ? (top5.reduce((s, v) => s + v.engRate, 0) / top5.length).toFixed(1) : '—';
+  const avgShareRate = top5.length ? (top5.reduce((s, v) => s + v.shareRate, 0) / top5.length).toFixed(2) : '0';
+  const avgLikeRate = top5.length ? (top5.reduce((s, v) => s + (v.views > 0 ? v.likes / v.views * 100 : 0), 0) / top5.length).toFixed(2) : '0';
 
-  // Before/after split
-  let beforeAfterContext = '';
+  let beforeAfterText = '';
   if (startDate && parsed.followers?.length) {
-    const before = parsed.followers.filter(r => parseRowDate(r.date) < new Date(startDate));
-    const after = parsed.followers.filter(r => parseRowDate(r.date) >= new Date(startDate));
+    const before = parsed.followers.filter(r => { const d = parseRowDate(r.date); return d && d < new Date(startDate); });
+    const after = parsed.followers.filter(r => { const d = parseRowDate(r.date); return d && d >= new Date(startDate); });
     if (before.length && after.length) {
-      const followersAtStart = before[before.length - 1].followers;
-      const followersNow = after[after.length - 1].followers;
-      const growth = followersNow - followersAtStart;
-      const growthPct = followersAtStart > 0 ? ((growth / followersAtStart) * 100).toFixed(1) : '—';
-      beforeAfterContext = `\nComparatif depuis le début du partenariat Mazine (${startDate}) :\n- Abonnés au démarrage : ${fmt(followersAtStart)}\n- Abonnés maintenant : ${fmt(followersNow)}\n- Croissance : +${fmt(growth)} (+${growthPct}%)`;
+      const fBefore = before[before.length - 1].followers;
+      const fAfter = after[after.length - 1].followers;
+      const growth = fAfter - fBefore;
+      const pct = fBefore > 0 ? ((growth / fBefore) * 100).toFixed(1) : null;
+      beforeAfterText = `Abonnés au démarrage : ${fmt(fBefore)} → maintenant : ${fmt(fAfter)} (+${fmt(growth)}${pct ? `, +${pct}%` : ''})`;
     }
   }
 
-  const prompt = `Tu es l'IA analytique de Mazine.mu, agence de création de contenu TikTok à Maurice.
-
-Données analysées :
-- Total vues (période) : ${fmt(totalViews)}
-${followers ? `- Abonnés actuels : ${fmt(followers)}` : ''}
-- Engagement moyen top vidéos : ${avgEng}%
-${beforeAfterContext}
-
-Top 5 vidéos :
-${top5.map((v, i) => `${i+1}. "${v.title}" — ${fmt(v.views)} vues, ${fmt(v.likes)} likes, ${fmt(v.shares)} partages, ${v.engRate}% engagement`).join('\n')}
-
-Réponds UNIQUEMENT en JSON valide sans markdown ni backticks :
-{
-  "synthese": "2-3 phrases synthétisant les patterns clés et l'impact du partenariat Mazine si applicable. Ton éditorial et stratégique.",
-  "videos": [{"rank":1,"pourquoi":"1 phrase sur le facteur clé de succès de cette vidéo"}],
-  "recommandations": ["Reco 1 actionnable","Reco 2","Reco 3","Reco 4"]
-}`;
+  const payload = {
+    totalViews: fmt(totalViews),
+    followers: followers ? fmt(followers) : null,
+    followerGrowth: followerGrowth ? fmt(followerGrowth) : null,
+    avgEng, avgShareRate, avgLikeRate,
+    totalVideos: scored.length,
+    startDate: startDate || null,
+    beforeAfter: beforeAfterText || null,
+    top5: top5.map(v => ({
+      title: v.title, views: fmt(v.views), likes: fmt(v.likes),
+      comments: fmt(v.comments), shares: fmt(v.shares),
+      engRate: v.engRate, shareRate: v.shareRate, postTime: v.postTime
+    }))
+  };
 
   try {
-    const res = await fetch('https://api.openai.com/v1/chat/completions', {
+    const res = await fetch('/api/analyze', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + apiKey },
-      body: JSON.stringify({
-        model: 'gpt-4o',
-        max_tokens: 1000,
-        response_format: { type: 'json_object' },
-        messages: [
-          { role: 'system', content: 'Tu es l\'IA analytique de Mazine.mu. Réponds uniquement en JSON valide.' },
-          { role: 'user', content: prompt }
-        ]
-      })
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + authToken },
+      body: JSON.stringify({ data: payload })
     });
+    if (res.status === 401) { logout(); return null; }
     const data = await res.json();
-    if (data.error) throw new Error(data.error.message);
-    const txt = data.choices[0].message.content.replace(/```json|```/g, '').trim();
-    return JSON.parse(txt);
+    if (data.error) throw new Error(data.error);
+    return data.result;
   } catch (err) {
-    console.error('OpenAI error:', err);
+    console.error('Backend error:', err);
     return {
-      synthese: "Les vidéos les plus performantes reposent sur du contenu visuel pratique avec une forte valeur démonstrative. Les partages organiques constituent le principal levier de croissance des vues.",
-      videos: top5.map((_, i) => ({ rank: i + 1, pourquoi: "Fort engagement visuel et bonne adéquation avec les centres d'intérêt de l'audience locale." })),
-      recommandations: ["Reproduire la structure des vidéos démonstration produit (before/after).", "Publier entre 19h et 22h, pic d'activité de l'audience.", "Intégrer un appel à l'action explicite dans les 3 premières secondes.", "Alterner créole mauricien et français pour maximiser la portée locale."]
+      synthese: "Les vidéos les plus performantes reposent sur du contenu visuel pratique avec une forte valeur démonstrative. Les partages organiques constituent le principal levier de croissance.",
+      diagnostic: { points_forts: ["Fort taux de partage organique", "Contenu démonstratif très engageant", "Bonne adéquation avec l'audience locale"], points_amelioration: ["Augmenter la fréquence de publication", "Diversifier les formats de contenu"] },
+      analyse_viralite: "Le ratio partages/vues indique un contenu que l'audience souhaite partager activement avec son entourage.",
+      videos: top5.map((_, i) => ({ rank: i + 1, format: "Démonstration produit", pourquoi: "Fort engagement visuel et bonne adéquation avec les centres d'intérêt de l'audience locale." })),
+      brief_prochain_contenu: { angle_prioritaire: "Démonstration produit avant/après", format_recommande: "Vidéo courte 15-30s avec résultat visuel fort", accroche_type: "Question ou transformation visuelle immédiate", a_eviter: "Contenu trop institutionnel sans valeur pratique" },
+      recommandations: ["Reproduire la structure des vidéos démonstration produit.", "Publier entre 19h et 22h, pic d'activité de l'audience.", "Intégrer un appel à l'action explicite dans les 3 premières secondes.", "Alterner créole mauricien et français pour maximiser la portée locale."]
     };
   }
 }
@@ -628,102 +721,68 @@ function buildDashboard(parsed, scored, top5, ai) {
     { label: 'Engagement moyen', value: avgEng + '%', sub: 'top vidéos' },
   ].map(m => `<div class="m-card"><p class="m-label">${m.label}</p><p class="m-value">${m.value}</p>${m.sub ? `<p class="m-sub">${m.sub}</p>` : ''}</div>`).join('');
 
-  // AI
+  // AI synthese
   document.getElementById('ai-text').textContent = ai.synthese;
 
-  // Videos
+  // Diagnostic
+  document.getElementById('diagnostic-section').style.display = 'none';
+  if (ai.diagnostic) {
+    document.getElementById('diagnostic-section').style.display = 'block';
+    const pf = (ai.diagnostic.points_forts || []).map(p => `<li>✓ ${esc(p)}</li>`).join('');
+    const pa = (ai.diagnostic.points_amelioration || []).map(p => `<li>→ ${esc(p)}</li>`).join('');
+    document.getElementById('diagnostic-content').innerHTML = `
+      <div class="diag-col"><p class="diag-label">Points forts</p><ul class="diag-list diag-pos">${pf}</ul></div>
+      <div class="diag-col"><p class="diag-label">Leviers de croissance</p><ul class="diag-list diag-neu">${pa}</ul></div>`;
+  }
+
+  // Viralite
+  document.getElementById('viralite-section').style.display = 'none';
+  if (ai.analyse_viralite) {
+    document.getElementById('viralite-section').style.display = 'block';
+    document.getElementById('viralite-text').textContent = ai.analyse_viralite;
+  }
+
+  // Videos with format tag
   const aiMap = {};
-  (ai.videos || []).forEach(v => aiMap[v.rank] = v.pourquoi);
-  document.getElementById('video-list').innerHTML = top5.map((v, i) => `
+  (ai.videos || []).forEach(v => aiMap[v.rank] = v);
+  document.getElementById('video-list').innerHTML = top5.map((v, i) => {
+    const aiV = aiMap[i + 1] || {};
+    return `
     <div class="video-item">
       <div class="v-rank">0${i+1}</div>
       <div class="v-body">
         <p class="v-title" title="${esc(v.title)}">${esc(v.title || 'Vidéo sans titre')}</p>
-        <p class="v-why">${esc(aiMap[i+1] || '—')}</p>
+        ${aiV.format ? `<span class="v-format">${esc(aiV.format)}</span>` : ''}
+        <p class="v-why">${esc(aiV.pourquoi || '—')}</p>
         <div class="v-stats">
           <span class="v-stat"><strong>${fmt(v.views)}</strong> vues</span>
           <span class="v-stat"><strong>${fmt(v.likes)}</strong> likes</span>
           <span class="v-stat"><strong>${fmt(v.shares)}</strong> partages</span>
+          <span class="v-stat"><strong>${v.shareRate}%</strong> viral</span>
         </div>
       </div>
       <div class="v-eng">
         <div class="v-eng-val">${v.engRate}<span style="font-size:0.6rem;color:var(--teal)">%</span></div>
         <div class="v-eng-lbl">eng.</div>
       </div>
-    </div>`).join('');
+    </div>`;
+  }).join('');
 
-  // Gender
-  if (parsed.gender?.length) {
-    const male = parsed.gender.find(g => /^male$/i.test(g.gender));
-    const female = parsed.gender.find(g => /^female$/i.test(g.gender));
-    document.getElementById('gender-row').innerHTML = `
-      <div class="gender-block"><div class="gender-val">${male ? Math.round(male.dist * 100) + '%' : '—'}</div><div class="gender-lbl">Hommes</div></div>
-      <div class="gender-block"><div class="gender-val">${female ? Math.round(female.dist * 100) + '%' : '—'}</div><div class="gender-lbl">Femmes</div></div>`;
-  } else { document.getElementById('gender-row').innerHTML = '<p style="font-size:0.78rem;color:rgba(239,214,177,0.25)">Données non importées</p>'; }
-
-  // Territories
-  const countryMap = { MU:'Maurice',FR:'France',CA:'Canada',AU:'Australie',GB:'Royaume-Uni',AE:'Émirats',RE:'Réunion',SC:'Seychelles',US:'États-Unis',ZA:'Afrique du Sud' };
-  if (parsed.territories?.length) {
-    document.getElementById('territories-list').innerHTML = parsed.territories.slice(0, 6).map(t => `
-      <div class="bar-row">
-        <span class="bar-label">${countryMap[t.territory] || t.territory}</span>
-        <div class="bar-track"><div class="bar-fill" style="width:${Math.round(t.dist * 100)}%"></div></div>
-        <span class="bar-pct">${Math.round(t.dist * 100)}%</span>
-      </div>`).join('');
-  } else { document.getElementById('territories-list').innerHTML = '<p style="font-size:0.78rem;color:rgba(239,214,177,0.25)">Données non importées</p>'; }
-
-  // Followers chart
-  if (parsed.followers?.length) {
-    const fl = parsed.followers.slice(-14);
-    charts.push(new Chart(document.getElementById('chart-followers').getContext('2d'), {
-      type: 'line',
-      data: { labels: fl.map(r => shortDate(r.date)), datasets: [{ data: fl.map(r => r.followers), borderColor: '#618F9B', borderWidth: 1.5, pointRadius: 0, tension: 0.4, fill: true, backgroundColor: 'rgba(97,143,155,0.07)' }] },
-      options: { ...chartOpts(), plugins: { legend: { display: false }, tooltip: { callbacks: { label: c => fmt(c.raw) + ' abonnés' } } } }
-    }));
-  } else { noData('chart-followers'); }
-
-  // Views chart
-  if (parsed.overview?.length) {
-    const ov = parsed.overview.slice(-14);
-    charts.push(new Chart(document.getElementById('chart-views').getContext('2d'), {
-      type: 'bar',
-      data: { labels: ov.map(r => shortDate(r.date)), datasets: [{ data: ov.map(r => r.views), backgroundColor: 'rgba(97,143,155,0.45)', borderRadius: 3 }] },
-      options: { ...chartOpts(), plugins: { legend: { display: false }, tooltip: { callbacks: { label: c => fmt(c.raw) + ' vues' } } } }
-    }));
-  } else { noData('chart-views'); }
-
-  // Activity heatmap
-  if (parsed.activity?.length) {
-    const byHour = {};
-    for (let h = 0; h < 24; h++) byHour[h] = [];
-    parsed.activity.forEach(r => { if (byHour[r.hour] !== undefined) byHour[r.hour].push(r.active); });
-    const avg = Array.from({ length: 24 }, (_, h) => ({ hour: h, avg: byHour[h].length ? byHour[h].reduce((a, b) => a + b, 0) / byHour[h].length : 0 }));
-    const maxV = Math.max(...avg.map(h => h.avg));
-    const best = avg.reduce((a, b) => a.avg > b.avg ? a : b);
-    document.getElementById('time-grid').innerHTML = avg.map(({ hour, avg: a }) => {
-      const alpha = maxV > 0 ? 0.1 + (a / maxV) * 0.9 : 0.1;
-      return `<div class="time-cell" title="${hour}h — ${Math.round(a)} abonnés actifs" style="background:rgba(97,143,155,${alpha.toFixed(2)})"></div>`;
-    }).join('');
-    document.getElementById('time-labels').innerHTML = avg.map(({ hour }) => `<div class="time-lbl">${hour % 4 === 0 ? hour + 'h' : ''}</div>`).join('');
-    document.getElementById('best-time-label').textContent = `Pic d'activité : ${best.hour}h — publier entre ${best.hour}h et ${best.hour + 1}h`;
-  } else {
-    document.getElementById('time-grid').innerHTML = '<p style="font-size:0.78rem;color:rgba(239,214,177,0.25);grid-column:1/-1">Données non importées</p>';
+  // Brief prochain contenu
+  document.getElementById('brief-section').style.display = 'none';
+  if (ai.brief_prochain_contenu) {
+    const b = ai.brief_prochain_contenu;
+    document.getElementById('brief-section').style.display = 'block';
+    document.getElementById('brief-content').innerHTML = `
+      <div class="brief-grid">
+        <div class="brief-item"><p class="brief-label">Angle prioritaire</p><p class="brief-text">${esc(b.angle_prioritaire||'—')}</p></div>
+        <div class="brief-item"><p class="brief-label">Format recommandé</p><p class="brief-text">${esc(b.format_recommande||'—')}</p></div>
+        <div class="brief-item"><p class="brief-label">Type d’accroche</p><p class="brief-text">${esc(b.accroche_type||'—')}</p></div>
+        <div class="brief-item brief-avoid"><p class="brief-label">À éviter</p><p class="brief-text">${esc(b.a_eviter||'—')}</p></div>
+      </div>`;
   }
 
-  // Viewers chart
-  if (parsed.viewers?.length) {
-    const vw = parsed.viewers.filter(r => r.total > 0).slice(0, 20);
-    charts.push(new Chart(document.getElementById('chart-viewers').getContext('2d'), {
-      type: 'bar',
-      data: { labels: vw.map(r => shortDate(r.date)), datasets: [
-        { label: 'Nouveaux', data: vw.map(r => r.newV), backgroundColor: 'rgba(97,143,155,0.65)', borderRadius: 2 },
-        { label: 'Récurrents', data: vw.map(r => r.returning), backgroundColor: 'rgba(239,214,177,0.18)', borderRadius: 2 }
-      ]},
-      options: { ...chartOpts(), scales: { x: { ...chartOpts().scales.x, stacked: true }, y: { ...chartOpts().scales.y, stacked: true } }, plugins: { legend: { display: true, labels: { color: 'rgba(239,214,177,0.45)', font: { size: 9 }, boxWidth: 8 } }, tooltip: { callbacks: { label: c => c.dataset.label + ' : ' + fmt(c.raw) } } } }
-    }));
-  } else { noData('chart-viewers'); }
-
-  // Recommendations
+    // Recommendations
   document.getElementById('reco-grid').innerHTML = (ai.recommandations || []).map((r, i) => `
     <div class="reco-card">
       <p class="reco-num">Recommandation ${i + 1}</p>

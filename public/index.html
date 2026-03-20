@@ -670,31 +670,38 @@ function parseDate(raw) {
   return isNaN(native) ? null : native;
 }
 
-// Guess year when not provided — simple fallback, corrected by fixYears()
 function guessYear(month, day) {
   const now = new Date();
-  const cy = now.getFullYear(), cm = now.getMonth();
-  if (month > cm) return cy - 1;
-  return cy;
+  if (month > now.getMonth()) return now.getFullYear() - 1;
+  return now.getFullYear();
 }
 
-// Post-process an array of {date} objects: fix year rollovers when month names have no year.
-// Walks chronologically; when month goes backward by >3 months, we crossed a year boundary.
-function fixYears(arr) {
+// assignYearsSequentially: reliable year assignment for TikTok 365-day exports.
+// Handles same-month start/end (e.g. Mar 2025 to Mar 2026) without double-correcting.
+function assignYearsSequentially(arr) {
   if (!arr || arr.length < 2) return arr;
-  let yearOffset = 0;
-  for (let i = 1; i < arr.length; i++) {
-    const prev = arr[i-1].date, cur = arr[i].date;
-    if (!prev || !cur) continue;
-    const prevM = prev.getMonth(), curM = cur.getMonth();
-    // Month dropped by more than 3 → year rolled over
-    if (prevM - curM > 3) {
-      yearOffset++;
-    }
-    if (yearOffset > 0) {
-      arr[i].date = new Date(cur.getFullYear() + yearOffset, cur.getMonth(), cur.getDate());
-      arr[i].dk = dateKey(arr[i].date);
-    }
+  const today = new Date();
+  // Extract raw month+day ignoring guessYear's potentially wrong year
+  const mds = arr.map(r => r.date ? [r.date.getMonth(), r.date.getDate()] : [0, 1]);
+  // Count year rollovers (month drops significantly in the sequence)
+  let rollovers = 0;
+  for (let i = 1; i < mds.length; i++) {
+    if (mds[i-1][0] - mds[i][0] > 2) rollovers++;
+  }
+  // Year of LAST entry must be <= today
+  const [lastM, lastD] = mds[mds.length - 1];
+  let endYear = today.getFullYear();
+  if (new Date(endYear, lastM, lastD) > today) endYear--;
+  // Assign years forward, incrementing at each rollover
+  let curYear = endYear - rollovers;
+  let prevM = mds[0][0];
+  for (let i = 0; i < arr.length; i++) {
+    if (!arr[i].date) continue;
+    const [m, d] = mds[i];
+    if (i > 0 && prevM - m > 2) curYear++;
+    arr[i].date = new Date(curYear, m, d);
+    arr[i].dk = dateKey(arr[i].date);
+    prevM = m;
   }
   return arr;
 }
@@ -731,7 +738,7 @@ function parseAll() {
         views: nv(row['Video Views']||row['Video views']||row['Views']),
         likes: nv(row['Likes']), comments: nv(row['Comments']), shares: nv(row['Shares']) };
     }).filter(r=>r.date&&r.views>=0);
-    r.overview = fixYears(raw);
+    r.overview = assignYearsSequentially(raw);
   }
   if (loaded.content) {
     r.content = parseRows(loaded.content).map(row=>{
@@ -756,7 +763,7 @@ function parseAll() {
         followers: nv(row['Followers']),
         diff: nv(row['Difference in followers from previous day']||row['Diff']||row['Change']||row['Net new followers']) };
     }).filter(r=>r.date&&r.followers>0);
-    r.followers = fixYears(raw);
+    r.followers = assignYearsSequentially(raw);
   }
   if (loaded.gender) {
     const rows = parseRows(loaded.gender).map(row=>({

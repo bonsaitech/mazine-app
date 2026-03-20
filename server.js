@@ -6,7 +6,7 @@ const { Pool } = require('pg');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-app.use(express.json({ limit: '4mb' }));
+app.use(express.json({ limit: '20mb' })); // larger limit for bulk data
 app.use(express.static(path.join(__dirname, 'public')));
 
 // ── DATABASE ──────────────────────────────────────────
@@ -27,11 +27,80 @@ async function initDB() {
     CREATE TABLE IF NOT EXISTS reports (
       id SERIAL PRIMARY KEY,
       client_id INTEGER REFERENCES clients(id) ON DELETE CASCADE,
-      month_key TEXT NOT NULL,           -- 'all' or 'YYYY-MM'
+      month_key TEXT NOT NULL,
       ai_result JSONB,
       created_at TIMESTAMPTZ DEFAULT NOW(),
       updated_at TIMESTAMPTZ DEFAULT NOW(),
       UNIQUE(client_id, month_key)
+    );
+
+    -- Daily time-series data
+    CREATE TABLE IF NOT EXISTS tiktok_overview (
+      client_id INTEGER REFERENCES clients(id) ON DELETE CASCADE,
+      date DATE NOT NULL,
+      views INTEGER DEFAULT 0,
+      likes INTEGER DEFAULT 0,
+      comments INTEGER DEFAULT 0,
+      shares INTEGER DEFAULT 0,
+      updated_at TIMESTAMPTZ DEFAULT NOW(),
+      PRIMARY KEY (client_id, date)
+    );
+
+    CREATE TABLE IF NOT EXISTS tiktok_followers (
+      client_id INTEGER REFERENCES clients(id) ON DELETE CASCADE,
+      date DATE NOT NULL,
+      followers INTEGER DEFAULT 0,
+      diff INTEGER DEFAULT 0,
+      updated_at TIMESTAMPTZ DEFAULT NOW(),
+      PRIMARY KEY (client_id, date)
+    );
+
+    CREATE TABLE IF NOT EXISTS tiktok_viewers (
+      client_id INTEGER REFERENCES clients(id) ON DELETE CASCADE,
+      date DATE NOT NULL,
+      new_viewers INTEGER DEFAULT 0,
+      returning_viewers INTEGER DEFAULT 0,
+      updated_at TIMESTAMPTZ DEFAULT NOW(),
+      PRIMARY KEY (client_id, date)
+    );
+
+    CREATE TABLE IF NOT EXISTS tiktok_activity (
+      client_id INTEGER REFERENCES clients(id) ON DELETE CASCADE,
+      date DATE NOT NULL,
+      hour SMALLINT NOT NULL,
+      active_followers INTEGER DEFAULT 0,
+      updated_at TIMESTAMPTZ DEFAULT NOW(),
+      PRIMARY KEY (client_id, date, hour)
+    );
+
+    -- Video content (upsert on title)
+    CREATE TABLE IF NOT EXISTS tiktok_content (
+      client_id INTEGER REFERENCES clients(id) ON DELETE CASCADE,
+      title TEXT NOT NULL,
+      views INTEGER DEFAULT 0,
+      likes INTEGER DEFAULT 0,
+      comments INTEGER DEFAULT 0,
+      shares INTEGER DEFAULT 0,
+      post_time TEXT,
+      updated_at TIMESTAMPTZ DEFAULT NOW(),
+      PRIMARY KEY (client_id, title)
+    );
+
+    -- Static distributions (replace on upload)
+    CREATE TABLE IF NOT EXISTS tiktok_gender (
+      client_id INTEGER REFERENCES clients(id) ON DELETE CASCADE,
+      gender TEXT NOT NULL,
+      distribution NUMERIC(6,2) DEFAULT 0,
+      updated_at TIMESTAMPTZ DEFAULT NOW(),
+      PRIMARY KEY (client_id, gender)
+    );
+
+    CREATE TABLE IF NOT EXISTS tiktok_territories (
+      client_id INTEGER REFERENCES clients(id) ON DELETE CASCADE,
+      territory TEXT NOT NULL,
+      distribution NUMERIC(8,4) DEFAULT 0,
+      updated_at TIMESTAMPTZ DEFAULT NOW(),
+      PRIMARY KEY (client_id, territory)
     );
   `);
   console.log('DB ready');
@@ -70,20 +139,18 @@ app.post('/api/logout', (req, res) => {
 });
 
 // ── CLIENTS ───────────────────────────────────────────
-// GET all clients
 app.get('/api/clients', async (req, res) => {
   if (!isAuthenticated(req)) return res.status(401).json({ error: 'Non authentifié.' });
   try {
     const { rows } = await pool.query(
-      'SELECT id, name, mazine_start_date FROM clients ORDER BY name ASC'
+      `SELECT c.id, c.name, c.mazine_start_date,
+        (SELECT MAX(updated_at) FROM tiktok_overview WHERE client_id=c.id) as last_upload
+       FROM clients c ORDER BY c.name ASC`
     );
     res.json({ clients: rows });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
+  } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
-// POST create client
 app.post('/api/clients', async (req, res) => {
   if (!isAuthenticated(req)) return res.status(401).json({ error: 'Non authentifié.' });
   const { name, mazine_start_date } = req.body;
@@ -94,12 +161,9 @@ app.post('/api/clients', async (req, res) => {
       [name.trim(), mazine_start_date || null]
     );
     res.json({ client: rows[0] });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
+  } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
-// PUT update client
 app.put('/api/clients/:id', async (req, res) => {
   if (!isAuthenticated(req)) return res.status(401).json({ error: 'Non authentifié.' });
   const { name, mazine_start_date } = req.body;
@@ -110,24 +174,171 @@ app.put('/api/clients/:id', async (req, res) => {
     );
     if (!rows.length) return res.status(404).json({ error: 'Client introuvable.' });
     res.json({ client: rows[0] });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
+  } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
-// DELETE client
 app.delete('/api/clients/:id', async (req, res) => {
   if (!isAuthenticated(req)) return res.status(401).json({ error: 'Non authentifié.' });
   try {
     await pool.query('DELETE FROM clients WHERE id=$1', [req.params.id]);
     res.json({ ok: true });
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+// ── TIKTOK DATA — SAVE (upsert) ───────────────────────
+app.post('/api/clients/:id/data', async (req, res) => {
+  if (!isAuthenticated(req)) return res.status(401).json({ error: 'Non authentifié.' });
+  const clientId = req.params.id;
+  const { overview, followers, viewers, activity, content, gender, territories } = req.body;
+  const client = await pool.connect();
+
+  try {
+    await client.query('BEGIN');
+
+    // ── Overview ──
+    if (overview?.length) {
+      for (const row of overview) {
+        if (!row.date) continue;
+        await client.query(`
+          INSERT INTO tiktok_overview (client_id, date, views, likes, comments, shares, updated_at)
+          VALUES ($1, $2, $3, $4, $5, $6, NOW())
+          ON CONFLICT (client_id, date) DO UPDATE
+          SET views=$3, likes=$4, comments=$5, shares=$6, updated_at=NOW()
+        `, [clientId, row.date, row.views||0, row.likes||0, row.comments||0, row.shares||0]);
+      }
+    }
+
+    // ── Followers ──
+    if (followers?.length) {
+      for (const row of followers) {
+        if (!row.date) continue;
+        await client.query(`
+          INSERT INTO tiktok_followers (client_id, date, followers, diff, updated_at)
+          VALUES ($1, $2, $3, $4, NOW())
+          ON CONFLICT (client_id, date) DO UPDATE
+          SET followers=$3, diff=$4, updated_at=NOW()
+        `, [clientId, row.date, row.followers||0, row.diff||0]);
+      }
+    }
+
+    // ── Viewers ──
+    if (viewers?.length) {
+      for (const row of viewers) {
+        if (!row.date) continue;
+        await client.query(`
+          INSERT INTO tiktok_viewers (client_id, date, new_viewers, returning_viewers, updated_at)
+          VALUES ($1, $2, $3, $4, NOW())
+          ON CONFLICT (client_id, date) DO UPDATE
+          SET new_viewers=$3, returning_viewers=$4, updated_at=NOW()
+        `, [clientId, row.date, row.newV||0, row.returning||0]);
+      }
+    }
+
+    // ── Activity ──
+    if (activity?.length) {
+      for (const row of activity) {
+        if (!row.date) continue;
+        await client.query(`
+          INSERT INTO tiktok_activity (client_id, date, hour, active_followers, updated_at)
+          VALUES ($1, $2, $3, $4, NOW())
+          ON CONFLICT (client_id, date, hour) DO UPDATE
+          SET active_followers=$4, updated_at=NOW()
+        `, [clientId, row.date, row.hour||0, row.active||0]);
+      }
+    }
+
+    // ── Content ──
+    if (content?.length) {
+      for (const row of content) {
+        if (!row.title) continue;
+        await client.query(`
+          INSERT INTO tiktok_content (client_id, title, views, likes, comments, shares, post_time, updated_at)
+          VALUES ($1, $2, $3, $4, $5, $6, $7, NOW())
+          ON CONFLICT (client_id, title) DO UPDATE
+          SET views=$3, likes=$4, comments=$5, shares=$6, post_time=$7, updated_at=NOW()
+        `, [clientId, row.title, row.views||0, row.likes||0, row.comments||0, row.shares||0, row.postTime||null]);
+      }
+    }
+
+    // ── Gender (replace all for client) ──
+    if (gender?.length) {
+      await client.query('DELETE FROM tiktok_gender WHERE client_id=$1', [clientId]);
+      for (const row of gender) {
+        if (!row.gender) continue;
+        await client.query(`
+          INSERT INTO tiktok_gender (client_id, gender, distribution, updated_at)
+          VALUES ($1, $2, $3, NOW())
+          ON CONFLICT (client_id, gender) DO UPDATE SET distribution=$3, updated_at=NOW()
+        `, [clientId, row.gender, row.dist||0]);
+      }
+    }
+
+    // ── Territories (replace all for client) ──
+    if (territories?.length) {
+      await client.query('DELETE FROM tiktok_territories WHERE client_id=$1', [clientId]);
+      for (const row of territories) {
+        if (!row.territory) continue;
+        await client.query(`
+          INSERT INTO tiktok_territories (client_id, territory, distribution, updated_at)
+          VALUES ($1, $2, $3, NOW())
+          ON CONFLICT (client_id, territory) DO UPDATE SET distribution=$3, updated_at=NOW()
+        `, [clientId, row.territory, row.dist||0]);
+      }
+    }
+
+    await client.query('COMMIT');
+    res.json({ ok: true, saved: {
+      overview: overview?.length||0,
+      followers: followers?.length||0,
+      viewers: viewers?.length||0,
+      activity: activity?.length||0,
+      content: content?.length||0,
+      gender: gender?.length||0,
+      territories: territories?.length||0,
+    }});
+  } catch (err) {
+    await client.query('ROLLBACK');
+    console.error('Data save error:', err);
+    res.status(500).json({ error: err.message });
+  } finally {
+    client.release();
+  }
+});
+
+// ── TIKTOK DATA — LOAD ────────────────────────────────
+app.get('/api/clients/:id/data', async (req, res) => {
+  if (!isAuthenticated(req)) return res.status(401).json({ error: 'Non authentifié.' });
+  const clientId = req.params.id;
+  try {
+    const [ov, fol, view, act, cont, gen, ter] = await Promise.all([
+      pool.query('SELECT date, views, likes, comments, shares FROM tiktok_overview WHERE client_id=$1 ORDER BY date ASC', [clientId]),
+      pool.query('SELECT date, followers, diff FROM tiktok_followers WHERE client_id=$1 ORDER BY date ASC', [clientId]),
+      pool.query('SELECT date, new_viewers, returning_viewers FROM tiktok_viewers WHERE client_id=$1 ORDER BY date ASC', [clientId]),
+      pool.query('SELECT date, hour, active_followers FROM tiktok_activity WHERE client_id=$1 ORDER BY date ASC, hour ASC', [clientId]),
+      pool.query('SELECT title, views, likes, comments, shares, post_time FROM tiktok_content WHERE client_id=$1 ORDER BY views DESC', [clientId]),
+      pool.query('SELECT gender, distribution FROM tiktok_gender WHERE client_id=$1', [clientId]),
+      pool.query('SELECT territory, distribution FROM tiktok_territories WHERE client_id=$1 ORDER BY distribution DESC', [clientId]),
+    ]);
+
+    // Count total rows to tell client if data exists
+    const total = ov.rowCount + fol.rowCount + cont.rowCount;
+
+    res.json({
+      hasData: total > 0,
+      overview:     ov.rows.map(r => ({ dateRaw: r.date, date: r.date, views: +r.views, likes: +r.likes, comments: +r.comments, shares: +r.shares })),
+      followers:    fol.rows.map(r => ({ dateRaw: r.date, date: r.date, followers: +r.followers, diff: +r.diff })),
+      viewers:      view.rows.map(r => ({ dateRaw: r.date, date: r.date, newV: +r.new_viewers, returning: +r.returning_viewers })),
+      activity:     act.rows.map(r => ({ dateRaw: r.date, date: r.date, hour: +r.hour, active: +r.active_followers })),
+      content:      cont.rows.map(r => ({ title: r.title, views: +r.views, likes: +r.likes, comments: +r.comments, shares: +r.shares, postTime: r.post_time })),
+      gender:       gen.rows.map(r => ({ gender: r.gender, dist: +r.distribution })),
+      territories:  ter.rows.map(r => ({ territory: r.territory, dist: +r.distribution })),
+    });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 });
 
 // ── REPORTS ───────────────────────────────────────────
-// GET all reports for a client
 app.get('/api/clients/:id/reports', async (req, res) => {
   if (!isAuthenticated(req)) return res.status(401).json({ error: 'Non authentifié.' });
   try {
@@ -136,12 +347,9 @@ app.get('/api/clients/:id/reports', async (req, res) => {
       [req.params.id]
     );
     res.json({ reports: rows });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
+  } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
-// POST save/update a report for a client+month
 app.post('/api/clients/:id/reports', async (req, res) => {
   if (!isAuthenticated(req)) return res.status(401).json({ error: 'Non authentifié.' });
   const { month_key, ai_result } = req.body;
@@ -150,22 +358,17 @@ app.post('/api/clients/:id/reports', async (req, res) => {
     await pool.query(`
       INSERT INTO reports (client_id, month_key, ai_result, updated_at)
       VALUES ($1, $2, $3, NOW())
-      ON CONFLICT (client_id, month_key)
-      DO UPDATE SET ai_result=$3, updated_at=NOW()
+      ON CONFLICT (client_id, month_key) DO UPDATE SET ai_result=$3, updated_at=NOW()
     `, [req.params.id, month_key, JSON.stringify(ai_result)]);
     res.json({ ok: true });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
+  } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
 // ── AI PROXY ──────────────────────────────────────────
 app.post('/api/analyze', (req, res) => {
   if (!isAuthenticated(req)) return res.status(401).json({ error: 'Non authentifié.' });
-
   const apiKey = process.env.OPENAI_API_KEY;
   if (!apiKey) return res.status(500).json({ error: 'OPENAI_API_KEY not configured.' });
-
   const { data } = req.body;
   if (!data) return res.status(400).json({ error: 'Données manquantes.' });
 
@@ -182,65 +385,54 @@ Ton rôle est de transformer la data brute en insights actionnables qui démontr
 Tu connais les spécificités du marché mauricien : audience bilingue créole/français, forte affinité mobile, pics d'activité en soirée, sensibilité aux promotions locales et événements (fêtes, ramadan, vacances scolaires).
 Réponds uniquement en JSON valide, sans markdown, sans backticks.`;
 
-  const userPrompt = `Produis le rapport mensuel TikTok de ${analyseMonth || 'la période sélectionnée'}.
+  const userPrompt = `Produis le rapport TikTok de ${analyseMonth || 'la période sélectionnée'}.
 
-━━━ CONTEXTE GLOBAL (365 jours) ━━━
-- Total vues sur l'année : ${totalViewsFull || 'N/A'}
+━━━ CONTEXTE GLOBAL ━━━
+- Total vues : ${totalViewsFull || 'N/A'}
 - Abonnés actuels : ${followers || 'N/A'}
-${followerGrowthFull ? `- Croissance totale abonnés : +${followerGrowthFull}` : ''}
+${followerGrowthFull ? `- Croissance abonnés : +${followerGrowthFull}` : ''}
 ${beforeAfter ? `- Impact partenariat Mazine (depuis ${startDate}) : ${beforeAfter}` : ''}
 
-━━━ MÉTRIQUES DU MOIS : ${analyseMonth || 'période'} ━━━
-- Vues : ${monthViews}
-- Likes : ${monthLikes}
-- Partages : ${monthShares}
-- Vidéos publiées ce mois : ${monthVideos}
-- Engagement moyen (top vidéos) : ${avgEng}%
-- Taux de viralité moyen (partages/vues) : ${avgShareRate}%
-- Taux d'affinité moyen (likes/vues) : ${avgLikeRate}%
+━━━ MÉTRIQUES : ${analyseMonth || 'période'} ━━━
+- Vues : ${monthViews} | Likes : ${monthLikes} | Partages : ${monthShares}
+- Vidéos publiées : ${monthVideos}
+- Engagement moyen : ${avgEng}% | Viralité : ${avgShareRate}% | Affinité : ${avgLikeRate}%
 ${monthVsPrev ? `- Tendance : ${monthVsPrev}` : ''}
 
-━━━ TOP 5 VIDÉOS DU MOIS ━━━
-${top5.map((v, i) => `${i+1}. "${v.title}"
-   Vues : ${v.views} | Likes : ${v.likes} | Commentaires : ${v.comments} | Partages : ${v.shares}
-   Engagement : ${v.engRate}% | Viralité : ${v.shareRate}% | Publié : ${v.postTime || 'N/A'}`).join('\n\n')}
+━━━ TOP 5 VIDÉOS ━━━
+${top5.map((v, i) => `${i+1}. "${v.title}" — ${v.views} vues | Eng: ${v.engRate}% | Viral: ${v.shareRate}%`).join('\n')}
 
-Produis le rapport JSON suivant :
+Réponds avec ce JSON exact :
 {
-  "synthese": "3-4 phrases. Résume les faits saillants du mois avec des chiffres concrets.",
+  "synthese": "3-4 phrases avec chiffres concrets.",
   "diagnostic": {
-    "points_forts": ["Point fort 1 — appuyé par un chiffre", "Point fort 2", "Point fort 3"],
-    "points_amelioration": ["Levier 1 — concret et actionnable", "Levier 2"]
+    "points_forts": ["Point 1 chiffré", "Point 2", "Point 3"],
+    "points_amelioration": ["Levier 1 actionnable", "Levier 2"]
   },
-  "analyse_viralite": "2 phrases max. Interprète le ratio partages/vues.",
-  "videos": [{"rank": 1, "format": "Catégorie précise", "pourquoi": "1 phrase sur le facteur clé de succès"}],
+  "analyse_viralite": "2 phrases max sur le ratio partages/vues.",
+  "videos": [{"rank": 1, "format": "Catégorie précise", "pourquoi": "Facteur clé de succès"}],
   "brief_prochain_contenu": {
-    "angle_prioritaire": "Thème dominant à poursuivre",
+    "angle_prioritaire": "Thème dominant",
     "format_recommande": "Format exact",
-    "accroche_type": "Type d'accroche à privilégier",
-    "a_eviter": "Ce qui n'a pas performé — avec justification"
+    "accroche_type": "Type d'accroche",
+    "a_eviter": "Ce qui n'a pas performé"
   },
-  "recommandations": ["Recommandation 1", "Recommandation 2", "Recommandation 3", "Recommandation 4"]
+  "recommandations": ["Reco 1", "Reco 2", "Reco 3", "Reco 4"]
 }`;
 
   fetch('https://api.openai.com/v1/chat/completions', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + apiKey },
     body: JSON.stringify({
-      model: 'gpt-4o',
-      max_tokens: 1500,
+      model: 'gpt-4o', max_tokens: 1500,
       response_format: { type: 'json_object' },
-      messages: [
-        { role: 'system', content: systemPrompt },
-        { role: 'user', content: userPrompt }
-      ]
+      messages: [{ role: 'system', content: systemPrompt }, { role: 'user', content: userPrompt }]
     })
   })
   .then(r => r.json())
-  .then(openaiData => {
-    if (openaiData.error) return res.status(500).json({ error: openaiData.error.message });
-    const txt = openaiData.choices[0].message.content.replace(/```json|```/g, '').trim();
-    res.json({ result: JSON.parse(txt) });
+  .then(d => {
+    if (d.error) return res.status(500).json({ error: d.error.message });
+    res.json({ result: JSON.parse(d.choices[0].message.content.replace(/```json|```/g, '').trim()) });
   })
   .catch(err => res.status(500).json({ error: err.message }));
 });

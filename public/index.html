@@ -340,10 +340,26 @@ input[type="date"].field-input::-webkit-calendar-picker-indicator { filter: inve
 <div class="screen" id="screen-upload">
   <div style="padding:3rem 2.5rem;max-width:860px;margin:0 auto;">
     <div class="upload-hero">
-      <p class="eyebrow">TikTok Performance Report</p>
+      <p class="eyebrow" id="upload-eyebrow">TikTok Performance Report</p>
       <h1 class="hero-title">Analyse <em>intelligente</em><br>de vos données</h1>
       <p class="hero-sub">Importez vos exports TikTok Analytics. Les statistiques s'affichent immédiatement, les insights IA sont disponibles à la demande.</p>
     </div>
+
+    <!-- Existing data banner (shown when DB has data for this client) -->
+    <div id="existing-data-banner" style="display:none;background:var(--teal-dim);border:0.5px solid var(--teal-border);border-radius:0.85rem;padding:1.1rem 1.5rem;margin-bottom:1.5rem;display:none;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap;">
+      <div style="display:flex;align-items:center;gap:0.85rem;">
+        <div style="width:28px;height:28px;background:rgba(97,143,155,0.2);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;color:var(--teal);flex-shrink:0;">↑</div>
+        <div>
+          <p style="font-size:0.6rem;letter-spacing:0.15em;text-transform:uppercase;color:var(--teal);margin-bottom:0.2rem;">Données existantes</p>
+          <p style="font-family:'Lora',serif;font-style:italic;font-size:0.82rem;color:var(--cream-dim);" id="existing-data-desc">Des données sont déjà enregistrées pour ce client.</p>
+        </div>
+      </div>
+      <div style="display:flex;gap:0.5rem;flex-wrap:wrap;">
+        <button onclick="loadFromDB()" style="background:var(--teal);color:var(--dark);border:none;padding:0.55rem 1.1rem;font-family:'Plus Jakarta Sans',sans-serif;font-size:0.7rem;letter-spacing:0.12em;text-transform:uppercase;border-radius:2rem;cursor:pointer;">Utiliser ces données →</button>
+        <button onclick="document.getElementById('existing-data-banner').style.display='none'" style="background:transparent;border:0.5px solid rgba(239,214,177,0.15);color:rgba(239,214,177,0.4);padding:0.55rem 1.1rem;font-family:'Plus Jakarta Sans',sans-serif;font-size:0.7rem;letter-spacing:0.12em;text-transform:uppercase;border-radius:2rem;cursor:pointer;">Uploader de nouveaux fichiers</button>
+      </div>
+    </div>
+
     <p class="files-label">Fichiers TikTok Analytics</p>
     <div class="drop-grid" id="drop-grid"></div>
     <div class="progress-row">
@@ -674,21 +690,88 @@ function editClient(id, name, date) {
   }).then(()=>{ showToast('Client mis à jour'); loadClients(); }).catch(()=>showToast('Erreur','error'));
 }
 
-function selectClient(id, clientObj) {
+async function selectClient(id, clientObj) {
   currentClient = typeof clientObj === 'string' ? JSON.parse(clientObj) : clientObj;
-  // Set the mazine start date from client record
   if (currentClient.mazine_start_date) {
     document.getElementById('client-start-date').value = currentClient.mazine_start_date.split('T')[0];
   } else {
     document.getElementById('client-start-date').value = '';
   }
-  // Show client badge in header
   const badge = document.getElementById('current-client-badge');
   badge.style.display = 'inline-flex';
   badge.textContent = '← ' + currentClient.name;
+
+  // Load saved AI reports
+  await loadSavedReports(id);
+
+  // Check if DB has existing tiktok data
+  await checkExistingData(id);
+
   showScreen('screen-upload');
-  // Auto-load saved AI reports from DB
-  loadSavedReports(id);
+}
+
+async function checkExistingData(clientId) {
+  try {
+    const res = await fetch('/api/clients/'+clientId+'/data', { headers:{'Authorization':'Bearer '+authToken} });
+    const data = await res.json();
+    const banner = document.getElementById('existing-data-banner');
+    if (data.hasData) {
+      // Store DB data for potential use
+      window._dbData = data;
+      const ovCount = data.overview?.length || 0;
+      const folCount = data.followers?.length || 0;
+      const contCount = data.content?.length || 0;
+      document.getElementById('existing-data-desc').textContent =
+        `${ovCount} jours d'overview, ${folCount} jours de followers, ${contCount} vidéos — dernier import disponible.`;
+      banner.style.display = 'flex';
+    } else {
+      window._dbData = null;
+      banner.style.display = 'none';
+    }
+  } catch(err) {
+    console.warn('checkExistingData failed:', err);
+  }
+}
+
+async function loadFromDB() {
+  if (!window._dbData) return;
+  document.getElementById('existing-data-banner').style.display = 'none';
+  showScreen('screen-loading');
+  setStep('Chargement des données depuis la base…');
+  await sleep(300);
+
+  // Convert DB dates (ISO strings) back to Date objects
+  const d = window._dbData;
+  function hydrate(arr, dateField='date') {
+    return (arr||[]).map(r => {
+      const dateObj = r[dateField] ? new Date(r[dateField]) : null;
+      return { ...r, date: dateObj, dk: dateObj ? dateObj.getFullYear()+'-'+String(dateObj.getMonth()+1).padStart(2,'0') : null };
+    }).filter(r => r.date && !isNaN(r.date));
+  }
+
+  const parsed = {
+    overview:    hydrate(d.overview),
+    followers:   hydrate(d.followers),
+    viewers:     hydrate(d.viewers),
+    activity:    hydrate(d.activity),
+    content:     d.content || [],
+    gender:      d.gender || [],
+    territories: d.territories || [],
+  };
+
+  setStep('Calcul des performances…');
+  await sleep(200);
+  const scored = scoreVideos(parsed.content);
+  const top5 = scored.slice(0, 5);
+  G = { parsed, scored, top5 };
+  buildMonthPills(parsed);
+  currentMonth = 'all';
+  setStep('Construction du rapport…');
+  await sleep(200);
+  renderDashboard('all');
+  showScreen('screen-dashboard');
+  document.getElementById('month-bar').style.display = 'flex';
+  showToast('Données chargées depuis la base de données');
 }
 
 async function loadSavedReports(clientId) {
@@ -814,10 +897,36 @@ async function startAnalysis() {
   G = { parsed, scored, top5 };
   buildMonthPills(parsed);
   currentMonth = 'all';
+  setStep('Sauvegarde en base de données…');
+  await saveDataToDB(parsed);
   setStep('Construction du rapport…'); await sleep(200);
   renderDashboard('all');
   showScreen('screen-dashboard');
   document.getElementById('month-bar').style.display = 'flex';
+}
+
+async function saveDataToDB(parsed) {
+  if (!currentClient) return;
+  try {
+    const toISO = arr => (arr||[]).map(r => ({...r, date: r.date instanceof Date ? r.date.toISOString().split('T')[0] : (r.date||null)}));
+    const body = {
+      overview: toISO(parsed.overview), followers: toISO(parsed.followers),
+      viewers: toISO(parsed.viewers), activity: toISO(parsed.activity),
+      content: parsed.content||[], gender: parsed.gender||[], territories: parsed.territories||[],
+    };
+    const res = await fetch('/api/clients/'+currentClient.id+'/data', {
+      method:'POST', headers:{'Content-Type':'application/json','Authorization':'Bearer '+authToken},
+      body: JSON.stringify(body)
+    });
+    const result = await res.json();
+    if (result.ok) {
+      const s = result.saved;
+      showToast('Sauvegardé — '+s.overview+' jours overview · '+s.content+' vidéos · '+s.followers+' jours followers');
+    }
+  } catch(err) {
+    console.warn('saveDataToDB failed:', err);
+    showToast('Sauvegarde DB échouée — données disponibles en session', 'warn');
+  }
 }
 
 // ═══════════════════════════════════════════════════

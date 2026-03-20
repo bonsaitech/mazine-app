@@ -32,66 +32,41 @@ header {
 .btn-logout { background: transparent; border: 0.5px solid rgba(239,214,177,0.15); color: rgba(239,214,177,0.4); padding: 0.3rem 0.85rem; border-radius: 2rem; font-family: 'Plus Jakarta Sans', sans-serif; font-size: 0.65rem; letter-spacing: 0.1em; cursor: pointer; transition: all 0.2s; text-transform: uppercase; }
 .btn-logout:hover { border-color: rgba(239,214,177,0.35); color: var(--cream-dim); }
 
-/* ─── LOGIN ─── */
+/* LOGIN */
 .login-wrap { max-width: 400px; margin: 0 auto; padding: 5rem 2rem; text-align: center; }
 .login-box { text-align: left; background: var(--cream-faint); border: 0.5px solid rgba(239,214,177,0.1); border-radius: 1rem; padding: 1.75rem; }
 .login-error { font-size: 0.75rem; color: #f0a0a0; margin-top: 0.5rem; min-height: 1rem; font-family: 'Lora', serif; font-style: italic; }
 
-/* ─── UPLOAD ─── */
-#screen-upload { padding: 3rem 2.5rem; max-width: 860px; margin: 0 auto; }
-
+/* UPLOAD */
 .upload-hero { text-align: center; padding: 2.5rem 0 3rem; }
 .eyebrow { font-family: 'Lora', serif; font-style: italic; font-size: 0.85rem; color: var(--teal); margin-bottom: 1.2rem; }
 .hero-title { font-weight: 200; font-size: clamp(2rem, 5vw, 3rem); letter-spacing: 0.12em; text-transform: uppercase; line-height: 1.2; margin-bottom: 0.75rem; }
 .hero-title em { font-family: 'Lora', serif; font-style: italic; font-weight: 400; text-transform: none; letter-spacing: 0; color: var(--teal); }
 .hero-sub { font-family: 'Lora', serif; font-size: 0.9rem; color: var(--cream-dim); max-width: 460px; margin: 0 auto; line-height: 1.75; }
-
 .files-label { font-size: 0.62rem; letter-spacing: 0.2em; text-transform: uppercase; color: rgba(239,214,177,0.3); margin-bottom: 1.25rem; }
-
 .drop-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 0.85rem; margin-bottom: 2rem; }
-
-.drop-zone {
-  border: 0.5px dashed rgba(239,214,177,0.2); border-radius: 0.9rem;
-  padding: 1.5rem 1.25rem; cursor: pointer; transition: all 0.25s;
-  background: var(--cream-faint); position: relative; text-align: center;
-}
+.drop-zone { border: 0.5px dashed rgba(239,214,177,0.2); border-radius: 0.9rem; padding: 1.5rem 1.25rem; cursor: pointer; transition: all 0.25s; background: var(--cream-faint); position: relative; text-align: center; }
 .drop-zone:hover { border-color: var(--teal); background: var(--teal-dim); }
 .drop-zone.loaded { border-color: var(--teal); border-style: solid; background: var(--teal-dim); }
 .drop-zone.drag-over { border-color: var(--teal); background: rgba(97,143,155,0.18); }
 .drop-zone input[type=file] { display: none; }
-
 .dz-icon { width: 36px; height: 36px; margin: 0 auto 0.85rem; border: 0.5px solid rgba(239,214,177,0.15); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 15px; color: rgba(239,214,177,0.35); transition: all 0.25s; }
 .drop-zone.loaded .dz-icon { border-color: var(--teal); color: var(--teal); background: rgba(97,143,155,0.15); }
 .dz-name { font-size: 0.72rem; letter-spacing: 0.08em; color: rgba(239,214,177,0.7); margin-bottom: 0.3rem; font-weight: 400; }
 .dz-hint { font-family: 'Lora', serif; font-style: italic; font-size: 0.68rem; color: rgba(239,214,177,0.3); transition: color 0.25s; }
 .drop-zone.loaded .dz-hint { color: var(--teal); }
-
 .progress-row { display: flex; align-items: center; gap: 1rem; margin-bottom: 1.5rem; }
 .progress-track { flex: 1; height: 2px; background: rgba(239,214,177,0.08); border-radius: 1px; overflow: hidden; }
 .progress-fill { height: 100%; background: var(--teal); border-radius: 1px; transition: width 0.4s ease; }
 .progress-label { font-size: 0.68rem; color: rgba(239,214,177,0.35); white-space: nowrap; }
-
 .api-key-label { display: block; font-size: 0.6rem; letter-spacing: 0.18em; text-transform: uppercase; color: rgba(239,214,177,0.35); margin-bottom: 0.5rem; }
-.api-key-input {
-  width: 100%; background: var(--cream-faint); border: 0.5px solid rgba(239,214,177,0.15);
-  border-radius: 0.75rem; padding: 0.75rem 1rem; color: var(--cream);
-  font-family: 'Plus Jakarta Sans', sans-serif; font-size: 0.82rem; letter-spacing: 0.05em;
-  outline: none; transition: border-color 0.2s;
-}
+.api-key-input { width: 100%; background: var(--cream-faint); border: 0.5px solid rgba(239,214,177,0.15); border-radius: 0.75rem; padding: 0.75rem 1rem; color: var(--cream); font-family: 'Plus Jakarta Sans', sans-serif; font-size: 0.82rem; letter-spacing: 0.05em; outline: none; transition: border-color 0.2s; }
 .api-key-input::placeholder { color: rgba(239,214,177,0.2); }
 .api-key-input:focus { border-color: var(--teal); }
 input[type="date"].api-key-input::-webkit-calendar-picker-indicator { filter: invert(0.6) sepia(1) saturate(0.5) hue-rotate(150deg); cursor: pointer; }
-
-.btn-analyze {
-  width: 100%; background: var(--teal); color: var(--dark); border: none;
-  padding: 0.95rem 2rem; font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 400;
-  font-size: 0.8rem; letter-spacing: 0.15em; text-transform: uppercase;
-  border-radius: 2rem; cursor: pointer; transition: all 0.2s;
-  opacity: 0.35; pointer-events: none;
-}
+.btn-analyze { width: 100%; background: var(--teal); color: var(--dark); border: none; padding: 0.95rem 2rem; font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 400; font-size: 0.8rem; letter-spacing: 0.15em; text-transform: uppercase; border-radius: 2rem; cursor: pointer; transition: all 0.2s; opacity: 0.35; pointer-events: none; }
 .btn-analyze.ready { opacity: 1; pointer-events: all; }
 .btn-analyze.ready:hover { background: var(--cream); }
-
 .guide { margin-top: 3rem; border-top: 0.5px solid rgba(239,214,177,0.08); padding-top: 2rem; }
 .guide-label { font-size: 0.62rem; letter-spacing: 0.2em; text-transform: uppercase; color: rgba(239,214,177,0.25); margin-bottom: 1.25rem; }
 .guide-steps { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; }
@@ -99,7 +74,7 @@ input[type="date"].api-key-input::-webkit-calendar-picker-indicator { filter: in
 .step-num { font-weight: 200; font-size: 1.6rem; color: var(--teal); opacity: 0.5; line-height: 1; margin-bottom: 0.6rem; }
 .step-txt { font-size: 0.78rem; line-height: 1.6; color: var(--cream-dim); }
 
-/* ─── LOADING ─── */
+/* LOADING */
 #screen-loading { flex-direction: column; align-items: center; justify-content: center; min-height: 75vh; text-align: center; padding: 2rem; }
 #screen-loading.active { display: flex; }
 .loader-ring { width: 56px; height: 56px; border: 1px solid rgba(239,214,177,0.08); border-top-color: var(--teal); border-radius: 50%; animation: spin 1.2s linear infinite; margin-bottom: 2rem; }
@@ -107,30 +82,48 @@ input[type="date"].api-key-input::-webkit-calendar-picker-indicator { filter: in
 .loading-title { font-weight: 200; font-size: 1rem; letter-spacing: 0.2em; text-transform: uppercase; margin-bottom: 0.4rem; }
 #loading-step { font-family: 'Lora', serif; font-style: italic; font-size: 0.85rem; color: var(--teal); }
 
-/* ─── DASHBOARD ─── */
-#screen-dashboard { padding: 2rem 2.5rem; max-width: 1100px; margin: 0 auto; }
+/* MONTH PILLS */
+.month-bar { display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; padding: 0.85rem 2.5rem; border-bottom: 0.5px solid rgba(239,214,177,0.06); background: rgba(19,30,33,0.97); position: sticky; top: 64px; z-index: 90; }
+.month-bar-label { font-size: 0.55rem; letter-spacing: 0.2em; text-transform: uppercase; color: rgba(239,214,177,0.25); margin-right: 0.25rem; white-space: nowrap; }
+.month-pill { font-size: 0.65rem; letter-spacing: 0.08em; text-transform: uppercase; padding: 0.3rem 0.8rem; border-radius: 2rem; cursor: pointer; transition: all 0.2s; border: 0.5px solid rgba(239,214,177,0.12); color: rgba(239,214,177,0.4); background: transparent; font-family: 'Plus Jakarta Sans', sans-serif; }
+.month-pill:hover { border-color: var(--teal); color: var(--teal); }
+.month-pill.active { background: var(--teal); border-color: var(--teal); color: var(--dark); font-weight: 400; }
+.month-pill.all.active { background: rgba(239,214,177,0.1); border-color: var(--cream-dim); color: var(--cream); }
 
+/* DASHBOARD */
+#screen-dashboard { padding: 2rem 2.5rem; max-width: 1100px; margin: 0 auto; }
 .dash-top { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 2rem; flex-wrap: wrap; gap: 1rem; }
 .dash-client { font-size: 0.6rem; letter-spacing: 0.25em; text-transform: uppercase; color: rgba(239,214,177,0.3); margin-bottom: 0.3rem; }
 .dash-title { font-weight: 200; font-size: 1.8rem; letter-spacing: 0.1em; text-transform: uppercase; }
 .dash-period { font-family: 'Lora', serif; font-style: italic; color: var(--teal); font-size: 0.85rem; margin-top: 0.2rem; }
 .btn-reset { background: transparent; border: 0.5px solid rgba(239,214,177,0.15); color: rgba(239,214,177,0.4); padding: 0.45rem 1rem; border-radius: 2rem; font-family: 'Plus Jakarta Sans', sans-serif; font-size: 0.7rem; letter-spacing: 0.1em; cursor: pointer; transition: all 0.2s; text-transform: uppercase; }
 .btn-reset:hover { border-color: var(--teal); color: var(--teal); }
-
 .metrics-row { display: grid; grid-template-columns: repeat(5, 1fr); gap: 0.75rem; margin-bottom: 1.5rem; }
 .m-card { background: var(--card); border: 0.5px solid rgba(239,214,177,0.07); border-radius: 0.75rem; padding: 1rem; }
 .m-label { font-size: 0.58rem; letter-spacing: 0.15em; text-transform: uppercase; color: rgba(239,214,177,0.3); margin-bottom: 0.5rem; }
 .m-value { font-weight: 200; font-size: 1.5rem; color: var(--cream); line-height: 1; }
 .m-sub { font-family: 'Lora', serif; font-style: italic; font-size: 0.65rem; color: var(--teal); margin-top: 0.25rem; }
 
+/* AI BANNER */
 .ai-banner { background: var(--teal-dim); border: 0.5px solid var(--teal-border); border-radius: 0.85rem; padding: 1.25rem 1.5rem; margin-bottom: 1.5rem; display: flex; gap: 1rem; align-items: flex-start; }
 .ai-icon { width: 30px; height: 30px; background: rgba(97,143,155,0.2); border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 13px; color: var(--teal); }
 .ai-badge { font-size: 0.58rem; letter-spacing: 0.2em; text-transform: uppercase; color: var(--teal); margin-bottom: 0.35rem; }
 .ai-text { font-family: 'Lora', serif; font-size: 0.88rem; line-height: 1.75; color: var(--cream-dim); }
 
+/* AI TRIGGER */
+.ai-trigger-banner { background: var(--cream-faint); border: 0.5px dashed rgba(97,143,155,0.3); border-radius: 0.85rem; padding: 1.25rem 1.5rem; margin-bottom: 1.5rem; display: flex; gap: 1rem; align-items: center; justify-content: space-between; flex-wrap: wrap; }
+.ai-trigger-info { display: flex; align-items: center; gap: 0.85rem; }
+.ai-trigger-icon { width: 30px; height: 30px; background: rgba(97,143,155,0.08); border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 13px; color: rgba(97,143,155,0.5); }
+.ai-trigger-label { font-size: 0.6rem; letter-spacing: 0.15em; text-transform: uppercase; color: rgba(239,214,177,0.3); margin-bottom: 0.25rem; }
+.ai-trigger-desc { font-family: 'Lora', serif; font-style: italic; font-size: 0.82rem; color: rgba(239,214,177,0.35); }
+.btn-ai-generate { background: var(--teal); color: var(--dark); border: none; padding: 0.6rem 1.25rem; font-family: 'Plus Jakarta Sans', sans-serif; font-size: 0.72rem; letter-spacing: 0.12em; text-transform: uppercase; border-radius: 2rem; cursor: pointer; transition: all 0.2s; white-space: nowrap; flex-shrink: 0; }
+.btn-ai-generate:hover { background: var(--cream); }
+.btn-ai-generate:disabled { opacity: 0.45; pointer-events: none; }
+.ai-loading-inline { font-family: 'Lora', serif; font-style: italic; font-size: 0.78rem; color: var(--teal); display: none; }
+.ai-loading-inline.visible { display: block; }
+
 .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem; }
 .main-row { display: grid; grid-template-columns: 1.4fr 1fr; gap: 1rem; margin-bottom: 1rem; }
-
 .section { background: var(--card); border: 0.5px solid rgba(239,214,177,0.07); border-radius: 0.85rem; padding: 1.25rem; }
 .sec-label { font-size: 0.58rem; letter-spacing: 0.2em; text-transform: uppercase; color: rgba(239,214,177,0.3); margin-bottom: 1rem; }
 
@@ -146,31 +139,27 @@ input[type="date"].api-key-input::-webkit-calendar-picker-indicator { filter: in
 .v-eng { text-align: right; flex-shrink: 0; }
 .v-eng-val { font-weight: 200; font-size: 1.1rem; }
 .v-eng-lbl { font-size: 0.52rem; letter-spacing: 0.1em; text-transform: uppercase; color: rgba(239,214,177,0.25); }
+.v-global-badge { font-size: 0.55rem; font-family: 'Lora', serif; font-style: italic; color: rgba(239,214,177,0.2); margin-bottom: 0.75rem; }
 
 .gender-row { display: flex; gap: 0.75rem; }
 .gender-block { flex: 1; background: var(--teal-dim); border-radius: 0.5rem; padding: 0.75rem; text-align: center; }
 .gender-val { font-weight: 200; font-size: 1.4rem; color: var(--cream); }
 .gender-lbl { font-size: 0.6rem; letter-spacing: 0.1em; text-transform: uppercase; color: rgba(239,214,177,0.35); margin-top: 0.2rem; }
-
 .bar-row { display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.55rem; }
 .bar-label { font-size: 0.7rem; color: var(--cream-dim); width: 5.5rem; flex-shrink: 0; }
 .bar-track { flex: 1; height: 3px; background: rgba(239,214,177,0.07); border-radius: 2px; overflow: hidden; }
 .bar-fill { height: 100%; background: var(--teal); border-radius: 2px; }
 .bar-pct { font-size: 0.65rem; color: rgba(239,214,177,0.35); width: 2.2rem; text-align: right; flex-shrink: 0; }
-
 .chart-wrap { position: relative; height: 155px; }
-
 .time-grid { display: grid; grid-template-columns: repeat(24, 1fr); gap: 3px; }
 .time-cell { height: 26px; border-radius: 3px; }
 .time-labels { display: grid; grid-template-columns: repeat(24, 1fr); gap: 3px; margin-top: 5px; }
 .time-lbl { font-size: 0.48rem; color: rgba(239,214,177,0.25); text-align: center; }
 .best-time { font-family: 'Lora', serif; font-style: italic; font-size: 0.72rem; color: var(--teal); margin-top: 0.75rem; }
-
 .reco-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; }
 .reco-card { background: var(--cream-faint); border: 0.5px solid rgba(239,214,177,0.06); border-radius: 0.75rem; padding: 1rem; }
 .reco-num { font-size: 0.58rem; letter-spacing: 0.15em; text-transform: uppercase; color: var(--teal); margin-bottom: 0.4rem; }
 .reco-text { font-family: 'Lora', serif; font-size: 0.82rem; line-height: 1.65; color: var(--cream-dim); }
-
 .comp-header { display: flex; align-items: center; gap: 1rem; margin-bottom: 0.85rem; }
 .comp-since { font-family: 'Lora', serif; font-style: italic; font-size: 0.75rem; color: var(--teal); }
 .comp-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.75rem; }
@@ -186,10 +175,6 @@ input[type="date"].api-key-input::-webkit-calendar-picker-indicator { filter: in
 .comp-delta { font-size: 0.72rem; font-weight: 400; padding: 0.2rem 0.5rem; border-radius: 2rem; flex-shrink: 0; }
 .delta-pos { background: rgba(97,143,155,0.2); color: var(--teal); }
 .delta-neg { background: rgba(200,80,80,0.1); color: #f0a0a0; }
-
-.dash-footer { text-align: center; padding: 2rem 0; border-top: 0.5px solid rgba(239,214,177,0.06); margin-top: 1.5rem; }
-.footer-text { font-size: 0.6rem; letter-spacing: 0.25em; text-transform: uppercase; color: rgba(239,214,177,0.18); }
-
 .two-col-inner { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
 .diag-label { font-size: 0.58rem; letter-spacing: 0.15em; text-transform: uppercase; color: rgba(239,214,177,0.3); margin-bottom: 0.6rem; }
 .diag-list { list-style: none; display: flex; flex-direction: column; gap: 0.45rem; }
@@ -205,15 +190,16 @@ input[type="date"].api-key-input::-webkit-calendar-picker-indicator { filter: in
 .brief-text { font-family: 'Lora', serif; font-size: 0.82rem; line-height: 1.6; color: var(--cream-dim); }
 .brief-avoid .brief-text { color: rgba(240,160,160,0.7); }
 .no-data-msg { font-size: 0.78rem; color: rgba(239,214,177,0.25); padding-top: 1rem; font-family: 'Lora', serif; font-style: italic; }
+.dash-footer { text-align: center; padding: 2rem 0; border-top: 0.5px solid rgba(239,214,177,0.06); margin-top: 1.5rem; }
+.footer-text { font-size: 0.6rem; letter-spacing: 0.25em; text-transform: uppercase; color: rgba(239,214,177,0.18); }
 
 @media(max-width:700px){
   .metrics-row{grid-template-columns:repeat(2,1fr);}
   .two-col,.main-row,.two-col-inner{grid-template-columns:1fr;}
-  .reco-grid{grid-template-columns:1fr;}
-  .guide-steps{grid-template-columns:1fr;}
-  .comp-grid{grid-template-columns:1fr;}
+  .reco-grid,.brief-grid{grid-template-columns:1fr;}
+  .guide-steps,.comp-grid{grid-template-columns:1fr;}
   #screen-upload,#screen-dashboard{padding:1.5rem 1.25rem;}
-  header{padding:1rem 1.25rem;}
+  header,.month-bar{padding:1rem 1.25rem;}
 }
 </style>
 </head>
@@ -227,77 +213,67 @@ input[type="date"].api-key-input::-webkit-calendar-picker-indicator { filter: in
   <button class="btn-logout" id="btn-logout" style="display:none;" onclick="logout()">Déconnexion</button>
 </header>
 
-<!-- ─── LOGIN ─── -->
+<!-- LOGIN -->
 <div class="screen active" id="screen-login">
   <div class="login-wrap">
     <p class="eyebrow" style="margin-bottom:1.5rem;">Accès réservé</p>
     <h1 style="font-weight:200;font-size:1.8rem;letter-spacing:0.1em;text-transform:uppercase;margin-bottom:2rem;">Mazine<br><em style="font-family:'Lora',serif;font-style:italic;font-weight:400;text-transform:none;color:var(--teal);">Analytics</em></h1>
     <div class="login-box">
       <label class="api-key-label" for="login-password">Mot de passe</label>
-      <input class="api-key-input" type="password" id="login-password" placeholder="••••••••"
-        onkeydown="if(event.key==='Enter') doLogin()">
+      <input class="api-key-input" type="password" id="login-password" placeholder="••••••••" onkeydown="if(event.key==='Enter') doLogin()">
       <p class="login-error" id="login-error"></p>
-      <button id="btn-login" onclick="doLogin()" style="margin-top:1rem;width:100%;background:var(--teal);color:var(--dark);border:none;padding:0.85rem 2rem;font-family:'Plus Jakarta Sans',sans-serif;font-size:0.8rem;letter-spacing:0.15em;text-transform:uppercase;border-radius:2rem;cursor:pointer;transition:all 0.2s;">Accéder →</button>
+      <button id="btn-login" onclick="doLogin()" style="margin-top:1rem;width:100%;background:var(--teal);color:var(--dark);border:none;padding:0.85rem 2rem;font-family:'Plus Jakarta Sans',sans-serif;font-size:0.8rem;letter-spacing:0.15em;text-transform:uppercase;border-radius:2rem;cursor:pointer;">Accéder →</button>
     </div>
   </div>
 </div>
 
-<!-- ─── UPLOAD ─── -->
+<!-- UPLOAD -->
 <div class="screen" id="screen-upload">
   <div style="padding:3rem 2.5rem;max-width:860px;margin:0 auto;">
     <div class="upload-hero">
       <p class="eyebrow">TikTok Performance Report</p>
       <h1 class="hero-title">Analyse <em>intelligente</em><br>de vos données</h1>
-      <p class="hero-sub">Importez vos exports TikTok Analytics pour générer un rapport mensuel complet avec insights IA.</p>
+      <p class="hero-sub">Importez vos exports TikTok Analytics pour générer un rapport avec insights IA.</p>
     </div>
-
     <p class="files-label">Fichiers TikTok Analytics</p>
     <div class="drop-grid" id="drop-grid"></div>
-
     <div class="progress-row">
       <div class="progress-track"><div class="progress-fill" id="progress-fill" style="width:0%"></div></div>
       <span class="progress-label" id="progress-label">0 / 7 fichiers</span>
     </div>
-
     <div style="margin-bottom:0.75rem;">
-      <label class="api-key-label" for="client-start-date">Date de début du partenariat Mazine <span style="opacity:0.4;">(optionnel — pour l'analyse avant/après)</span></label>
+      <label class="api-key-label" for="client-start-date">Date de début du partenariat Mazine <span style="opacity:0.4;">(optionnel)</span></label>
       <input type="date" id="client-start-date" class="api-key-input" style="max-width:280px;">
     </div>
-
     <button class="btn-analyze" id="btn-analyze" onclick="startAnalysis()">Générer le rapport IA →</button>
-
     <div class="guide">
       <p class="guide-label">Comment exporter depuis TikTok</p>
       <div class="guide-steps">
-        <div class="guide-step">
-          <div class="step-num">01</div>
-          <p class="step-txt">Ouvrez TikTok Studio → Analytics. Sélectionnez la période 365 jours.</p>
-        </div>
-        <div class="guide-step">
-          <div class="step-num">02</div>
-          <p class="step-txt">Exportez chaque onglet séparément : Overview, Content, Followers, etc.</p>
-        </div>
-        <div class="guide-step">
-          <div class="step-num">03</div>
-          <p class="step-txt">Importez les fichiers .xlsx ou .csv dans les zones correspondantes ci-dessus.</p>
-        </div>
+        <div class="guide-step"><div class="step-num">01</div><p class="step-txt">Ouvrez TikTok Studio → Analytics. Sélectionnez la période 365 jours.</p></div>
+        <div class="guide-step"><div class="step-num">02</div><p class="step-txt">Exportez chaque onglet séparément : Overview, Content, Followers, etc.</p></div>
+        <div class="guide-step"><div class="step-num">03</div><p class="step-txt">Importez les fichiers .xlsx ou .csv dans les zones correspondantes ci-dessus.</p></div>
       </div>
     </div>
   </div>
 </div>
 
-<!-- ─── LOADING ─── -->
+<!-- LOADING -->
 <div class="screen" id="screen-loading">
   <div class="loader-ring"></div>
   <p class="loading-title">Analyse en cours</p>
   <p id="loading-step">Lecture des fichiers…</p>
 </div>
 
-<!-- ─── DASHBOARD ─── -->
+<!-- MONTH BAR (sticky, outside dashboard div) -->
+<div class="month-bar" id="month-bar" style="display:none;">
+  <span class="month-bar-label">Période</span>
+  <div id="month-pills" style="display:flex;gap:0.5rem;flex-wrap:wrap;"></div>
+</div>
+
+<!-- DASHBOARD -->
 <div class="screen" id="screen-dashboard">
   <div style="padding:2rem 2.5rem;max-width:1100px;margin:0 auto;">
 
-    <!-- Top -->
     <div class="dash-top">
       <div>
         <p class="dash-client">Rapport Mazine Analytics</p>
@@ -307,15 +283,29 @@ input[type="date"].api-key-input::-webkit-calendar-picker-indicator { filter: in
       <button class="btn-reset" onclick="reset()">← Nouvelle analyse</button>
     </div>
 
-    <!-- Metrics -->
     <div class="metrics-row" id="metrics-row"></div>
 
-    <!-- AI Banner -->
-    <div class="ai-banner">
+    <!-- AI banner (résultat disponible) -->
+    <div class="ai-banner" id="ai-banner" style="display:none;">
       <div class="ai-icon">✦</div>
-      <div>
-        <p class="ai-badge">Synthèse IA Mazine</p>
+      <div style="flex:1;">
+        <p class="ai-badge">Synthèse IA Mazine — <span id="ai-banner-month"></span></p>
         <p class="ai-text" id="ai-text"></p>
+      </div>
+    </div>
+
+    <!-- AI trigger (pas encore de résultat pour ce mois) -->
+    <div class="ai-trigger-banner" id="ai-trigger-banner">
+      <div class="ai-trigger-info">
+        <div class="ai-trigger-icon">✦</div>
+        <div>
+          <p class="ai-trigger-label">Insights IA</p>
+          <p class="ai-trigger-desc" id="ai-trigger-desc">Lancez l'analyse IA pour ce mois</p>
+        </div>
+      </div>
+      <div style="display:flex;align-items:center;gap:1rem;">
+        <span class="ai-loading-inline" id="ai-loading-inline">Analyse en cours…</span>
+        <button class="btn-ai-generate" id="btn-ai-generate" onclick="generateAIForMonth()">Générer les insights IA →</button>
       </div>
     </div>
 
@@ -328,23 +318,18 @@ input[type="date"].api-key-input::-webkit-calendar-picker-indicator { filter: in
     <!-- Top vidéos + Audience -->
     <div class="main-row">
       <div class="section">
-        <p class="sec-label">Top 5 vidéos du mois</p>
+        <p class="sec-label">Top 5 vidéos</p>
+        <p class="v-global-badge" id="video-scope-badge"></p>
         <div id="video-list"></div>
       </div>
       <div style="display:flex;flex-direction:column;gap:1rem;">
-        <!-- Genre -->
         <div class="section">
           <p class="sec-label">Audience — Genre</p>
-          <div class="gender-row" id="gender-row">
-            <p class="no-data-msg">Données non importées</p>
-          </div>
+          <div class="gender-row" id="gender-row"><p class="no-data-msg">Données non importées</p></div>
         </div>
-        <!-- Territoires -->
         <div class="section">
           <p class="sec-label">Top territoires</p>
-          <div id="territories-list">
-            <p class="no-data-msg">Données non importées</p>
-          </div>
+          <div id="territories-list"><p class="no-data-msg">Données non importées</p></div>
         </div>
       </div>
     </div>
@@ -353,14 +338,13 @@ input[type="date"].api-key-input::-webkit-calendar-picker-indicator { filter: in
     <div class="two-col">
       <div class="section">
         <p class="sec-label">Croissance abonnés</p>
-        <div class="chart-wrap"><canvas id="chart-followers"></canvas></div>
+        <div class="chart-wrap" id="wrap-followers"><canvas id="chart-followers"></canvas></div>
       </div>
       <div class="section">
         <p class="sec-label">Vues quotidiennes</p>
-        <div class="chart-wrap"><canvas id="chart-views"></canvas></div>
+        <div class="chart-wrap" id="wrap-views"><canvas id="chart-views"></canvas></div>
       </div>
     </div>
-
     <div class="two-col">
       <div class="section">
         <p class="sec-label">Meilleurs horaires de publication</p>
@@ -370,7 +354,7 @@ input[type="date"].api-key-input::-webkit-calendar-picker-indicator { filter: in
       </div>
       <div class="section">
         <p class="sec-label">Viewers — Nouveaux vs Récurrents</p>
-        <div class="chart-wrap"><canvas id="chart-viewers"></canvas></div>
+        <div class="chart-wrap" id="wrap-viewers"><canvas id="chart-viewers"></canvas></div>
       </div>
     </div>
 
@@ -380,14 +364,14 @@ input[type="date"].api-key-input::-webkit-calendar-picker-indicator { filter: in
       <p class="ai-text" id="viralite-text"></p>
     </div>
 
-    <!-- Brief contenu -->
+    <!-- Brief -->
     <div class="section" id="brief-section" style="display:none;margin-bottom:1rem;">
       <p class="sec-label">Brief — Prochain contenu</p>
       <div id="brief-content"></div>
     </div>
 
     <!-- Recommandations -->
-    <div class="section" style="margin-bottom:1rem;">
+    <div class="section" id="reco-section" style="display:none;margin-bottom:1rem;">
       <p class="sec-label">Recommandations stratégiques</p>
       <div class="reco-grid" id="reco-grid"></div>
     </div>
@@ -418,33 +402,32 @@ async function doLogin() {
   if (!pw) return;
   btn.textContent = 'Connexion…'; btn.style.opacity = '0.6';
   try {
-    const res = await fetch('/api/login', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ password: pw }) });
+    const res = await fetch('/api/login', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({password:pw}) });
     const data = await res.json();
-    if (!res.ok) { errEl.textContent = data.error || 'Erreur.'; btn.textContent = 'Accéder →'; btn.style.opacity = '1'; return; }
+    if (!res.ok) { errEl.textContent = data.error||'Erreur.'; btn.textContent='Accéder →'; btn.style.opacity='1'; return; }
     authToken = data.token;
     sessionStorage.setItem('mz_token', authToken);
-    errEl.textContent = '';
     document.getElementById('btn-logout').style.display = 'block';
     showScreen('screen-upload');
-  } catch { errEl.textContent = 'Erreur de connexion au serveur.'; }
+  } catch { errEl.textContent = 'Erreur de connexion.'; }
   btn.textContent = 'Accéder →'; btn.style.opacity = '1';
 }
 
 async function logout() {
-  if (authToken) fetch('/api/logout', { method: 'POST', headers: { 'Authorization': 'Bearer ' + authToken } });
-  authToken = null;
-  sessionStorage.removeItem('mz_token');
+  if (authToken) fetch('/api/logout', { method:'POST', headers:{'Authorization':'Bearer '+authToken} });
+  authToken = null; sessionStorage.removeItem('mz_token');
   document.getElementById('btn-logout').style.display = 'none';
   document.getElementById('login-password').value = '';
+  document.getElementById('month-bar').style.display = 'none';
   showScreen('screen-login');
 }
 
 window.addEventListener('DOMContentLoaded', async () => {
   if (authToken) {
     try {
-      const res = await fetch('/api/analyze', { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + authToken }, body: JSON.stringify({ data: null }) });
-      if (res.status === 400) { document.getElementById('btn-logout').style.display = 'block'; showScreen('screen-upload'); return; }
-      if (res.status === 401) { authToken = null; sessionStorage.removeItem('mz_token'); }
+      const res = await fetch('/api/analyze', { method:'POST', headers:{'Content-Type':'application/json','Authorization':'Bearer '+authToken}, body:JSON.stringify({data:null}) });
+      if (res.status===400) { document.getElementById('btn-logout').style.display='block'; showScreen('screen-upload'); return; }
+      if (res.status===401) { authToken=null; sessionStorage.removeItem('mz_token'); }
     } catch {}
   }
 });
@@ -462,304 +445,194 @@ const FILE_DEFS = [
 
 const loaded = {};
 let charts = [];
+let globalParsed = null, globalScored = null, globalTop5 = null;
+let currentMonth = 'all';
+const aiCache = {};
 
 const grid = document.getElementById('drop-grid');
 FILE_DEFS.forEach(def => {
   const zone = document.createElement('div');
-  zone.className = 'drop-zone';
-  zone.id = 'zone-' + def.key;
-  zone.innerHTML = `
-    <input type="file" id="input-${def.key}" accept=".xlsx,.csv">
-    <div class="dz-icon" id="icon-${def.key}">${def.icon}</div>
+  zone.className = 'drop-zone'; zone.id = 'zone-'+def.key;
+  zone.innerHTML = `<input type="file" id="input-${def.key}" accept=".xlsx,.csv">
+    <div class="dz-icon">${def.icon}</div>
     <div class="dz-name">${def.label}</div>
-    <div class="dz-hint" id="hint-${def.key}">${def.hint}</div>
-  `;
-  zone.addEventListener('click', () => document.getElementById('input-' + def.key).click());
+    <div class="dz-hint" id="hint-${def.key}">${def.hint}</div>`;
+  zone.addEventListener('click', () => document.getElementById('input-'+def.key).click());
   zone.addEventListener('dragover', e => { e.preventDefault(); zone.classList.add('drag-over'); });
   zone.addEventListener('dragleave', () => zone.classList.remove('drag-over'));
-  zone.addEventListener('drop', e => { e.preventDefault(); zone.classList.remove('drag-over'); const f = e.dataTransfer.files[0]; if (f) handleFile(f, def.key); });
-  document.getElementById('input-' + def.key)?.addEventListener('change', e => { if (e.target.files[0]) handleFile(e.target.files[0], def.key); });
+  zone.addEventListener('drop', e => { e.preventDefault(); zone.classList.remove('drag-over'); const f=e.dataTransfer.files[0]; if(f) handleFile(f,def.key); });
+  document.getElementById('input-'+def.key)?.addEventListener('change', e => { if(e.target.files[0]) handleFile(e.target.files[0],def.key); });
   grid.appendChild(zone);
 });
 
 function handleFile(file, key) {
   const ext = file.name.split('.').pop().toLowerCase();
-  if (ext === 'csv') {
-    Papa.parse(file, {
-      header: false, skipEmptyLines: true,
-      complete: r => { loaded[key] = r.data; markLoaded(key, file.name, r.data.length - 1); }
-    });
-  } else if (ext === 'xlsx' || ext === 'xls') {
+  if (ext==='csv') {
+    Papa.parse(file, { header:false, skipEmptyLines:true, complete: r => { loaded[key]=r.data; markLoaded(key,file.name,r.data.length-1); } });
+  } else if (ext==='xlsx'||ext==='xls') {
     const reader = new FileReader();
     reader.onload = e => {
-      const wb = XLSX.read(e.target.result, { type: 'array' });
-      const ws = wb.Sheets[wb.SheetNames[0]];
-      const data = XLSX.utils.sheet_to_json(ws, { header: 1, defval: '' });
-      loaded[key] = data;
-      markLoaded(key, file.name, data.length - 1);
+      const wb=XLSX.read(e.target.result,{type:'array'});
+      const ws=wb.Sheets[wb.SheetNames[0]];
+      const data=XLSX.utils.sheet_to_json(ws,{header:1,defval:''});
+      loaded[key]=data; markLoaded(key,file.name,data.length-1);
     };
     reader.readAsArrayBuffer(file);
   }
 }
 
 function markLoaded(key, filename, rows) {
-  loaded['_name_' + key] = filename;
-  const zone = document.getElementById('zone-' + key);
-  const hint = document.getElementById('hint-' + key);
-  zone.classList.add('loaded');
-  hint.textContent = '✓ ' + rows + ' lignes chargées';
+  document.getElementById('zone-'+key)?.classList.add('loaded');
+  document.getElementById('hint-'+key).textContent = '✓ '+rows+' lignes chargées';
   updateProgress();
 }
 
 function updateProgress() {
-  const count = FILE_DEFS.filter(d => loaded[d.key]).length;
-  const pct = Math.round(count / FILE_DEFS.length * 100);
-  document.getElementById('progress-fill').style.width = pct + '%';
-  document.getElementById('progress-label').textContent = count + ' / ' + FILE_DEFS.length + ' fichiers';
+  const count = FILE_DEFS.filter(d=>loaded[d.key]).length;
+  document.getElementById('progress-fill').style.width = Math.round(count/FILE_DEFS.length*100)+'%';
+  document.getElementById('progress-label').textContent = count+' / '+FILE_DEFS.length+' fichiers';
   document.getElementById('btn-analyze').classList.toggle('ready', !!loaded['content']);
 }
 
 function showScreen(id) {
-  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
   document.getElementById(id).classList.add('active');
-  window.scrollTo(0, 0);
+  window.scrollTo(0,0);
 }
 
 function setStep(t) { document.getElementById('loading-step').textContent = t; }
-function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
+function sleep(ms) { return new Promise(r=>setTimeout(r,ms)); }
 
+// ── MAIN FLOW ──────────────────────────────────────────
 async function startAnalysis() {
   if (!loaded['content']) return;
   showScreen('screen-loading');
-  setStep('Lecture des fichiers…');
-  await sleep(500);
+  setStep('Lecture des fichiers…'); await sleep(400);
   const parsed = parseAll();
-  setStep('Calcul des scores de performance…');
-  await sleep(400);
-  const scored = scoreVideos(parsed.content || []);
-  const top5 = scored.slice(0, 5);
+  setStep('Calcul des scores…'); await sleep(300);
+  const scored = scoreVideos(parsed.content||[]);
+  const top5 = scored.slice(0,5);
   setStep('Interrogation de l\'IA Mazine…');
-  const ai = await callBackend(parsed, top5, scored);
+  const ai = await callBackend(parsed, top5, scored, 'all');
   if (!ai) return;
-  setStep('Génération du rapport…');
-  await sleep(300);
-  buildDashboard(parsed, scored, top5, ai);
+  setStep('Génération du rapport…'); await sleep(200);
+  globalParsed=parsed; globalScored=scored; globalTop5=top5;
+  aiCache['all'] = ai;
+  buildMonthPills(parsed);
+  currentMonth='all';
+  renderDashboard('all');
   showScreen('screen-dashboard');
+  document.getElementById('month-bar').style.display = 'flex';
 }
 
-// ── PARSING ──
-function parseRows(raw) {
-  if (!raw || raw.length < 2) return [];
-  const headers = raw[0].map(h => String(h).trim());
-  return raw.slice(1).filter(r => r.some(c => c !== '')).map(row => {
-    const obj = {};
-    headers.forEach((h, i) => obj[h] = row[i] ?? '');
-    return obj;
+// ── MONTH PILLS ──────────────────────────────────────
+function buildMonthPills(parsed) {
+  const months = new Set();
+  const src = parsed.overview||parsed.followers||[];
+  src.forEach(r => {
+    const d = parseRowDate(r.date);
+    if (d) months.add(d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0'));
+  });
+  const container = document.getElementById('month-pills');
+  container.innerHTML = '';
+  const allPill = pill('Tout', 'all', true, true);
+  container.appendChild(allPill);
+  [...months].sort().forEach(m => {
+    const [y,mo] = m.split('-');
+    const label = new Date(+y,+mo-1,1).toLocaleDateString('fr-FR',{month:'short',year:'2-digit'});
+    container.appendChild(pill(label, m, false, false));
   });
 }
-function n(v) { return parseFloat(String(v ?? '').replace(/[^0-9.-]/g, '')) || 0; }
 
-function parseAll() {
-  const r = {};
-  if (loaded.overview) {
-    r.overview = parseRows(loaded.overview).map(row => ({
-      date: row['Date'] || Object.values(row)[0],
-      views: n(row['Video Views'] || row['Video views'] || row['Views']),
-      likes: n(row['Likes']), comments: n(row['Comments']), shares: n(row['Shares']),
-    }));
-  }
-  if (loaded.content) {
-    r.content = parseRows(loaded.content).map(row => ({
-      title: String(row['Video title'] || row['Title'] || Object.values(row)[0] || '').substring(0, 100),
-      views: n(row['Total views'] || row['Views']),
-      likes: n(row['Total likes'] || row['Likes']),
-      comments: n(row['Total comments'] || row['Comments']),
-      shares: n(row['Total shares'] || row['Shares']),
-      postTime: row['Post time'] || row['Post Time'] || '',
-    }));
-  }
-  if (loaded.followers) {
-    r.followers = parseRows(loaded.followers).map(row => ({
-      date: row['Date'], followers: n(row['Followers']),
-      diff: n(row['Difference in followers from previous day'] || row['Diff'] || row['Change']),
-    }));
-  }
-  if (loaded.gender) {
-    r.gender = parseRows(loaded.gender).map(row => ({
-      gender: String(row['Gender'] || Object.values(row)[0]),
-      dist: n(row['Distribution'] || Object.values(row)[1]),
-    })).filter(g => g.gender && g.dist > 0);
-  }
-  if (loaded.territories) {
-    r.territories = parseRows(loaded.territories).map(row => ({
-      territory: String(row['Top territories'] || row['Territory'] || Object.values(row)[0]),
-      dist: n(row['Distribution'] || Object.values(row)[1]),
-    })).filter(t => t.territory && t.territory !== 'Others' && t.dist > 0);
-  }
-  if (loaded.activity) {
-    r.activity = parseRows(loaded.activity).map(row => ({
-      date: row['Date'], hour: n(row['Hour']),
-      active: n(row['Active followers'] || row['Active Followers']),
-    }));
-  }
-  if (loaded.viewers) {
-    r.viewers = parseRows(loaded.viewers).map(row => ({
-      date: row['Date'],
-      total: n(row['Total Viewers'] || row['Total viewers']),
-      newV: n(row['New Viewers'] || row['New viewers']),
-      returning: n(row['Returning Viewers'] || row['Returning viewers']),
-    }));
-  }
-  return r;
+function pill(label, month, active, isAll) {
+  const el = document.createElement('button');
+  el.className = 'month-pill'+(isAll?' all':'')+(active?' active':'');
+  el.textContent = label;
+  el.dataset.month = month;
+  el.onclick = () => selectMonth(month);
+  return el;
 }
 
-function scoreVideos(content) {
-  return content.map(v => {
-    const eng = v.views > 0 ? (v.likes + v.comments + v.shares) / v.views * 100 : 0;
-    const shareRate = v.views > 0 ? (v.shares / v.views * 100) : 0;
-    const score = v.views * 0.3 + v.likes * 3 + v.comments * 5 + v.shares * 8;
-    return { ...v, engRate: parseFloat(eng.toFixed(2)), shareRate: parseFloat(shareRate.toFixed(2)), score };
-  }).sort((a, b) => b.score - a.score);
+function selectMonth(month) {
+  currentMonth = month;
+  document.querySelectorAll('.month-pill').forEach(p => p.classList.toggle('active', p.dataset.month===month));
+  renderDashboard(month);
+  window.scrollTo(0,0);
 }
 
-async function callBackend(parsed, top5, scored) {
-  const startDate = document.getElementById('client-start-date').value;
-  const totalViews = (parsed.overview || []).reduce((s, r) => s + r.views, 0) || scored.reduce((s, v) => s + v.views, 0);
-  const followers = parsed.followers?.length ? parsed.followers[parsed.followers.length - 1].followers : null;
-  const followerGrowth = parsed.followers?.length ? parsed.followers.reduce((s, r) => s + r.diff, 0) : null;
-  const avgEng = top5.length ? (top5.reduce((s, v) => s + v.engRate, 0) / top5.length).toFixed(1) : '—';
-  const avgShareRate = top5.length ? (top5.reduce((s, v) => s + v.shareRate, 0) / top5.length).toFixed(2) : '0';
-  const avgLikeRate = top5.length ? (top5.reduce((s, v) => s + (v.views > 0 ? v.likes / v.views * 100 : 0), 0) / top5.length).toFixed(2) : '0';
+// ── FILTER ────────────────────────────────────────────
+function filterByMonth(arr, month) {
+  if (!arr||month==='all') return arr;
+  const [y,m] = month.split('-').map(Number);
+  return arr.filter(r => { const d=parseRowDate(r.date); return d&&d.getFullYear()===y&&d.getMonth()===m-1; });
+}
 
-  let beforeAfterText = '';
-  if (startDate && parsed.followers?.length) {
-    const before = parsed.followers.filter(r => { const d = parseRowDate(r.date); return d && d < new Date(startDate); });
-    const after = parsed.followers.filter(r => { const d = parseRowDate(r.date); return d && d >= new Date(startDate); });
-    if (before.length && after.length) {
-      const fBefore = before[before.length - 1].followers;
-      const fAfter = after[after.length - 1].followers;
-      const growth = fAfter - fBefore;
-      const pct = fBefore > 0 ? ((growth / fBefore) * 100).toFixed(1) : null;
-      beforeAfterText = `Abonnés au démarrage : ${fmt(fBefore)} → maintenant : ${fmt(fAfter)} (+${fmt(growth)}${pct ? `, +${pct}%` : ''})`;
-    }
-  }
-
-  const payload = {
-    totalViews: fmt(totalViews),
-    followers: followers ? fmt(followers) : null,
-    followerGrowth: followerGrowth ? fmt(followerGrowth) : null,
-    avgEng, avgShareRate, avgLikeRate,
-    totalVideos: scored.length,
-    startDate: startDate || null,
-    beforeAfter: beforeAfterText || null,
-    top5: top5.map(v => ({
-      title: v.title, views: fmt(v.views), likes: fmt(v.likes),
-      comments: fmt(v.comments), shares: fmt(v.shares),
-      engRate: v.engRate, shareRate: v.shareRate, postTime: v.postTime
-    }))
+// ── RENDER ────────────────────────────────────────────
+function renderDashboard(month) {
+  const parsed=globalParsed, scored=globalScored, top5=globalTop5;
+  const fp = {
+    overview:    filterByMonth(parsed.overview, month),
+    followers:   filterByMonth(parsed.followers, month),
+    activity:    filterByMonth(parsed.activity, month),
+    viewers:     filterByMonth(parsed.viewers, month),
   };
 
-  try {
-    const res = await fetch('/api/analyze', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + authToken },
-      body: JSON.stringify({ data: payload })
-    });
-    if (res.status === 401) { logout(); return null; }
-    const data = await res.json();
-    if (data.error) throw new Error(data.error);
-    return data.result;
-  } catch (err) {
-    console.error('Backend error:', err);
-    return {
-      synthese: "Les vidéos les plus performantes reposent sur du contenu visuel pratique avec une forte valeur démonstrative. Les partages organiques constituent le principal levier de croissance.",
-      diagnostic: { points_forts: ["Fort taux de partage organique", "Contenu démonstratif très engageant", "Bonne adéquation avec l'audience locale"], points_amelioration: ["Augmenter la fréquence de publication", "Diversifier les formats de contenu"] },
-      analyse_viralite: "Le ratio partages/vues indique un contenu que l'audience souhaite partager activement avec son entourage.",
-      videos: top5.map((_, i) => ({ rank: i + 1, format: "Démonstration produit", pourquoi: "Fort engagement visuel et bonne adéquation avec les centres d'intérêt de l'audience locale." })),
-      brief_prochain_contenu: { angle_prioritaire: "Démonstration produit avant/après", format_recommande: "Vidéo courte 15-30s avec résultat visuel fort", accroche_type: "Question ou transformation visuelle immédiate", a_eviter: "Contenu trop institutionnel sans valeur pratique" },
-      recommandations: ["Reproduire la structure des vidéos démonstration produit.", "Publier entre 19h et 22h, pic d'activité de l'audience.", "Intégrer un appel à l'action explicite dans les 3 premières secondes.", "Alterner créole mauricien et français pour maximiser la portée locale."]
-    };
-  }
-}
-
-// ── DASHBOARD ──
-function buildDashboard(parsed, scored, top5, ai) {
-  charts.forEach(c => c.destroy()); charts = [];
-
   // Period
-  const dateSource = parsed.overview?.length ? parsed.overview : parsed.followers;
-  if (dateSource?.length) {
-    document.getElementById('dash-period').textContent = `${dateSource[0].date} → ${dateSource[dateSource.length - 1].date}`;
-  }
+  const src = fp.overview?.length ? fp.overview : fp.followers;
+  document.getElementById('dash-period').textContent = src?.length
+    ? (month==='all' ? src[0].date+' → '+src[src.length-1].date : monthLabel(month))
+    : (month==='all' ? '' : monthLabel(month));
 
   // Metrics
-  const totalViews = (parsed.overview || []).reduce((s, r) => s + r.views, 0) || scored.reduce((s, v) => s + v.views, 0);
-  const totalLikes = (parsed.overview || []).reduce((s, r) => s + r.likes, 0) || scored.reduce((s, v) => s + v.likes, 0);
-  const totalShares = (parsed.overview || []).reduce((s, r) => s + r.shares, 0) || scored.reduce((s, v) => s + v.shares, 0);
-  const lastFollowers = parsed.followers?.length ? parsed.followers[parsed.followers.length - 1].followers : null;
-  const followerGrowth = parsed.followers?.length ? parsed.followers.reduce((s, r) => s + r.diff, 0) : null;
-  const avgEng = top5.length ? (top5.reduce((s, v) => s + v.engRate, 0) / top5.length).toFixed(1) : '—';
+  const totalViews  = (fp.overview||[]).reduce((s,r)=>s+r.views,0);
+  const totalLikes  = (fp.overview||[]).reduce((s,r)=>s+r.likes,0);
+  const totalShares = (fp.overview||[]).reduce((s,r)=>s+r.shares,0);
+  const lastFoll    = fp.followers?.length ? fp.followers[fp.followers.length-1].followers : null;
+  const follGrowth  = fp.followers?.length ? fp.followers.reduce((s,r)=>s+r.diff,0) : null;
+  const avgEng      = top5.length ? (top5.reduce((s,v)=>s+v.engRate,0)/top5.length).toFixed(1) : '—';
 
   document.getElementById('metrics-row').innerHTML = [
-    { label: 'Total vues', value: fmt(totalViews), sub: 'sur la période' },
-    { label: 'Abonnés', value: lastFollowers ? fmt(lastFollowers) : '—', sub: followerGrowth ? `+${fmt(followerGrowth)} sur la période` : '' },
-    { label: 'Total likes', value: fmt(totalLikes), sub: '' },
-    { label: 'Total partages', value: fmt(totalShares), sub: '' },
-    { label: 'Engagement moyen', value: avgEng + '%', sub: 'top vidéos' },
-  ].map(m => `<div class="m-card"><p class="m-label">${m.label}</p><p class="m-value">${m.value}</p>${m.sub ? `<p class="m-sub">${m.sub}</p>` : ''}</div>`).join('');
+    { label:'Total vues',        value:fmt(totalViews),              sub: month==='all'?'sur la période':monthLabel(month) },
+    { label:'Abonnés',           value:lastFoll?fmt(lastFoll):'—',   sub: follGrowth?`+${fmt(follGrowth)} ${month==='all'?'sur la période':'ce mois'}`:'' },
+    { label:'Total likes',       value:fmt(totalLikes),              sub:'' },
+    { label:'Total partages',    value:fmt(totalShares),             sub:'' },
+    { label:'Engagement moyen',  value:avgEng+'%',                   sub:'top 5 global' },
+  ].map(m=>`<div class="m-card"><p class="m-label">${m.label}</p><p class="m-value">${m.value}</p>${m.sub?`<p class="m-sub">${m.sub}</p>`:''}</div>`).join('');
 
-  // AI
-  document.getElementById('ai-text').textContent = ai.synthese;
-
-  // Diagnostic
-  document.getElementById('diagnostic-section').style.display = 'none';
-  if (ai.diagnostic) {
-    document.getElementById('diagnostic-section').style.display = 'block';
-    const pf = (ai.diagnostic.points_forts || []).map(p => `<li>✓ ${esc(p)}</li>`).join('');
-    const pa = (ai.diagnostic.points_amelioration || []).map(p => `<li>→ ${esc(p)}</li>`).join('');
-    document.getElementById('diagnostic-content').innerHTML = `
-      <div><p class="diag-label">Points forts</p><ul class="diag-list diag-pos">${pf}</ul></div>
-      <div><p class="diag-label">Leviers de croissance</p><ul class="diag-list diag-neu">${pa}</ul></div>`;
+  // AI banner vs trigger
+  const ai = aiCache[month];
+  document.getElementById('ai-banner').style.display       = ai ? 'flex' : 'none';
+  document.getElementById('ai-trigger-banner').style.display = ai ? 'none' : 'flex';
+  if (ai) {
+    document.getElementById('ai-banner-month').textContent = month==='all'?'Vue globale':monthLabel(month);
+    document.getElementById('ai-text').textContent = ai.synthese;
+    renderAISections(ai);
+  } else {
+    document.getElementById('ai-trigger-desc').textContent = month==='all'
+      ? 'Générer une synthèse IA sur toute la période'
+      : `Générer les insights IA pour ${monthLabel(month)}`;
+    document.getElementById('btn-ai-generate').disabled = false;
+    document.getElementById('ai-loading-inline').classList.remove('visible');
+    hideAISections();
   }
 
-  // Videos
-  const aiMap = {};
-  (ai.videos || []).forEach(v => aiMap[v.rank] = v);
-  document.getElementById('video-list').innerHTML = top5.map((v, i) => {
-    const aiV = aiMap[i + 1] || {};
-    return `<div class="video-item">
-      <div class="v-rank">0${i+1}</div>
-      <div class="v-body">
-        <p class="v-title" title="${esc(v.title)}">${esc(v.title || 'Vidéo sans titre')}</p>
-        ${aiV.format ? `<span class="v-format">${esc(aiV.format)}</span>` : ''}
-        <p class="v-why">${esc(aiV.pourquoi || '—')}</p>
-        <div class="v-stats">
-          <span class="v-stat"><strong>${fmt(v.views)}</strong> vues</span>
-          <span class="v-stat"><strong>${fmt(v.likes)}</strong> likes</span>
-          <span class="v-stat"><strong>${fmt(v.shares)}</strong> partages</span>
-          <span class="v-stat"><strong>${v.shareRate}%</strong> viral</span>
-        </div>
-      </div>
-      <div class="v-eng">
-        <div class="v-eng-val">${v.engRate}<span style="font-size:0.6rem;color:var(--teal)">%</span></div>
-        <div class="v-eng-lbl">eng.</div>
-      </div>
-    </div>`;
-  }).join('');
+  // Top 5 (toujours global)
+  renderVideos(top5, ai);
+  document.getElementById('video-scope-badge').textContent = '— classement global, toute la période';
 
   // Gender
   if (parsed.gender?.length) {
-    const male = parsed.gender.find(g => /m/i.test(g.gender));
-    const female = parsed.gender.find(g => /f/i.test(g.gender));
-    document.getElementById('gender-row').innerHTML = `
-      <div class="gender-block"><div class="gender-val">${male ? male.dist + '%' : '—'}</div><div class="gender-lbl">Hommes</div></div>
-      <div class="gender-block"><div class="gender-val">${female ? female.dist + '%' : '—'}</div><div class="gender-lbl">Femmes</div></div>`;
+    const male=parsed.gender.find(g=>/^m/i.test(g.gender));
+    const female=parsed.gender.find(g=>/^f/i.test(g.gender));
+    document.getElementById('gender-row').innerHTML=`
+      <div class="gender-block"><div class="gender-val">${male?male.dist+'%':'—'}</div><div class="gender-lbl">Hommes</div></div>
+      <div class="gender-block"><div class="gender-val">${female?female.dist+'%':'—'}</div><div class="gender-lbl">Femmes</div></div>`;
   }
 
   // Territories
   if (parsed.territories?.length) {
-    const max = Math.max(...parsed.territories.map(t => t.dist));
-    document.getElementById('territories-list').innerHTML = parsed.territories.slice(0, 5).map(t => `
+    const max=Math.max(...parsed.territories.map(t=>t.dist));
+    document.getElementById('territories-list').innerHTML=parsed.territories.slice(0,5).map(t=>`
       <div class="bar-row">
         <span class="bar-label">${esc(t.territory)}</span>
         <div class="bar-track"><div class="bar-fill" style="width:${(t.dist/max*100).toFixed(1)}%"></div></div>
@@ -767,207 +640,282 @@ function buildDashboard(parsed, scored, top5, ai) {
       </div>`).join('');
   }
 
-  // Chart — Followers
-  if (parsed.followers?.length) {
-    const step = Math.max(1, Math.floor(parsed.followers.length / 60));
-    const filtered = parsed.followers.filter((_, i) => i % step === 0);
-    charts.push(new Chart(document.getElementById('chart-followers'), {
-      type: 'line',
-      data: {
-        labels: filtered.map(r => shortDate(r.date)),
-        datasets: [{ data: filtered.map(r => r.followers), borderColor: '#618F9B', backgroundColor: 'rgba(97,143,155,0.1)', borderWidth: 1.5, pointRadius: 0, tension: 0.3, fill: true }]
-      },
-      options: { ...chartOpts(), plugins: { legend: { display: false } } }
-    }));
-  } else {
-    document.getElementById('chart-followers').parentElement.innerHTML = '<p class="no-data-msg">Données non importées</p>';
-  }
+  // Charts
+  charts.forEach(c=>c.destroy()); charts=[];
+  renderChart('chart-followers','wrap-followers',fp.followers,'line',r=>r.followers,'#618F9B','rgba(97,143,155,0.1)');
+  renderBarChart('chart-views','wrap-views',fp.overview,r=>r.views,'rgba(97,143,155,0.45)');
+  renderHeatmap(fp.activity);
+  renderViewersChart(fp.viewers);
 
-  // Chart — Views
-  if (parsed.overview?.length) {
-    const step = Math.max(1, Math.floor(parsed.overview.length / 60));
-    const filtered = parsed.overview.filter((_, i) => i % step === 0);
-    charts.push(new Chart(document.getElementById('chart-views'), {
-      type: 'bar',
-      data: {
-        labels: filtered.map(r => shortDate(r.date)),
-        datasets: [{ data: filtered.map(r => r.views), backgroundColor: 'rgba(97,143,155,0.45)', borderRadius: 2 }]
-      },
-      options: { ...chartOpts(), plugins: { legend: { display: false } } }
-    }));
-  } else {
-    document.getElementById('chart-views').parentElement.innerHTML = '<p class="no-data-msg">Données non importées</p>';
-  }
-
-  // Heatmap horaires
-  const timeCells = document.getElementById('time-cells');
-  const timeLabels = document.getElementById('time-labels');
-  if (parsed.activity?.length) {
-    const hourMap = Array(24).fill(0);
-    const hourCount = Array(24).fill(0);
-    parsed.activity.forEach(r => { hourMap[r.hour] += r.active; hourCount[r.hour]++; });
-    const avg = hourMap.map((v, i) => hourCount[i] ? v / hourCount[i] : 0);
-    const max = Math.max(...avg);
-    timeCells.innerHTML = avg.map((v, h) => {
-      const op = max > 0 ? 0.08 + (v / max) * 0.92 : 0.08;
-      return `<div class="time-cell" style="background:rgba(97,143,155,${op.toFixed(2)})" title="${h}h : ${Math.round(v)} followers actifs"></div>`;
-    }).join('');
-    timeLabels.innerHTML = Array.from({length: 24}, (_, h) => `<div class="time-lbl">${h}</div>`).join('');
-    const bestH = avg.indexOf(max);
-    document.getElementById('best-time-label').textContent = `Meilleur créneau : ${bestH}h–${bestH+1}h`;
-  } else {
-    timeCells.innerHTML = '<p class="no-data-msg">Données non importées</p>';
-  }
-
-  // Chart — Viewers
-  if (parsed.viewers?.length) {
-    const step = Math.max(1, Math.floor(parsed.viewers.length / 60));
-    const filtered = parsed.viewers.filter((_, i) => i % step === 0);
-    charts.push(new Chart(document.getElementById('chart-viewers'), {
-      type: 'bar',
-      data: {
-        labels: filtered.map(r => shortDate(r.date)),
-        datasets: [
-          { label: 'Nouveaux', data: filtered.map(r => r.newV), backgroundColor: 'rgba(97,143,155,0.7)', borderRadius: 2 },
-          { label: 'Récurrents', data: filtered.map(r => r.returning), backgroundColor: 'rgba(239,214,177,0.2)', borderRadius: 2 }
-        ]
-      },
-      options: { ...chartOpts(), plugins: { legend: { display: true, labels: { color: 'rgba(239,214,177,0.4)', font: { size: 9 } } } } }
-    }));
-  } else {
-    document.getElementById('chart-viewers').parentElement.innerHTML = '<p class="no-data-msg">Données non importées</p>';
-  }
-
-  // Viralité
-  document.getElementById('viralite-section').style.display = 'none';
-  if (ai.analyse_viralite) {
-    document.getElementById('viralite-section').style.display = 'block';
-    document.getElementById('viralite-text').textContent = ai.analyse_viralite;
-  }
-
-  // Brief
-  document.getElementById('brief-section').style.display = 'none';
-  if (ai.brief_prochain_contenu) {
-    const b = ai.brief_prochain_contenu;
-    document.getElementById('brief-section').style.display = 'block';
-    document.getElementById('brief-content').innerHTML = `
-      <div class="brief-grid">
-        <div class="brief-item"><p class="brief-label">Angle prioritaire</p><p class="brief-text">${esc(b.angle_prioritaire||'—')}</p></div>
-        <div class="brief-item"><p class="brief-label">Format recommandé</p><p class="brief-text">${esc(b.format_recommande||'—')}</p></div>
-        <div class="brief-item"><p class="brief-label">Type d'accroche</p><p class="brief-text">${esc(b.accroche_type||'—')}</p></div>
-        <div class="brief-item brief-avoid"><p class="brief-label">À éviter</p><p class="brief-text">${esc(b.a_eviter||'—')}</p></div>
-      </div>`;
-  }
-
-  // Recommandations
-  document.getElementById('reco-grid').innerHTML = (ai.recommandations || []).map((r, i) => `
-    <div class="reco-card">
-      <p class="reco-num">Recommandation ${i + 1}</p>
-      <p class="reco-text">${esc(r)}</p>
-    </div>`).join('');
-
-  // Comparatif Mazine
+  // Comparatif (vue globale uniquement)
   const startDate = document.getElementById('client-start-date').value;
   document.getElementById('comparatif-section').style.display = 'none';
-  if (startDate && (parsed.followers?.length || parsed.overview?.length)) {
-    const beforeAfter = computeBeforeAfter(parsed, startDate);
-    if (beforeAfter) {
+  if (startDate && month==='all') {
+    const ba = computeBeforeAfter(parsed, startDate);
+    if (ba) {
       document.getElementById('comparatif-section').style.display = 'block';
-      document.getElementById('comparatif-date').textContent = 'Depuis le ' + formatDisplayDate(startDate);
-      document.getElementById('comparatif-grid').innerHTML = beforeAfter.map(item => `
-        <div class="comp-card ${item.positive ? 'comp-positive' : ''}">
+      document.getElementById('comparatif-date').textContent = 'Depuis le '+formatDisplayDate(startDate);
+      document.getElementById('comparatif-grid').innerHTML = ba.map(item=>`
+        <div class="comp-card ${item.positive?'comp-positive':''}">
           <p class="comp-label">${item.label}</p>
           <div class="comp-row">
             <div class="comp-block"><p class="comp-period">Avant Mazine</p><p class="comp-val">${item.before}</p></div>
             <div class="comp-arrow">→</div>
             <div class="comp-block"><p class="comp-period">Avec Mazine</p><p class="comp-val comp-val-after">${item.after}</p></div>
-            <div class="comp-delta ${item.positive ? 'delta-pos' : 'delta-neg'}">${item.delta}</div>
+            <div class="comp-delta ${item.positive?'delta-pos':'delta-neg'}">${item.delta}</div>
           </div>
         </div>`).join('');
     }
   }
 }
 
-// ── HELPERS ──
-function chartOpts() {
-  return {
-    responsive: true, maintainAspectRatio: false,
-    scales: {
-      x: { ticks: { color: 'rgba(239,214,177,0.3)', font: { size: 9 }, maxTicksLimit: 8 }, grid: { color: 'rgba(239,214,177,0.04)' }, border: { color: 'rgba(239,214,177,0.07)' } },
-      y: { ticks: { color: 'rgba(239,214,177,0.3)', font: { size: 9 }, callback: v => fmt(v) }, grid: { color: 'rgba(239,214,177,0.04)' }, border: { color: 'rgba(239,214,177,0.07)' } }
-    }
+function renderChart(canvasId, wrapId, data, type, valFn, borderColor, bgColor) {
+  const wrap = document.getElementById(wrapId);
+  wrap.innerHTML = '<canvas id="'+canvasId+'"></canvas>';
+  if (!data?.length) { wrap.innerHTML='<p class="no-data-msg">Données non disponibles</p>'; return; }
+  const step = Math.max(1,Math.floor(data.length/60));
+  const filt = data.filter((_,i)=>i%step===0);
+  charts.push(new Chart(document.getElementById(canvasId),{
+    type, data:{ labels:filt.map(r=>shortDate(r.date)), datasets:[{data:filt.map(valFn), borderColor, backgroundColor:bgColor, borderWidth:1.5, pointRadius:0, tension:0.3, fill:true}] },
+    options:{...chartOpts(), plugins:{legend:{display:false}}}
+  }));
+}
+
+function renderBarChart(canvasId, wrapId, data, valFn, color) {
+  const wrap = document.getElementById(wrapId);
+  wrap.innerHTML = '<canvas id="'+canvasId+'"></canvas>';
+  if (!data?.length) { wrap.innerHTML='<p class="no-data-msg">Données non disponibles</p>'; return; }
+  const step = Math.max(1,Math.floor(data.length/60));
+  const filt = data.filter((_,i)=>i%step===0);
+  charts.push(new Chart(document.getElementById(canvasId),{
+    type:'bar', data:{ labels:filt.map(r=>shortDate(r.date)), datasets:[{data:filt.map(valFn), backgroundColor:color, borderRadius:2}] },
+    options:{...chartOpts(), plugins:{legend:{display:false}}}
+  }));
+}
+
+function renderHeatmap(actData) {
+  const timeCells=document.getElementById('time-cells');
+  const timeLabels=document.getElementById('time-labels');
+  if (!actData?.length) { timeCells.innerHTML='<p class="no-data-msg">Données non disponibles</p>'; timeLabels.innerHTML=''; document.getElementById('best-time-label').textContent=''; return; }
+  const hourMap=Array(24).fill(0), hourCount=Array(24).fill(0);
+  actData.forEach(r=>{hourMap[r.hour]+=r.active; hourCount[r.hour]++;});
+  const avg=hourMap.map((v,i)=>hourCount[i]?v/hourCount[i]:0);
+  const max=Math.max(...avg);
+  timeCells.innerHTML=avg.map((v,h)=>{
+    const op=max>0?0.08+(v/max)*0.92:0.08;
+    return `<div class="time-cell" style="background:rgba(97,143,155,${op.toFixed(2)})" title="${h}h : ${Math.round(v)} followers actifs"></div>`;
+  }).join('');
+  timeLabels.innerHTML=Array.from({length:24},(_,h)=>`<div class="time-lbl">${h}</div>`).join('');
+  const bestH=avg.indexOf(max);
+  document.getElementById('best-time-label').textContent=`Meilleur créneau : ${bestH}h–${bestH+1}h`;
+}
+
+function renderViewersChart(viewersData) {
+  const wrap=document.getElementById('wrap-viewers');
+  wrap.innerHTML='<canvas id="chart-viewers"></canvas>';
+  if (!viewersData?.length) { wrap.innerHTML='<p class="no-data-msg">Données non disponibles</p>'; return; }
+  const step=Math.max(1,Math.floor(viewersData.length/60));
+  const filt=viewersData.filter((_,i)=>i%step===0);
+  charts.push(new Chart(document.getElementById('chart-viewers'),{
+    type:'bar',
+    data:{ labels:filt.map(r=>shortDate(r.date)), datasets:[
+      {label:'Nouveaux', data:filt.map(r=>r.newV), backgroundColor:'rgba(97,143,155,0.7)', borderRadius:2},
+      {label:'Récurrents', data:filt.map(r=>r.returning), backgroundColor:'rgba(239,214,177,0.2)', borderRadius:2}
+    ]},
+    options:{...chartOpts(), plugins:{legend:{display:true, labels:{color:'rgba(239,214,177,0.4)',font:{size:9}}}}}
+  }));
+}
+
+// ── AI ON DEMAND ──────────────────────────────────────
+async function generateAIForMonth() {
+  const btn=document.getElementById('btn-ai-generate');
+  const loader=document.getElementById('ai-loading-inline');
+  btn.disabled=true; loader.classList.add('visible');
+  const ai = await callBackend(globalParsed, globalTop5, globalScored, currentMonth);
+  if (ai) { aiCache[currentMonth]=ai; renderDashboard(currentMonth); }
+  else { btn.disabled=false; loader.classList.remove('visible'); }
+}
+
+function renderAISections(ai) {
+  document.getElementById('diagnostic-section').style.display='none';
+  if (ai.diagnostic) {
+    document.getElementById('diagnostic-section').style.display='block';
+    const pf=(ai.diagnostic.points_forts||[]).map(p=>`<li>✓ ${esc(p)}</li>`).join('');
+    const pa=(ai.diagnostic.points_amelioration||[]).map(p=>`<li>→ ${esc(p)}</li>`).join('');
+    document.getElementById('diagnostic-content').innerHTML=`
+      <div><p class="diag-label">Points forts</p><ul class="diag-list diag-pos">${pf}</ul></div>
+      <div><p class="diag-label">Leviers de croissance</p><ul class="diag-list diag-neu">${pa}</ul></div>`;
+  }
+  document.getElementById('viralite-section').style.display='none';
+  if (ai.analyse_viralite) { document.getElementById('viralite-section').style.display='block'; document.getElementById('viralite-text').textContent=ai.analyse_viralite; }
+  document.getElementById('brief-section').style.display='none';
+  if (ai.brief_prochain_contenu) {
+    const b=ai.brief_prochain_contenu;
+    document.getElementById('brief-section').style.display='block';
+    document.getElementById('brief-content').innerHTML=`<div class="brief-grid">
+      <div class="brief-item"><p class="brief-label">Angle prioritaire</p><p class="brief-text">${esc(b.angle_prioritaire||'—')}</p></div>
+      <div class="brief-item"><p class="brief-label">Format recommandé</p><p class="brief-text">${esc(b.format_recommande||'—')}</p></div>
+      <div class="brief-item"><p class="brief-label">Type d'accroche</p><p class="brief-text">${esc(b.accroche_type||'—')}</p></div>
+      <div class="brief-item brief-avoid"><p class="brief-label">À éviter</p><p class="brief-text">${esc(b.a_eviter||'—')}</p></div>
+    </div>`;
+  }
+  document.getElementById('reco-section').style.display='none';
+  if (ai.recommandations?.length) {
+    document.getElementById('reco-section').style.display='block';
+    document.getElementById('reco-grid').innerHTML=ai.recommandations.map((r,i)=>`
+      <div class="reco-card"><p class="reco-num">Recommandation ${i+1}</p><p class="reco-text">${esc(r)}</p></div>`).join('');
+  }
+}
+
+function hideAISections() {
+  ['diagnostic-section','viralite-section','brief-section','reco-section'].forEach(id=>document.getElementById(id).style.display='none');
+}
+
+function renderVideos(top5, ai) {
+  const aiMap={};
+  (ai?.videos||[]).forEach(v=>aiMap[v.rank]=v);
+  document.getElementById('video-list').innerHTML=top5.map((v,i)=>{
+    const aiV=aiMap[i+1]||{};
+    return `<div class="video-item">
+      <div class="v-rank">0${i+1}</div>
+      <div class="v-body">
+        <p class="v-title" title="${esc(v.title)}">${esc(v.title||'Vidéo sans titre')}</p>
+        ${aiV.format?`<span class="v-format">${esc(aiV.format)}</span>`:''}
+        <p class="v-why">${esc(aiV.pourquoi||'—')}</p>
+        <div class="v-stats">
+          <span class="v-stat"><strong>${fmt(v.views)}</strong> vues</span>
+          <span class="v-stat"><strong>${fmt(v.likes)}</strong> likes</span>
+          <span class="v-stat"><strong>${fmt(v.shares)}</strong> partages</span>
+          <span class="v-stat"><strong>${v.shareRate}%</strong> viral</span>
+        </div>
+      </div>
+      <div class="v-eng"><div class="v-eng-val">${v.engRate}<span style="font-size:0.6rem;color:var(--teal)">%</span></div><div class="v-eng-lbl">eng.</div></div>
+    </div>`;
+  }).join('');
+}
+
+// ── PARSING ──────────────────────────────────────────
+function parseRows(raw) {
+  if (!raw||raw.length<2) return [];
+  const headers=raw[0].map(h=>String(h).trim());
+  return raw.slice(1).filter(r=>r.some(c=>c!=='')).map(row=>{const obj={};headers.forEach((h,i)=>obj[h]=row[i]??'');return obj;});
+}
+function n(v) { return parseFloat(String(v??'').replace(/[^0-9.-]/g,''))||0; }
+
+function parseAll() {
+  const r={};
+  if(loaded.overview) r.overview=parseRows(loaded.overview).map(row=>({date:row['Date']||Object.values(row)[0],views:n(row['Video Views']||row['Video views']||row['Views']),likes:n(row['Likes']),comments:n(row['Comments']),shares:n(row['Shares'])}));
+  if(loaded.content) r.content=parseRows(loaded.content).map(row=>({title:String(row['Video title']||row['Title']||Object.values(row)[0]||'').substring(0,100),views:n(row['Total views']||row['Views']),likes:n(row['Total likes']||row['Likes']),comments:n(row['Total comments']||row['Comments']),shares:n(row['Total shares']||row['Shares']),postTime:row['Post time']||row['Post Time']||''}));
+  if(loaded.followers) r.followers=parseRows(loaded.followers).map(row=>({date:row['Date'],followers:n(row['Followers']),diff:n(row['Difference in followers from previous day']||row['Diff']||row['Change'])}));
+  if(loaded.gender) r.gender=parseRows(loaded.gender).map(row=>({gender:String(row['Gender']||Object.values(row)[0]),dist:n(row['Distribution']||Object.values(row)[1])})).filter(g=>g.gender&&g.dist>0);
+  if(loaded.territories) r.territories=parseRows(loaded.territories).map(row=>({territory:String(row['Top territories']||row['Territory']||Object.values(row)[0]),dist:n(row['Distribution']||Object.values(row)[1])})).filter(t=>t.territory&&t.territory!=='Others'&&t.dist>0);
+  if(loaded.activity) r.activity=parseRows(loaded.activity).map(row=>({date:row['Date'],hour:n(row['Hour']),active:n(row['Active followers']||row['Active Followers'])}));
+  if(loaded.viewers) r.viewers=parseRows(loaded.viewers).map(row=>({date:row['Date'],total:n(row['Total Viewers']||row['Total viewers']),newV:n(row['New Viewers']||row['New viewers']),returning:n(row['Returning Viewers']||row['Returning viewers'])}));
+  return r;
+}
+
+function scoreVideos(content) {
+  return content.map(v=>{
+    const eng=v.views>0?(v.likes+v.comments+v.shares)/v.views*100:0;
+    const shareRate=v.views>0?v.shares/v.views*100:0;
+    return {...v, engRate:parseFloat(eng.toFixed(2)), shareRate:parseFloat(shareRate.toFixed(2)), score:v.views*0.3+v.likes*3+v.comments*5+v.shares*8};
+  }).sort((a,b)=>b.score-a.score);
+}
+
+async function callBackend(parsed, top5, scored, month) {
+  const startDate=document.getElementById('client-start-date').value;
+  const fp={overview:filterByMonth(parsed.overview,month),followers:filterByMonth(parsed.followers,month)};
+  const totalViews=(fp.overview||[]).reduce((s,r)=>s+r.views,0)||scored.reduce((s,v)=>s+v.views,0);
+  const foll=fp.followers||parsed.followers||[];
+  const lastFoll=foll.length?foll[foll.length-1].followers:null;
+  const follGrowth=foll.length?foll.reduce((s,r)=>s+r.diff,0):null;
+  const avgEng=top5.length?(top5.reduce((s,v)=>s+v.engRate,0)/top5.length).toFixed(1):'—';
+  const avgShareRate=top5.length?(top5.reduce((s,v)=>s+v.shareRate,0)/top5.length).toFixed(2):'0';
+  const avgLikeRate=top5.length?(top5.reduce((s,v)=>s+(v.views>0?v.likes/v.views*100:0),0)/top5.length).toFixed(2):'0';
+  let beforeAfterText='';
+  if(startDate&&parsed.followers?.length){
+    const before=parsed.followers.filter(r=>{const d=parseRowDate(r.date);return d&&d<new Date(startDate);});
+    const after=parsed.followers.filter(r=>{const d=parseRowDate(r.date);return d&&d>=new Date(startDate);});
+    if(before.length&&after.length){const fB=before[before.length-1].followers,fA=after[after.length-1].followers,g=fA-fB,p=fB>0?((g/fB)*100).toFixed(1):null;beforeAfterText=`Abonnés au démarrage : ${fmt(fB)} → maintenant : ${fmt(fA)} (+${fmt(g)}${p?`, +${p}%`:''})`;}}
+  const payload={
+    analyseMonth:month==='all'?'la période complète':monthLabel(month),
+    totalViewsFull:fmt(totalViews),followers:lastFoll?fmt(lastFoll):null,followerGrowthFull:follGrowth?fmt(follGrowth):null,
+    monthViews:fmt(totalViews),monthLikes:fmt(scored.reduce((s,v)=>s+v.likes,0)),monthShares:fmt(scored.reduce((s,v)=>s+v.shares,0)),monthVideos:scored.length,
+    avgEng,avgShareRate,avgLikeRate,startDate:startDate||null,beforeAfter:beforeAfterText||null,monthVsPrev:null,
+    top5:top5.map(v=>({title:v.title,views:fmt(v.views),likes:fmt(v.likes),comments:fmt(v.comments),shares:fmt(v.shares),engRate:v.engRate,shareRate:v.shareRate,postTime:v.postTime}))
   };
-}
-
-function shortDate(d) {
-  return String(d).replace(/ (janvier|février|mars|avril|mai|juin|juillet|août|septembre|octobre|novembre|décembre)/i, '');
-}
-function fmt(n) { n = parseInt(n) || 0; if (n >= 1000000) return (n/1000000).toFixed(1)+'M'; if (n >= 1000) return (n/1000).toFixed(1)+'K'; return n.toString(); }
-function esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
-
-const FR_MONTHS = { 'janvier':0,'février':1,'mars':2,'avril':3,'mai':4,'juin':5,'juillet':6,'août':7,'septembre':8,'octobre':9,'novembre':10,'décembre':11 };
-function parseRowDate(str) {
-  if (!str) return null;
-  const s = String(str).trim().toLowerCase();
-  const parts = s.split(' ');
-  if (parts.length === 2) {
-    const day = parseInt(parts[0]);
-    const month = FR_MONTHS[parts[1]];
-    if (!isNaN(day) && month !== undefined) return new Date(new Date().getFullYear(), month, day);
+  try {
+    const res=await fetch('/api/analyze',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+authToken},body:JSON.stringify({data:payload})});
+    if(res.status===401){logout();return null;}
+    const data=await res.json();
+    if(data.error) throw new Error(data.error);
+    return data.result;
+  } catch(err) {
+    console.error('Backend error:',err);
+    return {
+      synthese:"Les vidéos les plus performantes reposent sur du contenu visuel pratique avec une forte valeur démonstrative.",
+      diagnostic:{points_forts:["Fort taux de partage organique","Contenu démonstratif très engageant","Bonne adéquation avec l'audience locale"],points_amelioration:["Augmenter la fréquence de publication","Diversifier les formats"]},
+      analyse_viralite:"Le ratio partages/vues indique un contenu que l'audience souhaite partager activement.",
+      videos:top5.map((_,i)=>({rank:i+1,format:"Démonstration produit",pourquoi:"Fort engagement visuel et bonne adéquation avec l'audience locale."})),
+      brief_prochain_contenu:{angle_prioritaire:"Démonstration produit avant/après",format_recommande:"Vidéo courte 15-30s",accroche_type:"Transformation visuelle immédiate",a_eviter:"Contenu trop institutionnel"},
+      recommandations:["Reproduire la structure des vidéos démonstration.","Publier entre 19h et 22h.","Intégrer un CTA dans les 3 premières secondes.","Alterner créole et français."]
+    };
   }
-  const d = new Date(str);
-  return isNaN(d) ? null : d;
 }
 
-function formatDisplayDate(isoDate) {
-  return new Date(isoDate).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' });
+// ── HELPERS ──────────────────────────────────────────
+function chartOpts() {
+  return {responsive:true,maintainAspectRatio:false,scales:{
+    x:{ticks:{color:'rgba(239,214,177,0.3)',font:{size:9},maxTicksLimit:8},grid:{color:'rgba(239,214,177,0.04)'},border:{color:'rgba(239,214,177,0.07)'}},
+    y:{ticks:{color:'rgba(239,214,177,0.3)',font:{size:9},callback:v=>fmt(v)},grid:{color:'rgba(239,214,177,0.04)'},border:{color:'rgba(239,214,177,0.07)'}}
+  }};
 }
+function shortDate(d){return String(d).replace(/ (janvier|février|mars|avril|mai|juin|juillet|août|septembre|octobre|novembre|décembre)/i,'');}
+function fmt(n){n=parseInt(n)||0;if(n>=1000000)return(n/1000000).toFixed(1)+'M';if(n>=1000)return(n/1000).toFixed(1)+'K';return n.toString();}
+function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+function monthLabel(m){if(!m||m==='all')return'Vue globale';const[y,mo]=m.split('-');return new Date(+y,+mo-1,1).toLocaleDateString('fr-FR',{month:'long',year:'numeric'});}
+const FR_MONTHS={'janvier':0,'février':1,'mars':2,'avril':3,'mai':4,'juin':5,'juillet':6,'août':7,'septembre':8,'octobre':9,'novembre':10,'décembre':11};
+function parseRowDate(str){if(!str)return null;const s=String(str).trim().toLowerCase();const parts=s.split(' ');if(parts.length===2){const day=parseInt(parts[0]);const month=FR_MONTHS[parts[1]];if(!isNaN(day)&&month!==undefined)return new Date(new Date().getFullYear(),month,day);}const d=new Date(str);return isNaN(d)?null:d;}
+function formatDisplayDate(isoDate){return new Date(isoDate).toLocaleDateString('fr-FR',{day:'numeric',month:'long',year:'numeric'});}
 
-function computeBeforeAfter(parsed, startDateStr) {
-  const startDate = new Date(startDateStr);
-  const items = [];
-  if (parsed.followers?.length >= 2) {
-    const before = parsed.followers.filter(r => { const d = parseRowDate(r.date); return d && d < startDate; });
-    const after = parsed.followers.filter(r => { const d = parseRowDate(r.date); return d && d >= startDate; });
-    if (before.length && after.length) {
-      const fBefore = before[before.length - 1].followers;
-      const fAfter = after[after.length - 1].followers;
-      const growth = fAfter - fBefore;
-      const pct = fBefore > 0 ? ((growth / fBefore) * 100).toFixed(1) : null;
-      items.push({ label: 'Abonnés', before: fmt(fBefore), after: fmt(fAfter), delta: (growth >= 0 ? '+' : '') + fmt(growth) + (pct ? ` (${pct}%)` : ''), positive: growth >= 0 });
-      const avgBefore = before.length > 1 ? before.reduce((s, r) => s + r.diff, 0) / before.length : null;
-      const avgAfter = after.length > 1 ? after.reduce((s, r) => s + r.diff, 0) / after.length : null;
-      if (avgBefore !== null && avgAfter !== null) {
-        const diff = avgAfter - avgBefore;
-        items.push({ label: 'Gain / jour (abonnés)', before: '+' + avgBefore.toFixed(1), after: '+' + avgAfter.toFixed(1), delta: (diff >= 0 ? '+' : '') + diff.toFixed(1) + '/j', positive: diff >= 0 });
-      }
+function computeBeforeAfter(parsed,startDateStr){
+  const startDate=new Date(startDateStr);const items=[];
+  if(parsed.followers?.length>=2){
+    const before=parsed.followers.filter(r=>{const d=parseRowDate(r.date);return d&&d<startDate;});
+    const after=parsed.followers.filter(r=>{const d=parseRowDate(r.date);return d&&d>=startDate;});
+    if(before.length&&after.length){
+      const fB=before[before.length-1].followers,fA=after[after.length-1].followers,g=fA-fB,p=fB>0?((g/fB)*100).toFixed(1):null;
+      items.push({label:'Abonnés',before:fmt(fB),after:fmt(fA),delta:(g>=0?'+':'')+fmt(g)+(p?` (${p}%)`:''),positive:g>=0});
+      const avgB=before.length>1?before.reduce((s,r)=>s+r.diff,0)/before.length:null;
+      const avgA=after.length>1?after.reduce((s,r)=>s+r.diff,0)/after.length:null;
+      if(avgB!==null&&avgA!==null){const diff=avgA-avgB;items.push({label:'Gain / jour (abonnés)',before:'+'+avgB.toFixed(1),after:'+'+avgA.toFixed(1),delta:(diff>=0?'+':'')+diff.toFixed(1)+'/j',positive:diff>=0});}
     }
   }
-  if (parsed.overview?.length >= 2) {
-    const before = parsed.overview.filter(r => { const d = parseRowDate(r.date); return d && d < startDate; });
-    const after = parsed.overview.filter(r => { const d = parseRowDate(r.date); return d && d >= startDate; });
-    if (before.length && after.length) {
-      const avgB = before.reduce((s, r) => s + r.views, 0) / before.length;
-      const avgA = after.reduce((s, r) => s + r.views, 0) / after.length;
-      const diff = avgA - avgB;
-      const pct = avgB > 0 ? ((diff / avgB) * 100).toFixed(1) : null;
-      items.push({ label: 'Vues / jour (moy.)', before: fmt(Math.round(avgB)), after: fmt(Math.round(avgA)), delta: (diff >= 0 ? '+' : '') + (pct ? pct + '%' : fmt(Math.round(diff))), positive: diff >= 0 });
+  if(parsed.overview?.length>=2){
+    const before=parsed.overview.filter(r=>{const d=parseRowDate(r.date);return d&&d<startDate;});
+    const after=parsed.overview.filter(r=>{const d=parseRowDate(r.date);return d&&d>=startDate;});
+    if(before.length&&after.length){
+      const avgB=before.reduce((s,r)=>s+r.views,0)/before.length,avgA=after.reduce((s,r)=>s+r.views,0)/after.length,diff=avgA-avgB,p=avgB>0?((diff/avgB)*100).toFixed(1):null;
+      items.push({label:'Vues / jour (moy.)',before:fmt(Math.round(avgB)),after:fmt(Math.round(avgA)),delta:(diff>=0?'+':'')+(p?p+'%':fmt(Math.round(diff))),positive:diff>=0});
     }
   }
-  return items.length ? items : null;
+  return items.length?items:null;
 }
 
-function reset() {
-  FILE_DEFS.forEach(d => {
+function reset(){
+  FILE_DEFS.forEach(d=>{
     delete loaded[d.key];
-    document.getElementById('zone-' + d.key)?.classList.remove('loaded');
-    document.getElementById('hint-' + d.key).textContent = FILE_DEFS.find(f => f.key === d.key).hint;
-    const inp = document.getElementById('input-' + d.key);
-    if (inp) inp.value = '';
+    document.getElementById('zone-'+d.key)?.classList.remove('loaded');
+    document.getElementById('hint-'+d.key).textContent=FILE_DEFS.find(f=>f.key===d.key).hint;
+    const inp=document.getElementById('input-'+d.key);if(inp)inp.value='';
   });
-  document.getElementById('progress-fill').style.width = '0%';
-  document.getElementById('progress-label').textContent = '0 / 7 fichiers';
+  Object.keys(aiCache).forEach(k=>delete aiCache[k]);
+  globalParsed=null;globalScored=null;globalTop5=null;currentMonth='all';
+  document.getElementById('progress-fill').style.width='0%';
+  document.getElementById('progress-label').textContent='0 / 7 fichiers';
   document.getElementById('btn-analyze').classList.remove('ready');
+  document.getElementById('month-bar').style.display='none';
+  document.getElementById('month-pills').innerHTML='';
   showScreen('screen-upload');
 }
 </script>

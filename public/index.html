@@ -954,7 +954,7 @@ iframe#userpilot-resource-centre-frame {
       <label class="api-key-label" for="login-password">Mot de passe</label>
       <input type="password" id="login-password" class="api-key-input" placeholder="••••••••" onkeydown="if(event.key===&#39;Enter&#39;)doLogin()" data-np-checked="1">
       <p class="login-error" id="login-error"></p>
-      <button class="btn-analyze ready" id="btn-login" onclick="doLogin()" style="margin-top: 1rem; opacity: 1;" data-np-autofill-submit="">Accéder →</button>
+      <button class="btn-analyze" id="btn-login" onclick="doLogin()" style="margin-top: 1rem; opacity: 1;" data-np-autofill-submit="">Accéder →</button>
     </div>
   </div>
 </div>
@@ -969,46 +969,13 @@ iframe#userpilot-resource-centre-frame {
 
   <p class="files-label">Fichiers TikTok Studio — glissez ou cliquez</p>
 
-  <div class="drop-grid" id="drop-grid"><div class="drop-zone loaded" id="zone-overview">
-    <input type="file" id="input-overview" accept=".xlsx,.csv">
-    <div class="dz-icon" id="icon-overview">📊</div>
-    <div class="dz-name">Overview</div>
-    <div class="dz-hint" id="hint-overview">✓ 28 lignes chargées</div>
-  </div><div class="drop-zone loaded" id="zone-content">
-    <input type="file" id="input-content" accept=".xlsx,.csv">
-    <div class="dz-icon" id="icon-content">🎬</div>
-    <div class="dz-name">Content</div>
-    <div class="dz-hint" id="hint-content">✓ 15 lignes chargées</div>
-  </div><div class="drop-zone loaded" id="zone-followers">
-    <input type="file" id="input-followers" accept=".xlsx,.csv">
-    <div class="dz-icon" id="icon-followers">📈</div>
-    <div class="dz-name">FollowerHistory</div>
-    <div class="dz-hint" id="hint-followers">✓ 28 lignes chargées</div>
-  </div><div class="drop-zone loaded" id="zone-gender">
-    <input type="file" id="input-gender" accept=".xlsx,.csv">
-    <div class="dz-icon" id="icon-gender">👥</div>
-    <div class="dz-name">FollowerGender</div>
-    <div class="dz-hint" id="hint-gender">✓ 3 lignes chargées</div>
-  </div><div class="drop-zone loaded" id="zone-territories">
-    <input type="file" id="input-territories" accept=".xlsx,.csv">
-    <div class="dz-icon" id="icon-territories">🌍</div>
-    <div class="dz-name">FollowerTopTerritories</div>
-    <div class="dz-hint" id="hint-territories">✓ 11 lignes chargées</div>
-  </div><div class="drop-zone loaded" id="zone-activity">
-    <input type="file" id="input-activity" accept=".xlsx,.csv">
-    <div class="dz-icon" id="icon-activity">⏰</div>
-    <div class="dz-name">FollowerActivity</div>
-    <div class="dz-hint" id="hint-activity">✓ 168 lignes chargées</div>
-  </div><div class="drop-zone loaded" id="zone-viewers">
-    <input type="file" id="input-viewers" accept=".xlsx,.csv">
-    <div class="dz-icon" id="icon-viewers">👁</div>
-    <div class="dz-name">Viewers</div>
-    <div class="dz-hint" id="hint-viewers">✓ 365 lignes chargées</div>
-  </div></div>
+  <div class="drop-grid" id="drop-grid"></div>
 
   <div class="progress-row">
-    <div class="progress-track"><div class="progress-fill" id="progress-fill" style="width: 100%;"></div></div>
-    <span class="progress-label" id="progress-label">7 / 7 fichiers</span>
+
+  <div class="progress-row">
+    <div class="progress-track"><div class="progress-fill" id="progress-fill" style="width:0%"></div></div>
+    <span class="progress-label" id="progress-label">0 / 7 fichiers</span>
   </div>
 
   <div class="api-key-row">
@@ -1018,7 +985,7 @@ iframe#userpilot-resource-centre-frame {
     </div>
   </div>
 
-  <button class="btn-analyze ready" id="btn-analyze" onclick="startAnalysis()">Générer le rapport IA →</button>
+  <button class="btn-analyze" id="btn-analyze" onclick="startAnalysis()">Générer le rapport IA →</button>
 
   <div class="guide">
     <p class="guide-label">Comment exporter depuis TikTok Studio</p>

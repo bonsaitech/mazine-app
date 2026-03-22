@@ -471,6 +471,7 @@ input[type="date"].field-input::-webkit-calendar-picker-indicator { filter: inve
   </div>
   <div style="display:flex;align-items:center;gap:0.5rem;flex-shrink:0;">
     <div id="current-client-badge" style="display:none;" class="current-client-badge" onclick="goToClients()"></div>
+    <button class="btn-logout" onclick="window.location.href='/business.html'" style="display:none;" id="btn-business" title="Module Business">⚡ Business</button>
     <button class="btn-logout" id="btn-logout" style="display:none;" onclick="logout()">Déconnexion</button>
   </div>
 </header>
@@ -753,6 +754,7 @@ async function logout() {
   authToken = null; sessionStorage.removeItem('mz_token');
   currentClient = null;
   document.getElementById('btn-logout').style.display = 'none';
+  document.getElementById('btn-business').style.display = 'none';
   document.getElementById('current-client-badge').style.display = 'none';
   document.getElementById('month-bar').style.display = 'none';
   document.getElementById('login-password').value = '';
@@ -765,6 +767,7 @@ window.addEventListener('DOMContentLoaded', async () => {
       const res = await fetch('/api/clients', { headers:{'Authorization':'Bearer '+authToken} });
       if (res.status===401) { authToken=null; sessionStorage.removeItem('mz_token'); return; }
       document.getElementById('btn-logout').style.display = 'block';
+      document.getElementById('btn-business').style.display = 'block';
       await goToClients();
     } catch {}
   }

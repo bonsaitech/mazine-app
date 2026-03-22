@@ -208,7 +208,7 @@ input[type="date"].field-input::-webkit-calendar-picker-indicator { filter: inve
 .bar-pct { font-size: 0.65rem; color: rgba(239,214,177,0.35); width: 2.5rem; text-align: right; flex-shrink: 0; }
 
 /* ── CHARTS ── */
-.chart-wrap { position: relative; height: 155px; }
+.chart-wrap { position: relative; height: 155px; min-height: 100px; overflow: hidden; }
 .time-grid { display: grid; grid-template-columns: repeat(24, 1fr); gap: 3px; }
 .time-cell { height: 26px; border-radius: 3px; }
 .time-labels { display: grid; grid-template-columns: repeat(24, 1fr); gap: 3px; margin-top: 5px; }
@@ -1618,6 +1618,8 @@ function renderDashboard(month) {
   buildBarChart('wrap-views','chart-views', fp.overview, r=>r.views, 'rgba(97,143,155,0.45)');
   buildHeatmap(fp.activity);
   buildViewersChart(fp.viewers);
+  // Force Chart.js to recalculate sizes after layout reflow (fixes mobile blank charts)
+  requestAnimationFrame(() => { charts.forEach(c => { try { c.resize(); } catch(e){} }); });
 }
 
 // ═══════════════════════════════════════════════════
@@ -1670,14 +1672,21 @@ function chartOpts(extraPlugins) {
     }};
 }
 
-function buildLineChart(wrapId, canvasId, data, valFn, borderColor, bgColor) {
+function mkCanvas(wrapId, canvasId) {
   const wrap = document.getElementById(wrapId);
-  wrap.innerHTML = '<canvas id="'+canvasId+'"></canvas>';
-  if (!data?.length) { wrap.innerHTML='<p class="no-data-msg">Données non disponibles</p>'; return; }
+  if (!wrap) return null;
+  wrap.innerHTML = '<canvas id="'+canvasId+'" style="display:block;width:100%;height:100%;"></canvas>';
+  return document.getElementById(canvasId);
+}
+
+function buildLineChart(wrapId, canvasId, data, valFn, borderColor, bgColor) {
+  const canvas = mkCanvas(wrapId, canvasId);
+  if (!canvas) return;
+  if (!data?.length) { document.getElementById(wrapId).innerHTML='<p class="no-data-msg">Données non disponibles</p>'; return; }
   const step = Math.max(1,Math.floor(data.length/60));
   const filt = data.filter((_,i)=>i%step===0);
   const labels = filt.map(r=>r.date?r.date.toLocaleDateString('fr-FR',{day:'numeric',month:'short'}):'');
-  charts.push(new Chart(document.getElementById(canvasId),{
+  charts.push(new Chart(canvas,{
     type:'line',
     data:{ labels, datasets:[{data:filt.map(valFn), borderColor, backgroundColor:bgColor, borderWidth:1.5, pointRadius:0, tension:0.3, fill:true}] },
     options: chartOpts()
@@ -1685,13 +1694,13 @@ function buildLineChart(wrapId, canvasId, data, valFn, borderColor, bgColor) {
 }
 
 function buildBarChart(wrapId, canvasId, data, valFn, color) {
-  const wrap = document.getElementById(wrapId);
-  wrap.innerHTML = '<canvas id="'+canvasId+'"></canvas>';
-  if (!data?.length) { wrap.innerHTML='<p class="no-data-msg">Données non disponibles</p>'; return; }
+  const canvas = mkCanvas(wrapId, canvasId);
+  if (!canvas) return;
+  if (!data?.length) { document.getElementById(wrapId).innerHTML='<p class="no-data-msg">Données non disponibles</p>'; return; }
   const step = Math.max(1,Math.floor(data.length/60));
   const filt = data.filter((_,i)=>i%step===0);
   const labels = filt.map(r=>r.date?r.date.toLocaleDateString('fr-FR',{day:'numeric',month:'short'}):'');
-  charts.push(new Chart(document.getElementById(canvasId),{
+  charts.push(new Chart(canvas,{
     type:'bar',
     data:{ labels, datasets:[{data:filt.map(valFn), backgroundColor:color, borderRadius:2}] },
     options: chartOpts()
@@ -1717,13 +1726,13 @@ function buildHeatmap(actData) {
 }
 
 function buildViewersChart(data) {
-  const wrap = document.getElementById('wrap-viewers');
-  wrap.innerHTML = '<canvas id="chart-viewers"></canvas>';
-  if (!data?.length) { wrap.innerHTML='<p class="no-data-msg">Données non disponibles</p>'; return; }
+  const canvas = mkCanvas('wrap-viewers','chart-viewers');
+  if (!canvas) return;
+  if (!data?.length) { document.getElementById('wrap-viewers').innerHTML='<p class="no-data-msg">Données non disponibles</p>'; return; }
   const step=Math.max(1,Math.floor(data.length/60));
   const filt=data.filter((_,i)=>i%step===0);
   const labels=filt.map(r=>r.date?r.date.toLocaleDateString('fr-FR',{day:'numeric',month:'short'}):'');
-  charts.push(new Chart(document.getElementById('chart-viewers'),{
+  charts.push(new Chart(canvas,{
     type:'bar',
     data:{ labels, datasets:[
       {label:'Nouveaux', data:filt.map(r=>r.newV), backgroundColor:'rgba(97,143,155,0.7)', borderRadius:2},

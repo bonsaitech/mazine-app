@@ -1424,9 +1424,17 @@ app.get('/api/quotes/:id/pdf', auth, async (req, res) => {
     const fmtDate = d => d ? new Date(d).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' }) : '—';
 
     // Build Carbone data payload
+    // Parse notes field for structured sections (scope_terms | addons separated by --ADDONS--)
+    const notesRaw = quote.notes || '';
+    const notesParts = notesRaw.split('--ADDONS--');
+    const scopeTerms = notesParts[0].trim();
+    const addons     = notesParts[1]?.trim() || '';
+
+    const taxAmt = (+quote.subtotal) * (+quote.tax_rate||15) / 100;
     const data = {
       quote_number:    quote.quote_number,
       title:           quote.title,
+      subtitle:        quote.subtitle || '',
       issue_date:      fmtDate(new Date()),
       valid_until:     fmtDate(quote.valid_until),
       client_name:     quote.client_name || quote.lead_company || '—',
@@ -1434,15 +1442,18 @@ app.get('/api/quotes/:id/pdf', auth, async (req, res) => {
       contact_email:   quote.contact_email || '',
       contact_phone:   quote.contact_phone || '',
       subtotal_fmt:    fmt(quote.subtotal),
-      tax_rate:        quote.tax_rate || 15,
-      tax_amount_fmt:  fmt((+quote.subtotal) * (+quote.tax_rate||15) / 100),
+      tax_rate:        quote.tax_rate || 0,
+      tax_amount_fmt:  fmt(taxAmt),
       total_fmt:       fmt(quote.total),
-      notes:           quote.notes || '',
-      items: items.rows.map(i => ({
-        description:    i.description,
-        quantity:       +i.quantity,
-        unit_price_fmt: fmt(i.unit_price),
-        total_fmt:      fmt(i.total),
+      scope_terms:     scopeTerms,
+      addons:          addons,
+      items: items.rows.map((it, idx) => ({
+        index:          idx + 1,
+        description:    it.description,
+        quantity:       +it.quantity,
+        unit_price_fmt: fmt(it.unit_price),
+        total_fmt:      fmt(it.total),
+        vat_code:       (+it.unit_price) > 0 ? 'T' : '',
       })),
     };
 

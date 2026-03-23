@@ -752,7 +752,8 @@ tbody tr:hover td { background: rgba(239,214,177,0.015); }
     <h3 id="modal-quote-title">Nouveau devis</h3>
     <input type="hidden" id="quote-id">
     <div class="field-row">
-      <div class="field"><label>Titre *</label><input type="text" id="quote-title" placeholder="ex: Package TikTok Growth - Jan 2026"></div>
+      <div class="field"><label>Titre *</label><input type="text" id="quote-title" placeholder="ex: QUOTE | MAZINE | TikTok Content - Growth Package"></div>
+    <div class="field"><label>Sous-titre <span style="color:var(--grey);font-size:0.8em;">(phrase d'accroche italique)</span></label><input type="text" id="quote-subtitle" placeholder="ex: Designed for brands aiming to build authority..."></div>
       <div class="field"><label>Statut</label>
         <select id="quote-status"><option value="draft">Brouillon</option><option value="sent">Envoyé</option><option value="accepted">Accepté</option><option value="refused">Refusé</option></select>
       </div>
@@ -769,7 +770,8 @@ tbody tr:hover td { background: rgba(239,214,177,0.015); }
     <div id="quote-lines"></div>
     <button onclick="addQuoteLine()" style="background:transparent;border:0.5px dashed rgba(239,214,177,0.15);color:rgba(239,214,177,0.4);padding:0.45rem 1rem;border-radius:0.5rem;font-size:0.68rem;cursor:pointer;width:100%;margin-bottom:0.85rem;font-family:'Plus Jakarta Sans',sans-serif;">+ Ajouter une ligne</button>
     <div style="text-align:right;font-size:0.78rem;color:rgba(239,214,177,0.5);" id="quote-total-preview"></div>
-    <div class="field"><label>Notes</label><textarea id="quote-notes" placeholder="Conditions, délais..."></textarea></div>
+    <div class="field"><label>Scope &amp; Terms</label><textarea id="quote-notes" rows="4" placeholder="- 1 revision round per video included&#10;- Additional revisions billed separately&#10;- Client validation timelines apply"></textarea></div>
+    <div class="field"><label>Optional Add-Ons <span style="color:var(--grey);font-size:0.8em;">(séparé par --ADDONS-- dans le PDF)</span></label><textarea id="quote-addons" rows="3" placeholder="- Additional Authority Video: 3,500 MUR per video&#10;- Community Management: 3,000 MUR / month"></textarea></div>
     <div class="modal-footer">
       <button class="btn-ghost" onclick="closeModal('modal-quote')">Annuler</button>
       <button class="btn-primary" onclick="saveQuote()">Enregistrer</button>
@@ -1826,12 +1828,14 @@ function openQuoteModal() {
   quoteLines = [{description:'', quantity:1, unit_price:0}];
   document.getElementById('quote-id').value='';
   document.getElementById('quote-title').value='';
+  if(document.getElementById('quote-subtitle')) document.getElementById('quote-subtitle').value='';
   document.getElementById('quote-status').value='draft';
   document.getElementById('quote-client').value='';
   document.getElementById('quote-lead').value='';
   document.getElementById('quote-valid').value='';
-  document.getElementById('quote-tax').value='15';
+  document.getElementById('quote-tax').value='0';
   document.getElementById('quote-notes').value='';
+  if(document.getElementById('quote-addons')) document.getElementById('quote-addons').value='';
   document.getElementById('modal-quote-title').textContent='Nouveau devis';
   renderQuoteLines();
   // Populate lead select
@@ -1862,14 +1866,17 @@ function addQuoteLine() { quoteLines.push({description:'',quantity:1,unit_price:
 
 async function saveQuote() {
   const id = document.getElementById('quote-id').value;
+  const scopeTerms = document.getElementById('quote-notes').value;
+  const addons = document.getElementById('quote-addons')?.value || '';
   const body = {
     title:document.getElementById('quote-title').value.trim(),
+    subtitle:document.getElementById('quote-subtitle')?.value.trim()||'',
     status:document.getElementById('quote-status').value,
     client_id:document.getElementById('quote-client').value||null,
     lead_id:document.getElementById('quote-lead').value||null,
     valid_until:document.getElementById('quote-valid').value||null,
-    tax_rate:+document.getElementById('quote-tax').value||15,
-    notes:document.getElementById('quote-notes').value,
+    tax_rate:+document.getElementById('quote-tax').value||0,
+    notes: addons ? scopeTerms + '\n--ADDONS--\n' + addons : scopeTerms,
     items:quoteLines,
   };
   if (!body.title) { showToast('Titre requis','err'); return; }

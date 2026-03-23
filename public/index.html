@@ -734,6 +734,7 @@ async function doLogin() {
     authToken = data.token;
     sessionStorage.setItem('mz_token', authToken);
     document.getElementById('btn-logout').style.display = 'block';
+    document.getElementById('btn-business').style.display = 'block';
     // Step 2: load clients — if it fails, go to upload directly
     try {
       await goToClients();

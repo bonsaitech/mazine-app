@@ -17,180 +17,242 @@
 }
 body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--dark); color: var(--cream); min-height: 100vh; }
 
-/* ── HEADER ── */
-header { display: flex; align-items: center; justify-content: space-between; padding: 1.1rem 2rem; border-bottom: 0.5px solid rgba(239,214,177,0.1); position: sticky; top: 0; background: var(--dark); z-index: 100; gap: 1rem; flex-wrap: wrap; }
-.logo { font-weight: 200; font-size: 1.3rem; letter-spacing: 0.3em; text-transform: uppercase; white-space: nowrap; }
+header { display: flex; align-items: center; justify-content: space-between; padding: 1rem 1.75rem; border-bottom: 0.5px solid rgba(239,214,177,0.1); position: sticky; top: 0; background: var(--dark); z-index: 200; gap: 0.75rem; flex-wrap: wrap; }
+.logo { font-weight: 200; font-size: 1.2rem; letter-spacing: 0.3em; text-transform: uppercase; white-space: nowrap; }
 .logo span { color: var(--teal); }
 
-/* ── NAV TABS ── */
-.nav-tabs { display: flex; gap: 0.35rem; flex-wrap: wrap; }
-.nav-tab { font-size: 0.62rem; letter-spacing: 0.1em; text-transform: uppercase; padding: 0.35rem 0.85rem; border-radius: 2rem; cursor: pointer; transition: all 0.2s; border: 0.5px solid rgba(239,214,177,0.12); color: rgba(239,214,177,0.4); background: transparent; font-family: 'Plus Jakarta Sans', sans-serif; white-space: nowrap; }
+.nav-tabs { display: flex; gap: 0.3rem; flex-wrap: wrap; }
+.nav-tab { font-size: 0.6rem; letter-spacing: 0.1em; text-transform: uppercase; padding: 0.32rem 0.8rem; border-radius: 2rem; cursor: pointer; transition: all 0.2s; border: 0.5px solid rgba(239,214,177,0.12); color: rgba(239,214,177,0.4); background: transparent; font-family: 'Plus Jakarta Sans', sans-serif; white-space: nowrap; }
 .nav-tab:hover { border-color: var(--teal); color: var(--teal); }
 .nav-tab.active { background: var(--teal); border-color: var(--teal); color: var(--dark); font-weight: 400; }
-.nav-tab.app-switch { border-color: rgba(239,214,177,0.2); color: rgba(239,214,177,0.5); }
-.nav-tab.app-switch:hover { border-color: var(--cream-dim); color: var(--cream); }
+.nav-tab.switch { border-color: rgba(239,214,177,0.18); color: rgba(239,214,177,0.45); }
+.nav-tab.switch:hover { border-color: var(--cream-dim); color: var(--cream); }
 
-.header-right { display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; }
-.btn-sm { background: transparent; border: 0.5px solid rgba(239,214,177,0.15); color: rgba(239,214,177,0.4); padding: 0.3rem 0.75rem; border-radius: 2rem; font-family: 'Plus Jakarta Sans', sans-serif; font-size: 0.62rem; letter-spacing: 0.1em; cursor: pointer; transition: all 0.2s; text-transform: uppercase; white-space: nowrap; }
+.btn-sm { background: transparent; border: 0.5px solid rgba(239,214,177,0.15); color: rgba(239,214,177,0.4); padding: 0.28rem 0.7rem; border-radius: 2rem; font-family: 'Plus Jakarta Sans', sans-serif; font-size: 0.6rem; letter-spacing: 0.1em; cursor: pointer; transition: all 0.2s; text-transform: uppercase; white-space: nowrap; }
 .btn-sm:hover { border-color: rgba(239,214,177,0.3); color: var(--cream-dim); }
 
-/* ── LAYOUT ── */
-.page { display: none; padding: 1.75rem 2rem; max-width: 1200px; margin: 0 auto; }
+.page { display: none; padding: 1.5rem 1.75rem; max-width: 1280px; margin: 0 auto; }
 .page.active { display: block; }
 
-/* ── SECTION HEADER ── */
 .sec-hdr { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.25rem; flex-wrap: wrap; gap: 0.75rem; }
-.sec-hdr-left h2 { font-weight: 200; font-size: 1.4rem; letter-spacing: 0.08em; text-transform: uppercase; }
-.sec-hdr-left p { font-family: 'Lora', serif; font-style: italic; font-size: 0.82rem; color: var(--cream-dim); margin-top: 0.15rem; }
-.btn-primary { background: var(--teal); color: var(--dark); border: none; padding: 0.6rem 1.25rem; font-family: 'Plus Jakarta Sans', sans-serif; font-size: 0.72rem; letter-spacing: 0.12em; text-transform: uppercase; border-radius: 2rem; cursor: pointer; transition: all 0.2s; white-space: nowrap; }
+.sec-hdr-left h2 { font-weight: 200; font-size: 1.3rem; letter-spacing: 0.08em; text-transform: uppercase; }
+.sec-hdr-left p { font-family: 'Lora', serif; font-style: italic; font-size: 0.78rem; color: var(--cream-dim); margin-top: 0.1rem; }
+.sec-hdr-right { display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap; }
+
+.btn-primary { background: var(--teal); color: var(--dark); border: none; padding: 0.55rem 1.1rem; font-family: 'Plus Jakarta Sans', sans-serif; font-size: 0.7rem; letter-spacing: 0.12em; text-transform: uppercase; border-radius: 2rem; cursor: pointer; transition: all 0.2s; white-space: nowrap; }
 .btn-primary:hover { background: var(--cream); }
-.btn-ghost { background: transparent; border: 0.5px solid rgba(239,214,177,0.15); color: rgba(239,214,177,0.5); padding: 0.6rem 1.1rem; font-family: 'Plus Jakarta Sans', sans-serif; font-size: 0.72rem; letter-spacing: 0.1em; text-transform: uppercase; border-radius: 2rem; cursor: pointer; transition: all 0.2s; white-space: nowrap; }
+.btn-ghost { background: transparent; border: 0.5px solid rgba(239,214,177,0.15); color: rgba(239,214,177,0.5); padding: 0.55rem 1rem; font-family: 'Plus Jakarta Sans', sans-serif; font-size: 0.7rem; letter-spacing: 0.1em; text-transform: uppercase; border-radius: 2rem; cursor: pointer; transition: all 0.2s; white-space: nowrap; }
 .btn-ghost:hover { border-color: var(--teal); color: var(--teal); }
 
-/* ── CARDS ── */
-.card { background: var(--card); border: 0.5px solid rgba(239,214,177,0.07); border-radius: 0.85rem; padding: 1.25rem; }
-.card-label { font-size: 0.55rem; letter-spacing: 0.18em; text-transform: uppercase; color: rgba(239,214,177,0.3); margin-bottom: 0.5rem; }
-.card-value { font-weight: 200; font-size: 1.6rem; color: var(--cream); line-height: 1; }
-.card-sub { font-family: 'Lora', serif; font-style: italic; font-size: 0.65rem; margin-top: 0.3rem; }
-.card-pos { color: var(--pos); }
-.card-neg { color: var(--neg); }
-.card-warn { color: var(--warn); }
+.card { background: var(--card); border: 0.5px solid rgba(239,214,177,0.07); border-radius: 0.85rem; padding: 1.1rem; }
+.card-label { font-size: 0.52rem; letter-spacing: 0.18em; text-transform: uppercase; color: rgba(239,214,177,0.3); margin-bottom: 0.45rem; }
+.card-value { font-weight: 200; font-size: 1.5rem; color: var(--cream); line-height: 1; }
+.card-sub { font-family: 'Lora', serif; font-style: italic; font-size: 0.62rem; margin-top: 0.25rem; }
+.card-pos { color: var(--pos); } .card-neg { color: var(--neg); } .card-warn { color: var(--warn); }
 
-/* ── KPI ROW ── */
-.kpi-row { display: grid; grid-template-columns: repeat(5, 1fr); gap: 0.75rem; margin-bottom: 1.5rem; }
+.kpi-row { display: grid; grid-template-columns: repeat(5, 1fr); gap: 0.65rem; margin-bottom: 1.25rem; }
 
 /* ── TABLE ── */
-.table-wrap { overflow-x: auto; border-radius: 0.85rem; border: 0.5px solid rgba(239,214,177,0.07); }
+.table-wrap { overflow-x: auto; border-radius: 0.75rem; border: 0.5px solid rgba(239,214,177,0.07); }
 table { width: 100%; border-collapse: collapse; }
-thead th { font-size: 0.55rem; letter-spacing: 0.15em; text-transform: uppercase; color: rgba(239,214,177,0.3); padding: 0.85rem 1rem; text-align: left; border-bottom: 0.5px solid rgba(239,214,177,0.06); white-space: nowrap; background: rgba(255,255,255,0.01); }
-tbody td { font-size: 0.8rem; padding: 0.85rem 1rem; border-bottom: 0.5px solid rgba(239,214,177,0.04); vertical-align: middle; }
+thead th { font-size: 0.52rem; letter-spacing: 0.15em; text-transform: uppercase; color: rgba(239,214,177,0.3); padding: 0.75rem 0.85rem; text-align: left; border-bottom: 0.5px solid rgba(239,214,177,0.06); white-space: nowrap; background: rgba(255,255,255,0.01); }
+tbody td { font-size: 0.78rem; padding: 0.75rem 0.85rem; border-bottom: 0.5px solid rgba(239,214,177,0.04); vertical-align: middle; }
 tbody tr:last-child td { border-bottom: none; }
-tbody tr:hover td { background: rgba(239,214,177,0.02); }
+tbody tr:hover td { background: rgba(239,214,177,0.015); }
 
-/* ── STATUS BADGES ── */
-.badge { display: inline-flex; align-items: center; gap: 0.3rem; font-size: 0.6rem; letter-spacing: 0.08em; text-transform: uppercase; padding: 0.2rem 0.65rem; border-radius: 2rem; white-space: nowrap; font-family: 'Plus Jakarta Sans', sans-serif; }
-.badge-brief    { background: rgba(239,214,177,0.06); color: rgba(239,214,177,0.4); border: 0.5px solid rgba(239,214,177,0.1); }
-.badge-script   { background: rgba(196,154,60,0.1); color: var(--warn); border: 0.5px solid rgba(196,154,60,0.2); }
-.badge-shooting { background: rgba(97,143,155,0.1); color: var(--teal); border: 0.5px solid var(--teal-border); }
-.badge-editing  { background: rgba(150,100,200,0.1); color: #b08ad4; border: 0.5px solid rgba(150,100,200,0.2); }
-.badge-validation { background: rgba(196,154,60,0.15); color: var(--warn); border: 0.5px solid rgba(196,154,60,0.3); }
-.badge-posted   { background: var(--pos-bg); color: var(--pos); border: 0.5px solid var(--teal-border); }
-.badge-boosted  { background: rgba(97,143,155,0.2); color: var(--teal); border: 0.5px solid var(--teal); }
-.badge-new      { background: rgba(239,214,177,0.06); color: rgba(239,214,177,0.5); border: 0.5px solid rgba(239,214,177,0.1); }
-.badge-contacted{ background: rgba(196,154,60,0.1); color: var(--warn); border: 0.5px solid rgba(196,154,60,0.2); }
-.badge-qualified{ background: rgba(97,143,155,0.1); color: var(--teal); border: 0.5px solid var(--teal-border); }
-.badge-proposal { background: rgba(150,100,200,0.1); color: #b08ad4; border: 0.5px solid rgba(150,100,200,0.2); }
-.badge-won      { background: var(--pos-bg); color: var(--pos); border: 0.5px solid var(--teal-border); }
-.badge-lost     { background: var(--neg-bg); color: var(--neg); border: 0.5px solid rgba(192,90,90,0.2); }
+/* ── BADGES ── */
+.badge { display: inline-flex; align-items: center; font-size: 0.58rem; letter-spacing: 0.06em; text-transform: uppercase; padding: 0.18rem 0.6rem; border-radius: 2rem; white-space: nowrap; }
+.badge-ideas      { background: rgba(239,214,177,0.06); color: rgba(239,214,177,0.4); border: 0.5px solid rgba(239,214,177,0.1); }
+.badge-script     { background: rgba(196,154,60,0.1); color: var(--warn); border: 0.5px solid rgba(196,154,60,0.2); }
+.badge-shooting   { background: rgba(97,143,155,0.1); color: var(--teal); border: 0.5px solid var(--teal-border); }
+.badge-editing    { background: rgba(150,100,200,0.1); color: #b08ad4; border: 0.5px solid rgba(150,100,200,0.2); }
+.badge-ready      { background: rgba(60,150,100,0.1); color: #5db88a; border: 0.5px solid rgba(60,150,100,0.2); }
+.badge-posted     { background: var(--pos-bg); color: var(--pos); border: 0.5px solid var(--teal-border); }
+.badge-boosted    { background: rgba(200,100,50,0.12); color: #e07840; border: 0.5px solid rgba(200,100,50,0.25); }
+.badge-new        { background: rgba(239,214,177,0.05); color: rgba(239,214,177,0.4); border: 0.5px solid rgba(239,214,177,0.1); }
+.badge-contacted  { background: rgba(196,154,60,0.1); color: var(--warn); border: 0.5px solid rgba(196,154,60,0.2); }
+.badge-qualified  { background: rgba(97,143,155,0.1); color: var(--teal); border: 0.5px solid var(--teal-border); }
+.badge-proposal   { background: rgba(150,100,200,0.1); color: #b08ad4; border: 0.5px solid rgba(150,100,200,0.2); }
+.badge-won        { background: var(--pos-bg); color: var(--pos); border: 0.5px solid var(--teal-border); }
+.badge-lost       { background: var(--neg-bg); color: var(--neg); border: 0.5px solid rgba(192,90,90,0.2); }
+.badge-todo       { background: rgba(239,214,177,0.05); color: rgba(239,214,177,0.35); border: 0.5px solid rgba(239,214,177,0.08); }
+.badge-in_progress{ background: rgba(196,154,60,0.1); color: var(--warn); border: 0.5px solid rgba(196,154,60,0.2); }
+.badge-done       { background: var(--pos-bg); color: var(--pos); border: 0.5px solid var(--teal-border); }
+.badge-skipped    { background: rgba(100,100,100,0.1); color: rgba(239,214,177,0.25); border: 0.5px solid rgba(100,100,100,0.15); }
 
-/* ── PROGRESS BAR ── */
-.prog-wrap { display: flex; align-items: center; gap: 0.5rem; }
-.prog-track { flex: 1; height: 3px; background: rgba(239,214,177,0.07); border-radius: 2px; overflow: hidden; min-width: 60px; }
-.prog-fill { height: 100%; border-radius: 2px; transition: width 0.4s; }
-.prog-ok { background: var(--teal); }
-.prog-warn { background: var(--warn); }
-.prog-over { background: var(--neg); }
-.prog-val { font-size: 0.65rem; color: rgba(239,214,177,0.4); white-space: nowrap; }
+/* ── PROGRESS ── */
+.prog-wrap { display: flex; align-items: center; gap: 0.4rem; }
+.prog-track { flex: 1; height: 3px; background: rgba(239,214,177,0.07); border-radius: 2px; overflow: hidden; min-width: 50px; }
+.prog-fill { height: 100%; border-radius: 2px; }
+.prog-ok { background: var(--teal); } .prog-warn { background: var(--warn); } .prog-over { background: var(--neg); }
+.prog-val { font-size: 0.62rem; color: rgba(239,214,177,0.4); white-space: nowrap; }
 
-/* ── AVATAR DOT ── */
-.avatar { width: 24px; height: 24px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-size: 0.6rem; font-weight: 400; color: var(--dark); flex-shrink: 0; }
+/* ── AVATAR ── */
+.avatar { width: 22px; height: 22px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-size: 0.58rem; color: var(--dark); flex-shrink: 0; }
 
-/* ── ALERT BANNER ── */
-.alert-list { display: flex; flex-direction: column; gap: 0.5rem; margin-bottom: 1.5rem; }
-.alert-item { display: flex; align-items: center; gap: 0.85rem; background: var(--neg-bg); border: 0.5px solid rgba(192,90,90,0.2); border-radius: 0.65rem; padding: 0.75rem 1rem; }
-.alert-icon { font-size: 0.9rem; flex-shrink: 0; }
-.alert-text { font-size: 0.78rem; color: rgba(239,214,177,0.7); }
-.alert-text strong { color: var(--neg); }
+/* ── ALERT ── */
+.alert-list { display: flex; flex-direction: column; gap: 0.45rem; margin-bottom: 1.25rem; }
+.alert-item { display: flex; align-items: center; gap: 0.75rem; background: var(--neg-bg); border: 0.5px solid rgba(192,90,90,0.2); border-radius: 0.6rem; padding: 0.65rem 0.9rem; font-size: 0.76rem; color: rgba(239,214,177,0.7); }
+.alert-item strong { color: var(--neg); }
 
 /* ── MODAL ── */
-.modal-bg { position: fixed; inset: 0; background: rgba(0,0,0,0.6); backdrop-filter: blur(4px); z-index: 500; display: none; align-items: center; justify-content: center; padding: 1rem; }
+.modal-bg { position: fixed; inset: 0; background: rgba(0,0,0,0.65); backdrop-filter: blur(6px); z-index: 500; display: none; align-items: center; justify-content: center; padding: 1rem; }
 .modal-bg.open { display: flex; }
-.modal { background: #1a2b30; border: 0.5px solid rgba(239,214,177,0.1); border-radius: 1rem; padding: 1.75rem; width: 100%; max-width: 520px; max-height: 90vh; overflow-y: auto; }
-.modal h3 { font-weight: 200; font-size: 1.2rem; letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 1.25rem; }
-.modal-footer { display: flex; gap: 0.75rem; margin-top: 1.5rem; justify-content: flex-end; }
-.field { margin-bottom: 1rem; }
-.field label { display: block; font-size: 0.58rem; letter-spacing: 0.15em; text-transform: uppercase; color: rgba(239,214,177,0.35); margin-bottom: 0.45rem; }
+.modal { background: #192a30; border: 0.5px solid rgba(239,214,177,0.1); border-radius: 1rem; padding: 1.5rem; width: 100%; max-width: 540px; max-height: 92vh; overflow-y: auto; }
+.modal-wide { max-width: 720px; }
+.modal h3 { font-weight: 200; font-size: 1.1rem; letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 1.1rem; }
+.modal-footer { display: flex; gap: 0.65rem; margin-top: 1.25rem; justify-content: flex-end; }
+
+.field { margin-bottom: 0.85rem; }
+.field label { display: block; font-size: 0.55rem; letter-spacing: 0.15em; text-transform: uppercase; color: rgba(239,214,177,0.35); margin-bottom: 0.4rem; }
 .field input, .field select, .field textarea {
-  width: 100%; background: rgba(239,214,177,0.05); border: 0.5px solid rgba(239,214,177,0.12);
-  border-radius: 0.65rem; padding: 0.65rem 0.9rem; color: var(--cream);
-  font-family: 'Plus Jakarta Sans', sans-serif; font-size: 0.82rem; outline: none; transition: border-color 0.2s;
+  width: 100%; background: rgba(239,214,177,0.04); border: 0.5px solid rgba(239,214,177,0.11);
+  border-radius: 0.6rem; padding: 0.6rem 0.85rem; color: var(--cream);
+  font-family: 'Plus Jakarta Sans', sans-serif; font-size: 0.8rem; outline: none; transition: border-color 0.2s;
 }
 .field input:focus, .field select:focus, .field textarea:focus { border-color: var(--teal); }
-.field select option { background: #1a2b30; }
-.field textarea { resize: vertical; min-height: 80px; }
-.field input::placeholder, .field textarea::placeholder { color: rgba(239,214,177,0.2); }
-.field input[type="date"]::-webkit-calendar-picker-indicator { filter: invert(0.6) sepia(1) saturate(0.5) hue-rotate(150deg); cursor: pointer; }
-.field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; }
+.field select option { background: #192a30; }
+.field textarea { resize: vertical; min-height: 70px; }
+.field input::placeholder, .field textarea::placeholder { color: rgba(239,214,177,0.18); }
+.field input[type="date"]::-webkit-calendar-picker-indicator,
+.field input[type="month"]::-webkit-calendar-picker-indicator { filter: invert(0.6) sepia(1) saturate(0.5) hue-rotate(150deg); cursor: pointer; }
+.field input[type="color"] { height: 2.4rem; padding: 0.25rem; cursor: pointer; }
+.field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 0.7rem; }
+.field-row3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 0.7rem; }
 
 /* ── FILTERS ── */
-.filters { display: flex; gap: 0.5rem; margin-bottom: 1.25rem; flex-wrap: wrap; align-items: center; }
-.filter-select { background: var(--cream-faint); border: 0.5px solid rgba(239,214,177,0.12); border-radius: 2rem; padding: 0.35rem 0.85rem; color: rgba(239,214,177,0.6); font-family: 'Plus Jakarta Sans', sans-serif; font-size: 0.65rem; letter-spacing: 0.05em; outline: none; cursor: pointer; }
-.filter-select:focus { border-color: var(--teal); }
+.filters { display: flex; gap: 0.45rem; margin-bottom: 1.1rem; flex-wrap: wrap; align-items: center; }
+.filter-sel { background: var(--cream-faint); border: 0.5px solid rgba(239,214,177,0.11); border-radius: 2rem; padding: 0.32rem 0.8rem; color: rgba(239,214,177,0.55); font-family: 'Plus Jakarta Sans', sans-serif; font-size: 0.62rem; outline: none; cursor: pointer; }
+.filter-sel:focus { border-color: var(--teal); }
 
-/* ── PIPELINE COLUMNS ── */
-.pipeline { display: flex; gap: 0.75rem; overflow-x: auto; padding-bottom: 0.5rem; }
-.pipeline-col { flex-shrink: 0; width: 220px; }
-.pipeline-hdr { font-size: 0.58rem; letter-spacing: 0.15em; text-transform: uppercase; color: rgba(239,214,177,0.35); margin-bottom: 0.75rem; display: flex; align-items: center; justify-content: space-between; }
-.pipeline-count { background: rgba(239,214,177,0.08); border-radius: 2rem; padding: 0.1rem 0.45rem; font-size: 0.55rem; color: rgba(239,214,177,0.4); }
-.pipeline-cards { display: flex; flex-direction: column; gap: 0.5rem; min-height: 80px; }
-.pipeline-card { background: var(--card); border: 0.5px solid rgba(239,214,177,0.07); border-radius: 0.75rem; padding: 0.85rem; cursor: pointer; transition: all 0.2s; }
+/* ── PIPELINE ── */
+.pipeline { display: flex; gap: 0.65rem; overflow-x: auto; padding-bottom: 0.5rem; }
+.pipeline-col { flex-shrink: 0; width: 210px; }
+.pipeline-hdr { font-size: 0.55rem; letter-spacing: 0.15em; text-transform: uppercase; color: rgba(239,214,177,0.35); margin-bottom: 0.65rem; display: flex; align-items: center; justify-content: space-between; }
+.pipeline-count { background: rgba(239,214,177,0.07); border-radius: 2rem; padding: 0.1rem 0.4rem; font-size: 0.52rem; color: rgba(239,214,177,0.35); }
+.pipeline-cards { display: flex; flex-direction: column; gap: 0.45rem; min-height: 60px; }
+.pipeline-card { background: var(--card); border: 0.5px solid rgba(239,214,177,0.07); border-radius: 0.7rem; padding: 0.8rem; cursor: pointer; transition: all 0.2s; }
 .pipeline-card:hover { border-color: var(--teal); background: var(--teal-dim); }
-.pipeline-card-co { font-size: 0.8rem; color: var(--cream); font-weight: 400; margin-bottom: 0.2rem; }
-.pipeline-card-name { font-size: 0.68rem; color: rgba(239,214,177,0.4); margin-bottom: 0.5rem; }
-.pipeline-card-mrr { font-size: 0.7rem; color: var(--teal); }
-.pipeline-card-date { font-size: 0.6rem; color: rgba(239,214,177,0.25); margin-top: 0.3rem; }
+.pipeline-card-co { font-size: 0.78rem; color: var(--cream); font-weight: 400; margin-bottom: 0.15rem; }
+.pipeline-card-name { font-size: 0.65rem; color: rgba(239,214,177,0.38); margin-bottom: 0.45rem; }
+.pipeline-card-mrr { font-size: 0.68rem; color: var(--teal); }
+.pipeline-card-date { font-size: 0.58rem; color: rgba(239,214,177,0.22); margin-top: 0.25rem; }
 
-/* ── MONTH PICKER ── */
-.month-picker { background: var(--cream-faint); border: 0.5px solid rgba(239,214,177,0.12); border-radius: 2rem; padding: 0.35rem 0.85rem; color: rgba(239,214,177,0.6); font-family: 'Plus Jakarta Sans', sans-serif; font-size: 0.65rem; outline: none; cursor: pointer; }
+/* ═══════════════════════════════════
+   CALENDAR
+═══════════════════════════════════ */
+.calendar-nav { display: flex; align-items: center; gap: 1rem; margin-bottom: 1.25rem; flex-wrap: wrap; }
+.calendar-month { font-weight: 200; font-size: 1.1rem; letter-spacing: 0.1em; text-transform: uppercase; min-width: 200px; }
+.cal-nav-btn { background: transparent; border: 0.5px solid rgba(239,214,177,0.12); color: rgba(239,214,177,0.4); width: 30px; height: 30px; border-radius: 50%; cursor: pointer; font-size: 0.8rem; transition: all 0.2s; }
+.cal-nav-btn:hover { border-color: var(--teal); color: var(--teal); }
 
-/* ── MARGIN INDICATOR ── */
-.margin-cell { font-weight: 400; }
-.margin-pos { color: var(--teal); }
-.margin-neg { color: var(--neg); }
-.margin-warn { color: var(--warn); }
+.calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px; }
+.cal-day-hdr { font-size: 0.52rem; letter-spacing: 0.12em; text-transform: uppercase; color: rgba(239,214,177,0.25); text-align: center; padding: 0.5rem 0; }
+.cal-cell { min-height: 100px; background: var(--card); border: 0.5px solid rgba(239,214,177,0.05); border-radius: 0.4rem; padding: 0.4rem; position: relative; transition: background 0.15s; }
+.cal-cell:hover { background: rgba(239,214,177,0.02); }
+.cal-cell.today { border-color: var(--teal-border); background: var(--teal-dim); }
+.cal-cell.other-month { opacity: 0.35; }
+.cal-num { font-size: 0.7rem; color: rgba(239,214,177,0.3); margin-bottom: 0.3rem; font-weight: 200; }
+.cal-cell.today .cal-num { color: var(--teal); font-weight: 400; }
+
+.cal-event { font-size: 0.6rem; padding: 0.18rem 0.45rem; border-radius: 3px; margin-bottom: 2px; cursor: pointer; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; transition: opacity 0.15s; }
+.cal-event:hover { opacity: 0.8; }
+.cal-event-shoot { background: rgba(97,143,155,0.25); color: var(--teal); border-left: 2px solid var(--teal); }
+.cal-event-post  { background: var(--pos-bg); color: var(--pos); border-left: 2px solid var(--pos); }
+.cal-event-task  { background: rgba(196,154,60,0.12); color: var(--warn); border-left: 2px solid var(--warn); }
+.cal-event-task.done { opacity: 0.4; text-decoration: line-through; }
+
+.cal-legend { display: flex; gap: 1rem; margin-bottom: 0.85rem; flex-wrap: wrap; }
+.cal-legend-item { display: flex; align-items: center; gap: 0.35rem; font-size: 0.6rem; color: rgba(239,214,177,0.4); }
+.cal-legend-dot { width: 8px; height: 8px; border-radius: 1px; }
+
+/* ═══════════════════════════════════
+   CONTENT BOARD (Kanban)
+═══════════════════════════════════ */
+.kanban { display: flex; gap: 0.65rem; overflow-x: auto; padding-bottom: 0.75rem; align-items: flex-start; }
+.kanban-col { flex-shrink: 0; width: 240px; }
+.kanban-hdr { padding: 0.65rem 0.75rem; border-radius: 0.65rem 0.65rem 0 0; margin-bottom: 0.45rem; display: flex; align-items: center; justify-content: space-between; }
+.kanban-hdr-label { font-size: 0.6rem; letter-spacing: 0.12em; text-transform: uppercase; font-weight: 400; display: flex; align-items: center; gap: 0.4rem; }
+.kanban-hdr-count { font-size: 0.55rem; opacity: 0.6; }
+.kanban-cards { display: flex; flex-direction: column; gap: 0.45rem; min-height: 80px; }
+
+.kanban-card { background: var(--card); border: 0.5px solid rgba(239,214,177,0.07); border-radius: 0.7rem; padding: 0.9rem; cursor: pointer; transition: all 0.2s; }
+.kanban-card:hover { border-color: rgba(239,214,177,0.15); background: rgba(255,255,255,0.025); }
+.kanban-card-title { font-size: 0.78rem; color: var(--cream); line-height: 1.3; margin-bottom: 0.45rem; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.kanban-card-client { font-size: 0.62rem; color: rgba(239,214,177,0.4); margin-bottom: 0.45rem; }
+.kanban-card-meta { display: flex; align-items: center; justify-content: space-between; }
+.kanban-card-date { font-size: 0.6rem; color: rgba(239,214,177,0.25); }
+.kanban-card-tasks { display: flex; gap: 2px; align-items: center; }
+.task-dot { width: 6px; height: 6px; border-radius: 50%; }
+
+/* ═══════════════════════════════════
+   TASK PANEL (slide-in)
+═══════════════════════════════════ */
+.task-panel-bg { position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 400; display: none; }
+.task-panel-bg.open { display: block; }
+.task-panel { position: fixed; right: 0; top: 0; bottom: 0; width: 400px; max-width: 95vw; background: #192a30; border-left: 0.5px solid rgba(239,214,177,0.1); z-index: 401; overflow-y: auto; padding: 1.5rem; transition: transform 0.25s; transform: translateX(100%); }
+.task-panel.open { transform: translateX(0); }
+.task-panel-title { font-weight: 200; font-size: 1rem; letter-spacing: 0.06em; text-transform: uppercase; margin-bottom: 0.25rem; }
+.task-panel-client { font-family: 'Lora', serif; font-style: italic; font-size: 0.78rem; color: var(--teal); margin-bottom: 1.25rem; }
+
+.task-item { display: flex; align-items: center; gap: 0.7rem; padding: 0.75rem; background: var(--card); border: 0.5px solid rgba(239,214,177,0.06); border-radius: 0.65rem; margin-bottom: 0.5rem; transition: all 0.2s; }
+.task-item.done { opacity: 0.5; }
+.task-check { width: 18px; height: 18px; border-radius: 50%; border: 0.5px solid rgba(239,214,177,0.2); background: transparent; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: all 0.2s; font-size: 0.7rem; }
+.task-check:hover { border-color: var(--teal); }
+.task-check.done { background: var(--teal); border-color: var(--teal); color: var(--dark); }
+.task-info { flex: 1; min-width: 0; }
+.task-stage { font-size: 0.75rem; color: var(--cream); }
+.task-meta { display: flex; gap: 0.5rem; margin-top: 0.2rem; align-items: center; }
+.task-hours { font-size: 0.62rem; color: rgba(239,214,177,0.4); }
+.task-assignee { font-size: 0.6rem; color: rgba(239,214,177,0.35); }
+.task-due { font-size: 0.6rem; color: rgba(239,214,177,0.3); }
+.task-edit-btn { background: transparent; border: none; color: rgba(239,214,177,0.25); cursor: pointer; font-size: 0.7rem; padding: 0.2rem; transition: color 0.2s; flex-shrink: 0; }
+.task-edit-btn:hover { color: var(--teal); }
+
+.task-progress { margin-bottom: 1.25rem; }
+.task-progress-bar { height: 4px; background: rgba(239,214,177,0.08); border-radius: 2px; overflow: hidden; margin-top: 0.35rem; }
+.task-progress-fill { height: 100%; background: var(--teal); border-radius: 2px; transition: width 0.4s; }
+
+/* ── TIME LOG ── */
+.time-log-item { display: flex; align-items: center; gap: 0.75rem; padding: 0.6rem 0; border-bottom: 0.5px solid rgba(239,214,177,0.04); }
+.time-log-item:last-child { border-bottom: none; }
+
+/* ── TASK DEFAULTS TABLE ── */
+.defaults-table td input { background: transparent; border: none; border-bottom: 0.5px solid rgba(239,214,177,0.1); color: var(--cream); font-size: 0.78rem; padding: 0.2rem 0.4rem; width: 80px; outline: none; }
+.defaults-table td input:focus { border-bottom-color: var(--teal); }
+
+/* ── MODAL TASK EDIT ── */
+#modal-task-edit .modal { max-width: 400px; }
 
 /* ── TOAST ── */
-.toast { position: fixed; bottom: 1.5rem; left: 50%; transform: translateX(-50%); background: rgba(19,30,33,0.97); border: 0.5px solid var(--teal-border); border-radius: 2rem; padding: 0.65rem 1.25rem; font-size: 0.75rem; color: var(--cream-dim); z-index: 999; opacity: 0; transition: opacity 0.3s; pointer-events: none; white-space: nowrap; }
+.toast { position: fixed; bottom: 1.5rem; left: 50%; transform: translateX(-50%); background: rgba(19,30,33,0.97); border: 0.5px solid var(--teal-border); border-radius: 2rem; padding: 0.6rem 1.2rem; font-size: 0.72rem; color: var(--cream-dim); z-index: 999; opacity: 0; transition: opacity 0.3s; pointer-events: none; white-space: nowrap; max-width: calc(100vw - 2rem); text-align: center; white-space: normal; }
 .toast.show { opacity: 1; }
 .toast.err { border-color: rgba(192,90,90,0.5); color: #f0a0a0; }
 
-/* ── ACTION ICONS ── */
-.action-btns { display: flex; gap: 0.35rem; }
-.action-btn { width: 26px; height: 26px; border-radius: 50%; border: 0.5px solid rgba(239,214,177,0.08); background: transparent; color: rgba(239,214,177,0.3); font-size: 0.7rem; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s; }
+/* ── ACTION BTNS ── */
+.action-btns { display: flex; gap: 0.3rem; }
+.action-btn { width: 24px; height: 24px; border-radius: 50%; border: 0.5px solid rgba(239,214,177,0.08); background: transparent; color: rgba(239,214,177,0.3); font-size: 0.65rem; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s; }
 .action-btn:hover { border-color: var(--teal); color: var(--teal); }
 .action-btn.del:hover { border-color: var(--neg); color: var(--neg); }
 
-/* ── EMPTY STATE ── */
-.empty { text-align: center; padding: 3rem 1rem; }
-.empty-icon { font-size: 2rem; margin-bottom: 0.75rem; opacity: 0.3; }
-.empty-text { font-family: 'Lora', serif; font-style: italic; font-size: 0.85rem; color: rgba(239,214,177,0.3); }
-
-/* ── TIME LOG ── */
-.time-log-item { display: flex; align-items: center; gap: 0.85rem; padding: 0.65rem 0; border-bottom: 0.5px solid rgba(239,214,177,0.04); }
-.time-log-item:last-child { border-bottom: none; }
-.time-log-hours { font-weight: 200; font-size: 1.1rem; color: var(--cream); min-width: 2.5rem; }
-.time-log-meta { flex: 1; min-width: 0; }
-.time-log-task { font-size: 0.75rem; color: var(--cream); }
-.time-log-client { font-size: 0.65rem; color: rgba(239,214,177,0.4); margin-top: 0.1rem; }
-.time-log-cost { font-size: 0.72rem; color: var(--teal); white-space: nowrap; }
+.empty { text-align: center; padding: 2.5rem 1rem; }
+.empty-icon { font-size: 1.8rem; margin-bottom: 0.6rem; opacity: 0.25; }
+.empty-text { font-family: 'Lora', serif; font-style: italic; font-size: 0.82rem; color: rgba(239,214,177,0.28); }
 
 /* ── RESPONSIVE ── */
-@media (max-width: 900px) {
-  .kpi-row { grid-template-columns: repeat(3, 1fr); }
-}
+@media (max-width: 900px) { .kpi-row { grid-template-columns: repeat(3,1fr); } }
 @media (max-width: 640px) {
-  header { padding: 0.85rem 1rem; }
-  .logo { font-size: 1.1rem; }
-  .page { padding: 1.1rem 1rem; }
-  .kpi-row { grid-template-columns: repeat(2, 1fr); gap: 0.5rem; }
-  .field-row { grid-template-columns: 1fr; }
+  header { padding: 0.75rem 1rem; }
+  .page { padding: 1rem; }
+  .kpi-row { grid-template-columns: repeat(2,1fr); gap: 0.45rem; }
+  .field-row,.field-row3 { grid-template-columns: 1fr; }
+  .kanban { flex-direction: column; overflow-x: visible; }
+  .kanban-col { width: 100%; }
+  .task-panel { width: 100%; border-left: none; border-top: 0.5px solid rgba(239,214,177,0.1); top: auto; height: 75vh; }
   .pipeline { flex-direction: column; overflow-x: visible; }
   .pipeline-col { width: 100%; }
-  .nav-tabs { gap: 0.25rem; }
-  .nav-tab { font-size: 0.58rem; padding: 0.28rem 0.65rem; }
-  .modal { padding: 1.25rem; }
-  .table-wrap { border-radius: 0.5rem; }
-  thead th, tbody td { padding: 0.65rem 0.75rem; }
+  .calendar-grid { gap: 1px; }
+  .cal-cell { min-height: 70px; padding: 0.3rem; }
 }
 </style>
 </head>
@@ -198,266 +260,188 @@ tbody tr:hover td { background: rgba(239,214,177,0.02); }
 
 <header>
   <div class="logo">Ma<span>zine</span></div>
-  <div class="nav-tabs" id="nav-tabs">
+  <div class="nav-tabs">
     <button class="nav-tab active" onclick="switchPage('rentabilite')">Rentabilité</button>
+    <button class="nav-tab" onclick="switchPage('calendar')">Calendrier</button>
     <button class="nav-tab" onclick="switchPage('production')">Production</button>
     <button class="nav-tab" onclick="switchPage('time')">Temps</button>
     <button class="nav-tab" onclick="switchPage('leads')">Leads</button>
-    <button class="nav-tab" onclick="switchPage('team')">Équipe</button>
-    <button class="nav-tab app-switch" onclick="goToAnalytics()">↗ Analytics</button>
+    <button class="nav-tab" onclick="switchPage('settings')">Réglages</button>
+    <button class="nav-tab switch" onclick="goToAnalytics()">↗ Analytics</button>
   </div>
-  <div class="header-right">
-    <span id="user-month-display" style="font-size:0.6rem;color:rgba(239,214,177,0.3);letter-spacing:0.1em;text-transform:uppercase;"></span>
-    <button class="btn-sm" onclick="logout()">Déconnexion</button>
+  <div style="display:flex;gap:0.4rem;align-items:center;">
+    <span id="header-month" style="font-size:0.58rem;color:rgba(239,214,177,0.28);letter-spacing:0.1em;text-transform:uppercase;"></span>
+    <button class="btn-sm" onclick="logout()">Déco.</button>
   </div>
 </header>
 
-<!-- ══════════════════════════════════════════ -->
-<!-- PAGE: RENTABILITÉ -->
-<!-- ══════════════════════════════════════════ -->
+<!-- ══════════ RENTABILITÉ ══════════ -->
 <div class="page active" id="page-rentabilite">
   <div class="sec-hdr">
-    <div class="sec-hdr-left">
-      <h2>Rentabilité</h2>
-      <p>Marge nette par client · Heures vendues vs passées</p>
-    </div>
-    <div style="display:flex;gap:0.5rem;align-items:center;">
-      <input type="month" class="month-picker" id="month-picker" onchange="loadRentabilite()">
+    <div class="sec-hdr-left"><h2>Rentabilité</h2><p>Marge nette · Heures vendues vs passées</p></div>
+    <div class="sec-hdr-right">
+      <input type="month" class="filter-sel" id="month-picker" onchange="loadRentabilite()" style="cursor:pointer;">
     </div>
   </div>
-
-  <!-- Alerts -->
   <div id="alerts-list" class="alert-list" style="display:none;"></div>
-
-  <!-- KPIs -->
-  <div class="kpi-row" id="kpi-row">
+  <div class="kpi-row">
     <div class="card"><p class="card-label">MRR Total</p><p class="card-value" id="kpi-mrr">—</p><p class="card-sub card-pos" id="kpi-margin-pct"></p></div>
     <div class="card"><p class="card-label">Coût équipe</p><p class="card-value" id="kpi-cost">—</p><p class="card-sub" style="color:rgba(239,214,177,0.3);">ce mois</p></div>
-    <div class="card"><p class="card-label">Marge nette</p><p class="card-value" id="kpi-margin">—</p><p class="card-sub" id="kpi-margin-sub"></p></div>
+    <div class="card"><p class="card-label">Marge nette</p><p class="card-value" id="kpi-margin">—</p></div>
     <div class="card"><p class="card-label">Heures vendues</p><p class="card-value" id="kpi-hours-sold">—</p><p class="card-sub" style="color:rgba(239,214,177,0.3);" id="kpi-hours-spent-sub"></p></div>
-    <div class="card"><p class="card-label">Clients actifs</p><p class="card-value" id="kpi-clients">—</p><p class="card-sub" style="color:rgba(239,214,177,0.3);">sous contrat</p></div>
+    <div class="card"><p class="card-label">Clients actifs</p><p class="card-value" id="kpi-clients">—</p></div>
   </div>
-
-  <!-- Per client table -->
-  <div style="margin-bottom:1.5rem;">
-    <p style="font-size:0.55rem;letter-spacing:0.18em;text-transform:uppercase;color:rgba(239,214,177,0.3);margin-bottom:0.85rem;">Par client</p>
-    <div class="table-wrap">
-      <table>
-        <thead>
-          <tr>
-            <th>Client</th>
-            <th>Package</th>
-            <th>MRR</th>
-            <th>Coût</th>
-            <th>Marge</th>
-            <th>Heures</th>
-            <th>Vidéos</th>
-          </tr>
-        </thead>
-        <tbody id="rentabilite-table"></tbody>
-      </table>
-    </div>
+  <p style="font-size:0.52rem;letter-spacing:0.18em;text-transform:uppercase;color:rgba(239,214,177,0.28);margin-bottom:0.75rem;">Par client</p>
+  <div class="table-wrap" style="margin-bottom:1.25rem;">
+    <table><thead><tr><th>Client</th><th>Package</th><th>MRR</th><th>Coût</th><th>Marge</th><th>Heures</th><th>Vidéos</th></tr></thead>
+    <tbody id="rentabilite-table"></tbody></table>
   </div>
-
-  <!-- Per member -->
-  <p style="font-size:0.55rem;letter-spacing:0.18em;text-transform:uppercase;color:rgba(239,214,177,0.3);margin-bottom:0.85rem;">Par membre</p>
+  <p style="font-size:0.52rem;letter-spacing:0.18em;text-transform:uppercase;color:rgba(239,214,177,0.28);margin-bottom:0.75rem;">Par membre</p>
   <div class="table-wrap">
-    <table>
-      <thead><tr><th>Membre</th><th>Taux/h</th><th>Heures</th><th>Coût total</th></tr></thead>
-      <tbody id="member-table"></tbody>
-    </table>
+    <table><thead><tr><th>Membre</th><th>Taux/h</th><th>Heures</th><th>Coût</th></tr></thead>
+    <tbody id="member-table"></tbody></table>
   </div>
 </div>
 
-<!-- ══════════════════════════════════════════ -->
-<!-- PAGE: PRODUCTION -->
-<!-- ══════════════════════════════════════════ -->
+<!-- ══════════ CALENDRIER ══════════ -->
+<div class="page" id="page-calendar">
+  <div class="sec-hdr">
+    <div class="sec-hdr-left"><h2>Calendrier</h2><p>Planning de production et publication</p></div>
+    <div class="sec-hdr-right">
+      <button class="cal-nav-btn" onclick="calNav(-1)">‹</button>
+      <span class="calendar-month" id="cal-month-label"></span>
+      <button class="cal-nav-btn" onclick="calNav(1)">›</button>
+      <select class="filter-sel" id="cal-filter-client" onchange="loadCalendar()">
+        <option value="">Tous les clients</option>
+      </select>
+    </div>
+  </div>
+  <div class="cal-legend">
+    <div class="cal-legend-item"><div class="cal-legend-dot" style="background:rgba(97,143,155,0.6)"></div>Tournage</div>
+    <div class="cal-legend-item"><div class="cal-legend-dot" style="background:var(--pos)"></div>Publication</div>
+    <div class="cal-legend-item"><div class="cal-legend-dot" style="background:var(--warn)"></div>Tâche due</div>
+  </div>
+  <div class="calendar-grid" id="cal-headers"></div>
+  <div class="calendar-grid" id="cal-grid" style="margin-top:2px;"></div>
+</div>
+
+<!-- ══════════ PRODUCTION (Kanban) ══════════ -->
 <div class="page" id="page-production">
   <div class="sec-hdr">
-    <div class="sec-hdr-left">
-      <h2>Production</h2>
-      <p>Pipeline de contenu par client</p>
+    <div class="sec-hdr-left"><h2>Content Engine</h2><p>Pipeline de production TikTok</p></div>
+    <div class="sec-hdr-right">
+      <select class="filter-sel" id="kanban-filter-client" onchange="loadKanban()"><option value="">Tous les clients</option></select>
+      <button class="btn-primary" onclick="openContentModal()">+ Nouvelle vidéo</button>
     </div>
-    <button class="btn-primary" onclick="openModal('modal-content')">+ Nouvelle vidéo</button>
   </div>
-
-  <div class="filters">
-    <select class="filter-select" id="content-filter-client" onchange="loadContent()">
-      <option value="">Tous les clients</option>
-    </select>
-    <select class="filter-select" id="content-filter-status" onchange="loadContent()">
-      <option value="">Tous les statuts</option>
-      <option value="brief">Brief</option>
-      <option value="script">Script</option>
-      <option value="shooting">Tournage</option>
-      <option value="editing">Montage</option>
-      <option value="validation">Validation</option>
-      <option value="posted">Publié</option>
-      <option value="boosted">Boosté</option>
-    </select>
-    <input type="month" class="filter-select" id="content-filter-month" onchange="loadContent()" style="cursor:pointer;">
-  </div>
-
-  <div class="table-wrap">
-    <table>
-      <thead>
-        <tr>
-          <th>Titre</th>
-          <th>Client</th>
-          <th>Statut</th>
-          <th>Format</th>
-          <th>Tournage</th>
-          <th>Publication</th>
-          <th>Assigné</th>
-          <th>Heures</th>
-          <th></th>
-        </tr>
-      </thead>
-      <tbody id="content-table"></tbody>
-    </table>
-  </div>
+  <div class="kanban" id="kanban-board"></div>
 </div>
 
-<!-- ══════════════════════════════════════════ -->
-<!-- PAGE: TEMPS -->
-<!-- ══════════════════════════════════════════ -->
+<!-- ══════════ TEMPS ══════════ -->
 <div class="page" id="page-time">
   <div class="sec-hdr">
-    <div class="sec-hdr-left">
-      <h2>Suivi du temps</h2>
-      <p>Enregistrez vos heures par client et par tâche</p>
+    <div class="sec-hdr-left"><h2>Suivi du temps</h2><p>Heures par client, membre et tâche</p></div>
+    <div class="sec-hdr-right">
+      <button class="btn-primary" onclick="openModal('modal-time')">+ Saisir heures</button>
     </div>
-    <button class="btn-primary" onclick="openModal('modal-time')">+ Saisir des heures</button>
   </div>
-
   <div class="filters">
-    <select class="filter-select" id="time-filter-client" onchange="loadTime()">
-      <option value="">Tous les clients</option>
-    </select>
-    <select class="filter-select" id="time-filter-member" onchange="loadTime()">
-      <option value="">Toute l'équipe</option>
-    </select>
-    <input type="month" class="filter-select" id="time-filter-month" onchange="loadTime()" style="cursor:pointer;">
+    <select class="filter-sel" id="time-filter-client" onchange="loadTime()"><option value="">Tous les clients</option></select>
+    <select class="filter-sel" id="time-filter-member" onchange="loadTime()"><option value="">Toute l'équipe</option></select>
+    <input type="month" class="filter-sel" id="time-filter-month" onchange="loadTime()" style="cursor:pointer;">
   </div>
-
   <div id="time-log"></div>
 </div>
 
-<!-- ══════════════════════════════════════════ -->
-<!-- PAGE: LEADS -->
-<!-- ══════════════════════════════════════════ -->
+<!-- ══════════ LEADS ══════════ -->
 <div class="page" id="page-leads">
   <div class="sec-hdr">
-    <div class="sec-hdr-left">
-      <h2>Pipeline commercial</h2>
-      <p>Leads et prospects Mazine</p>
-    </div>
-    <button class="btn-primary" onclick="openModal('modal-lead')">+ Nouveau lead</button>
+    <div class="sec-hdr-left"><h2>Pipeline commercial</h2><p>Leads et prospects</p></div>
+    <div class="sec-hdr-right"><button class="btn-primary" onclick="openLeadModal()">+ Nouveau lead</button></div>
   </div>
   <div id="leads-pipeline"></div>
 </div>
 
-<!-- ══════════════════════════════════════════ -->
-<!-- PAGE: ÉQUIPE -->
-<!-- ══════════════════════════════════════════ -->
-<div class="page" id="page-team">
+<!-- ══════════ RÉGLAGES ══════════ -->
+<div class="page" id="page-settings">
   <div class="sec-hdr">
-    <div class="sec-hdr-left">
-      <h2>Équipe</h2>
-      <p>Membres et taux horaires</p>
-    </div>
-    <button class="btn-primary" onclick="openModal('modal-team')">+ Ajouter membre</button>
+    <div class="sec-hdr-left"><h2>Réglages</h2><p>Équipe · Durées par défaut · Clients</p></div>
+    <div class="sec-hdr-right"><button class="btn-primary" onclick="openModal('modal-team')">+ Membre</button></div>
   </div>
-  <div class="table-wrap">
-    <table>
-      <thead><tr><th>Nom</th><th>Rôle</th><th>Taux horaire</th><th>Couleur</th><th></th></tr></thead>
-      <tbody id="team-table"></tbody>
-    </table>
+
+  <p style="font-size:0.52rem;letter-spacing:0.15em;text-transform:uppercase;color:rgba(239,214,177,0.28);margin-bottom:0.75rem;">Équipe</p>
+  <div class="table-wrap" style="margin-bottom:1.5rem;">
+    <table><thead><tr><th>Nom</th><th>Rôle</th><th>Taux/h (MUR)</th><th>Couleur</th><th></th></tr></thead>
+    <tbody id="team-table"></tbody></table>
+  </div>
+
+  <p style="font-size:0.52rem;letter-spacing:0.15em;text-transform:uppercase;color:rgba(239,214,177,0.28);margin-bottom:0.75rem;">Durées par défaut des tâches</p>
+  <div class="card" style="margin-bottom:1.5rem;">
+    <p style="font-family:'Lora',serif;font-style:italic;font-size:0.78rem;color:var(--cream-dim);margin-bottom:1rem;">Ces durées s'appliquent automatiquement à chaque nouvelle vidéo créée.</p>
+    <div class="table-wrap">
+      <table class="defaults-table">
+        <thead><tr><th>Étape</th><th>Label</th><th>Heures par défaut</th><th></th></tr></thead>
+        <tbody id="defaults-table"></tbody>
+      </table>
+    </div>
   </div>
 </div>
 
-<!-- ══════════════════════════════════════════ -->
-<!-- MODALS -->
-<!-- ══════════════════════════════════════════ -->
+<!-- ══════════════════════════════════
+     MODALS
+══════════════════════════════════ -->
 
-<!-- Modal: Vidéo -->
+<!-- Vidéo -->
 <div class="modal-bg" id="modal-content">
   <div class="modal">
     <h3 id="modal-content-title">Nouvelle vidéo</h3>
     <input type="hidden" id="content-id">
-    <div class="field">
-      <label>Client *</label>
-      <select id="content-client"></select>
-    </div>
-    <div class="field">
-      <label>Titre de la vidéo *</label>
-      <input type="text" id="content-title" placeholder="Hook de la vidéo...">
-    </div>
     <div class="field-row">
-      <div class="field">
-        <label>Statut</label>
+      <div class="field"><label>Client *</label><select id="content-client"></select></div>
+      <div class="field"><label>Assigné à</label><select id="content-assignee"><option value="">Non assigné</option></select></div>
+    </div>
+    <div class="field"><label>Titre / Hook *</label><input type="text" id="content-title" placeholder="ex: LaRivière – Why Mauritian restaurants fail – Jan W2"></div>
+    <div class="field-row">
+      <div class="field"><label>Statut</label>
         <select id="content-status">
-          <option value="brief">Brief</option>
-          <option value="script">Script</option>
-          <option value="shooting">Tournage</option>
-          <option value="editing">Montage</option>
-          <option value="validation">Validation</option>
-          <option value="posted">Publié</option>
-          <option value="boosted">Boosté</option>
+          <option value="ideas">💡 Ideas</option><option value="script">✍ Script</option>
+          <option value="shooting">🎬 Shooting</option><option value="editing">🎞 Editing</option>
+          <option value="ready">📲 Ready to Post</option><option value="posted">📈 Posted</option>
+          <option value="boosted">🔥 Boosted</option>
         </select>
       </div>
-      <div class="field">
-        <label>Format</label>
+      <div class="field"><label>Format</label>
         <select id="content-format">
-          <option value="">—</option>
-          <option value="UGC">UGC</option>
-          <option value="FaceCam">Face Cam</option>
-          <option value="Voiceover">Voiceover</option>
-          <option value="Interview">Interview</option>
+          <option value="">—</option><option>UGC</option><option>FaceCam</option>
+          <option>Voiceover</option><option>Interview</option>
         </select>
       </div>
     </div>
     <div class="field-row">
-      <div class="field">
-        <label>Type de hook</label>
+      <div class="field"><label>Type de hook</label>
         <select id="content-hook">
-          <option value="">—</option>
-          <option value="Educational">Éducatif</option>
-          <option value="Story">Story</option>
-          <option value="Trend">Trend</option>
-          <option value="Offer">Offre</option>
+          <option value="">—</option><option>Educational</option><option>Storytelling</option>
+          <option>Trend</option><option>Authority</option><option>Problem/Solution</option>
+          <option>Case Study</option><option>Offer</option>
         </select>
       </div>
-      <div class="field">
-        <label>Objectif</label>
+      <div class="field"><label>Objectif</label>
         <select id="content-objective">
-          <option value="">—</option>
-          <option value="Brand">Brand</option>
-          <option value="Lead">Lead</option>
-          <option value="Conversion">Conversion</option>
+          <option value="">—</option><option value="Brand">Brand Awareness</option>
+          <option value="Engagement">Engagement</option><option value="Lead">Lead Generation</option>
+          <option value="Conversion">Conversion</option><option value="Retargeting">Retargeting</option>
         </select>
       </div>
     </div>
     <div class="field-row">
-      <div class="field">
-        <label>Date de tournage</label>
-        <input type="date" id="content-shoot-date">
-      </div>
-      <div class="field">
-        <label>Date de publication</label>
-        <input type="date" id="content-post-date">
-      </div>
+      <div class="field"><label>Date de tournage</label><input type="date" id="content-shoot-date"></div>
+      <div class="field"><label>Date de publication</label><input type="date" id="content-post-date"></div>
     </div>
-    <div class="field">
-      <label>Assigné à</label>
-      <select id="content-assignee">
-        <option value="">Non assigné</option>
-      </select>
+    <div class="field-row">
+      <div class="field"><label>CTA</label><input type="text" id="content-cta" placeholder="ex: Lien en bio"></div>
+      <div class="field" id="perf-fields" style="display:none;"><label>Vues TikTok</label><input type="number" id="content-views" placeholder="0"></div>
     </div>
-    <div class="field">
-      <label>Notes</label>
-      <textarea id="content-notes" placeholder="Brief, liens script, consignes..."></textarea>
-    </div>
+    <div class="field"><label>Notes / Brief</label><textarea id="content-notes" placeholder="Contexte, script, consignes..."></textarea></div>
     <div class="modal-footer">
       <button class="btn-ghost" onclick="closeModal('modal-content')">Annuler</button>
       <button class="btn-primary" onclick="saveContent()">Enregistrer</button>
@@ -465,50 +449,28 @@ tbody tr:hover td { background: rgba(239,214,177,0.02); }
   </div>
 </div>
 
-<!-- Modal: Saisie temps -->
+<!-- Saisie temps -->
 <div class="modal-bg" id="modal-time">
   <div class="modal">
     <h3>Saisir des heures</h3>
-    <div class="field">
-      <label>Membre de l'équipe *</label>
-      <select id="time-member"></select>
-    </div>
-    <div class="field">
-      <label>Client *</label>
-      <select id="time-client" onchange="loadContentForTime()"></select>
-    </div>
-    <div class="field">
-      <label>Vidéo (optionnel)</label>
-      <select id="time-content-item">
-        <option value="">— Aucune vidéo spécifique —</option>
-      </select>
+    <div class="field"><label>Membre *</label><select id="time-member"></select></div>
+    <div class="field-row">
+      <div class="field"><label>Client *</label><select id="time-client" onchange="loadContentForTime()"></select></div>
+      <div class="field"><label>Vidéo</label><select id="time-content-item"><option value="">— Aucune —</option></select></div>
     </div>
     <div class="field-row">
-      <div class="field">
-        <label>Type de tâche *</label>
+      <div class="field"><label>Type de tâche *</label>
         <select id="time-task">
-          <option value="strategy">Stratégie</option>
-          <option value="script">Script</option>
-          <option value="shooting">Tournage</option>
-          <option value="editing">Montage</option>
-          <option value="publishing">Publication</option>
-          <option value="meeting">Réunion client</option>
+          <option value="strategy">Stratégie</option><option value="script">Script</option>
+          <option value="shooting">Tournage</option><option value="editing">Montage</option>
+          <option value="publishing">Publication</option><option value="meeting">Réunion</option>
           <option value="admin">Admin</option>
         </select>
       </div>
-      <div class="field">
-        <label>Heures *</label>
-        <input type="number" id="time-hours" min="0.25" max="24" step="0.25" placeholder="ex: 2.5">
-      </div>
+      <div class="field"><label>Heures *</label><input type="number" id="time-hours" min="0.25" max="24" step="0.25" placeholder="ex: 2.5"></div>
     </div>
-    <div class="field">
-      <label>Date</label>
-      <input type="date" id="time-date">
-    </div>
-    <div class="field">
-      <label>Notes</label>
-      <textarea id="time-notes" placeholder="Optionnel..."></textarea>
-    </div>
+    <div class="field"><label>Date</label><input type="date" id="time-date"></div>
+    <div class="field"><label>Notes</label><textarea id="time-notes" placeholder="Optionnel..."></textarea></div>
     <div class="modal-footer">
       <button class="btn-ghost" onclick="closeModal('modal-time')">Annuler</button>
       <button class="btn-primary" onclick="saveTime()">Enregistrer</button>
@@ -516,78 +478,37 @@ tbody tr:hover td { background: rgba(239,214,177,0.02); }
   </div>
 </div>
 
-<!-- Modal: Lead -->
+<!-- Lead -->
 <div class="modal-bg" id="modal-lead">
   <div class="modal">
     <h3 id="modal-lead-title">Nouveau lead</h3>
     <input type="hidden" id="lead-id">
     <div class="field-row">
-      <div class="field">
-        <label>Entreprise *</label>
-        <input type="text" id="lead-company" placeholder="Nom de l'entreprise">
-      </div>
-      <div class="field">
-        <label>Contact</label>
-        <input type="text" id="lead-contact" placeholder="Prénom Nom">
-      </div>
+      <div class="field"><label>Entreprise *</label><input type="text" id="lead-company"></div>
+      <div class="field"><label>Contact</label><input type="text" id="lead-contact"></div>
     </div>
     <div class="field-row">
-      <div class="field">
-        <label>Téléphone</label>
-        <input type="tel" id="lead-phone" placeholder="+230...">
-      </div>
-      <div class="field">
-        <label>Email</label>
-        <input type="email" id="lead-email" placeholder="email@...">
-      </div>
-    </div>
-    <div class="field-row">
-      <div class="field">
-        <label>Statut</label>
+      <div class="field"><label>Téléphone</label><input type="tel" id="lead-phone" placeholder="+230"></div>
+      <div class="field"><label>Statut</label>
         <select id="lead-status">
-          <option value="new">Nouveau</option>
-          <option value="contacted">Contacté</option>
-          <option value="qualified">Qualifié</option>
-          <option value="proposal">Devis envoyé</option>
-          <option value="negotiation">Négociation</option>
-          <option value="won">Gagné ✓</option>
+          <option value="new">Nouveau</option><option value="contacted">Contacté</option>
+          <option value="qualified">Qualifié</option><option value="proposal">Devis</option>
+          <option value="negotiation">Négociation</option><option value="won">Gagné ✓</option>
           <option value="lost">Perdu ✗</option>
         </select>
       </div>
-      <div class="field">
-        <label>Service</label>
-        <select id="lead-service">
-          <option value="">—</option>
-          <option value="TikTok">TikTok</option>
-          <option value="Data">Analytics</option>
-          <option value="Full Package">Full Package</option>
-        </select>
+    </div>
+    <div class="field-row">
+      <div class="field"><label>MRR estimé (MUR)</label><input type="number" id="lead-mrr" placeholder="25000"></div>
+      <div class="field"><label>Service</label>
+        <select id="lead-service"><option value="">—</option><option>TikTok</option><option>Analytics</option><option>Full Package</option></select>
       </div>
     </div>
     <div class="field-row">
-      <div class="field">
-        <label>MRR estimé (MUR)</label>
-        <input type="number" id="lead-mrr" placeholder="ex: 25000">
-      </div>
-      <div class="field">
-        <label>Probabilité %</label>
-        <input type="number" id="lead-prob" min="0" max="100" placeholder="50">
-      </div>
+      <div class="field"><label>Responsable</label><select id="lead-owner"><option value="">—</option></select></div>
+      <div class="field"><label>Prochain suivi</label><input type="date" id="lead-next-action"></div>
     </div>
-    <div class="field-row">
-      <div class="field">
-        <label>Responsable</label>
-        <select id="lead-owner"><option value="">—</option></select>
-      </div>
-      <div class="field">
-        <label>Prochain suivi</label>
-        <input type="date" id="lead-next-action">
-      </div>
-    </div>
-    <div class="field">
-      <label>Notes</label>
-      <textarea id="lead-notes" placeholder="Contexte, besoins, historique..."></textarea>
-    </div>
+    <div class="field"><label>Notes</label><textarea id="lead-notes" placeholder="Contexte, besoins..."></textarea></div>
     <div class="modal-footer">
       <button class="btn-ghost" onclick="closeModal('modal-lead')">Annuler</button>
       <button class="btn-primary" onclick="saveLead()">Enregistrer</button>
@@ -595,33 +516,68 @@ tbody tr:hover td { background: rgba(239,214,177,0.02); }
   </div>
 </div>
 
-<!-- Modal: Équipe -->
+<!-- Membre équipe -->
 <div class="modal-bg" id="modal-team">
   <div class="modal">
     <h3 id="modal-team-title">Nouveau membre</h3>
     <input type="hidden" id="team-id">
-    <div class="field">
-      <label>Nom *</label>
-      <input type="text" id="team-name" placeholder="Prénom Nom">
-    </div>
-    <div class="field">
-      <label>Rôle</label>
-      <input type="text" id="team-role" placeholder="ex: Monteur, Stratège...">
-    </div>
+    <div class="field"><label>Nom *</label><input type="text" id="team-name"></div>
+    <div class="field"><label>Rôle</label><input type="text" id="team-role" placeholder="ex: Monteur, Stratège..."></div>
     <div class="field-row">
-      <div class="field">
-        <label>Taux horaire (MUR/h) *</label>
-        <input type="number" id="team-rate" placeholder="ex: 500" min="0">
-      </div>
-      <div class="field">
-        <label>Couleur</label>
-        <input type="color" id="team-color" value="#618F9B" style="height:2.5rem;padding:0.3rem;">
-      </div>
+      <div class="field"><label>Taux horaire (MUR/h) *</label><input type="number" id="team-rate" placeholder="500" min="0"></div>
+      <div class="field"><label>Couleur</label><input type="color" id="team-color" value="#618F9B"></div>
     </div>
     <div class="modal-footer">
       <button class="btn-ghost" onclick="closeModal('modal-team')">Annuler</button>
       <button class="btn-primary" onclick="saveTeam()">Enregistrer</button>
     </div>
+  </div>
+</div>
+
+<!-- Task edit modal -->
+<div class="modal-bg" id="modal-task-edit">
+  <div class="modal" style="max-width:400px;">
+    <h3>Modifier la tâche</h3>
+    <input type="hidden" id="task-edit-id">
+    <div class="field"><label>Statut</label>
+      <select id="task-edit-status">
+        <option value="todo">À faire</option><option value="in_progress">En cours</option>
+        <option value="done">Fait ✓</option><option value="skipped">Ignoré</option>
+      </select>
+    </div>
+    <div class="field"><label>Assigné à</label><select id="task-edit-assignee"><option value="">Non assigné</option></select></div>
+    <div class="field-row">
+      <div class="field"><label>Heures estimées</label><input type="number" id="task-edit-hours" step="0.25" min="0"></div>
+      <div class="field"><label>Date limite</label><input type="date" id="task-edit-due"></div>
+    </div>
+    <div class="field"><label>Notes</label><textarea id="task-edit-notes"></textarea></div>
+    <div class="modal-footer">
+      <button class="btn-ghost" onclick="closeModal('modal-task-edit')">Annuler</button>
+      <button class="btn-primary" onclick="saveTaskEdit()">Enregistrer</button>
+    </div>
+  </div>
+</div>
+
+<!-- Task Panel (slide-in) -->
+<div class="task-panel-bg" id="task-panel-bg" onclick="closeTaskPanel()"></div>
+<div class="task-panel" id="task-panel">
+  <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:0.5rem;">
+    <div>
+      <p class="task-panel-title" id="tp-title"></p>
+      <p class="task-panel-client" id="tp-client"></p>
+    </div>
+    <button class="btn-ghost" onclick="closeTaskPanel()" style="padding:0.3rem 0.65rem;font-size:0.6rem;">✕</button>
+  </div>
+  <div class="task-progress">
+    <div style="display:flex;justify-content:space-between;font-size:0.6rem;color:rgba(239,214,177,0.35);">
+      <span>Progression</span><span id="tp-progress-label"></span>
+    </div>
+    <div class="task-progress-bar"><div class="task-progress-fill" id="tp-progress-fill"></div></div>
+  </div>
+  <div id="tp-tasks"></div>
+  <div style="margin-top:1rem;display:flex;gap:0.5rem;">
+    <button class="btn-ghost" onclick="openModal('modal-time')" style="flex:1;font-size:0.65rem;">+ Saisir heures</button>
+    <button class="btn-ghost" onclick="editCurrentContent()" style="flex:1;font-size:0.65rem;">✎ Modifier vidéo</button>
   </div>
 </div>
 
@@ -631,38 +587,30 @@ tbody tr:hover td { background: rgba(239,214,177,0.02); }
 // ═══════════════════════════════════════════════
 // STATE
 // ═══════════════════════════════════════════════
-let authToken = sessionStorage.getItem('mz_token') || null;
-let teamData = [];
-let clientsData = [];
-let currentPage = 'rentabilite';
-let currentMonth = new Date().toISOString().slice(0,7);
+const token = sessionStorage.getItem('mz_token');
+if (!token) window.location.href = '/';
 
-// ── AUTH CHECK ──
-if (!authToken) {
-  window.location.href = '/';
-}
+let teamData = [], clientsData = [], taskDefaults = [];
+let currentPage = 'rentabilite';
+let calMonth = new Date(); // current calendar month
+let currentContentId = null; // for task panel
 
 // ═══════════════════════════════════════════════
 // INIT
 // ═══════════════════════════════════════════════
 document.addEventListener('DOMContentLoaded', async () => {
-  // Set month pickers to current month
-  document.getElementById('month-picker').value = currentMonth;
-  document.getElementById('time-filter-month').value = currentMonth;
+  const now = new Date().toISOString().slice(0,7);
+  document.getElementById('month-picker').value = now;
+  document.getElementById('time-filter-month').value = now;
   document.getElementById('time-date').value = new Date().toISOString().split('T')[0];
-  document.getElementById('content-filter-month').value = currentMonth;
-  document.getElementById('user-month-display').textContent = fmtMonth(currentMonth);
-
-  await Promise.all([loadTeam(), loadClients()]);
+  document.getElementById('header-month').textContent = fmtMonth(now);
+  await Promise.all([loadTeam(), loadClients(), loadDefaults()]);
   loadRentabilite();
 });
 
-function goToAnalytics() {
-  window.location.href = '/';
-}
-
+function goToAnalytics() { window.location.href = '/'; }
 function logout() {
-  if (authToken) fetch('/api/logout', { method:'POST', headers:{'Authorization':'Bearer '+authToken} });
+  fetch('/api/logout',{method:'POST',headers:{'Authorization':'Bearer '+token}});
   sessionStorage.removeItem('mz_token');
   window.location.href = '/';
 }
@@ -670,25 +618,23 @@ function logout() {
 // ═══════════════════════════════════════════════
 // NAVIGATION
 // ═══════════════════════════════════════════════
+const PAGES = ['rentabilite','calendar','production','time','leads','settings'];
 function switchPage(page) {
-  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-  document.getElementById('page-'+page).classList.add('active');
-  document.querySelectorAll('.nav-tab:not(.app-switch)').forEach((t,i) => {
-    const pages = ['rentabilite','production','time','leads','team'];
-    t.classList.toggle('active', pages[i]===page);
-  });
+  PAGES.forEach(p => document.getElementById('page-'+p).classList.toggle('active', p===page));
+  document.querySelectorAll('.nav-tab:not(.switch)').forEach((t,i) => t.classList.toggle('active', PAGES[i]===page));
   currentPage = page;
-  if (page==='production') loadContent();
+  if (page==='calendar') loadCalendar();
+  if (page==='production') loadKanban();
   if (page==='time') loadTime();
   if (page==='leads') loadLeads();
-  if (page==='team') renderTeam();
+  if (page==='settings') renderSettings();
 }
 
 // ═══════════════════════════════════════════════
-// API HELPER
+// API
 // ═══════════════════════════════════════════════
 async function api(method, url, body) {
-  const opts = { method, headers: { 'Authorization': 'Bearer '+authToken } };
+  const opts = { method, headers: { 'Authorization': 'Bearer '+token } };
   if (body) { opts.headers['Content-Type'] = 'application/json'; opts.body = JSON.stringify(body); }
   const res = await fetch(url, opts);
   if (res.status === 401) { window.location.href = '/'; return null; }
@@ -699,55 +645,39 @@ async function api(method, url, body) {
 // TEAM
 // ═══════════════════════════════════════════════
 async function loadTeam() {
-  const data = await api('GET', '/api/team');
-  if (!data) return;
-  teamData = data.team || [];
-  renderTeam();
+  const d = await api('GET','/api/team');
+  teamData = d?.team||[];
   populateTeamSelects();
 }
 
-function renderTeam() {
+function populateTeamSelects() {
+  const opts = teamData.map(m=>`<option value="${m.id}">${esc(m.name)}</option>`).join('');
+  ['time-member'].forEach(id => { const el=document.getElementById(id); if(el) el.innerHTML=opts; });
+  ['content-assignee','task-edit-assignee','lead-owner'].forEach(id => {
+    const el=document.getElementById(id); if(el) el.innerHTML='<option value="">—</option>'+opts;
+  });
+  const tf = document.getElementById('time-filter-member');
+  if (tf) tf.innerHTML='<option value="">Toute l\'équipe</option>'+opts;
+}
+
+function renderSettings() {
   const tbody = document.getElementById('team-table');
-  if (!teamData.length) { tbody.innerHTML = `<tr><td colspan="5"><div class="empty"><div class="empty-icon">👥</div><p class="empty-text">Aucun membre — ajoutez votre équipe</p></div></td></tr>`; return; }
-  tbody.innerHTML = teamData.map(m => `
+  tbody.innerHTML = teamData.map(m=>`
     <tr>
-      <td><div style="display:flex;align-items:center;gap:0.6rem;"><div class="avatar" style="background:${m.color}">${m.name.charAt(0)}</div>${esc(m.name)}</div></td>
-      <td style="color:rgba(239,214,177,0.5);">${esc(m.role||'—')}</td>
-      <td><strong>${fmtMUR(m.hourly_rate)}</strong> /h</td>
-      <td><div style="width:20px;height:20px;border-radius:50%;background:${m.color};border:0.5px solid rgba(239,214,177,0.2);"></div></td>
+      <td><div style="display:flex;align-items:center;gap:0.55rem;"><div class="avatar" style="background:${m.color}">${m.name[0]}</div>${esc(m.name)}</div></td>
+      <td style="color:rgba(239,214,177,0.45);">${esc(m.role||'—')}</td>
+      <td><strong>${fmtMUR(m.hourly_rate)}</strong></td>
+      <td><div style="width:18px;height:18px;border-radius:50%;background:${m.color};border:0.5px solid rgba(239,214,177,0.15);"></div></td>
       <td><div class="action-btns">
         <button class="action-btn" onclick="editTeam(${m.id})">✎</button>
         <button class="action-btn del" onclick="deleteTeam(${m.id})">✕</button>
       </div></td>
     </tr>`).join('');
+  renderDefaults();
 }
 
-function populateTeamSelects() {
-  const opts = teamData.map(m => `<option value="${m.id}">${esc(m.name)}</option>`).join('');
-  const optsBlank = '<option value="">—</option>' + opts;
-  ['time-member','content-assignee'].forEach(id => { const el = document.getElementById(id); if(el) el.innerHTML = id==='time-member'? opts : optsBlank; });
-  ['time-filter-member','lead-owner'].forEach(id => {
-    const el = document.getElementById(id);
-    if (el) el.innerHTML = (id==='time-filter-member'?'<option value="">Toute l\'équipe</option>':'<option value="">—</option>') + opts;
-  });
-}
-
-function openModal(id) {
-  if (id==='modal-team') { clearTeamForm(); }
-  if (id==='modal-content') { clearContentForm(); }
-  if (id==='modal-lead') { clearLeadForm(); }
-  document.getElementById(id).classList.add('open');
-}
+function openModal(id) { document.getElementById(id).classList.add('open'); }
 function closeModal(id) { document.getElementById(id).classList.remove('open'); }
-
-function clearTeamForm() {
-  document.getElementById('team-id').value='';
-  document.getElementById('team-name').value='';
-  document.getElementById('team-role').value='';
-  document.getElementById('team-rate').value='';
-  document.getElementById('team-color').value='#618F9B';
-  document.getElementById('modal-team-title').textContent='Nouveau membre';
-}
 
 function editTeam(id) {
   const m = teamData.find(t=>t.id===id); if(!m) return;
@@ -762,18 +692,16 @@ function editTeam(id) {
 
 async function saveTeam() {
   const id = document.getElementById('team-id').value;
-  const body = {
-    name: document.getElementById('team-name').value.trim(),
-    role: document.getElementById('team-role').value.trim(),
-    hourly_rate: +document.getElementById('team-rate').value,
-    color: document.getElementById('team-color').value,
-  };
+  const body = { name:document.getElementById('team-name').value.trim(), role:document.getElementById('team-role').value, hourly_rate:+document.getElementById('team-rate').value, color:document.getElementById('team-color').value };
   if (!body.name) { showToast('Nom requis','err'); return; }
-  const data = id ? await api('PUT','/api/team/'+id,body) : await api('POST','/api/team',body);
-  if (!data) return;
+  await api(id?'PUT':'POST', id?'/api/team/'+id:'/api/team', body);
   closeModal('modal-team');
+  document.getElementById('team-id').value='';
+  document.getElementById('team-name').value='';
+  document.getElementById('modal-team-title').textContent='Nouveau membre';
   showToast(id?'Membre mis à jour':'Membre ajouté');
   await loadTeam();
+  renderSettings();
 }
 
 async function deleteTeam(id) {
@@ -781,176 +709,252 @@ async function deleteTeam(id) {
   await api('DELETE','/api/team/'+id);
   showToast('Membre supprimé');
   await loadTeam();
+  renderSettings();
 }
 
 // ═══════════════════════════════════════════════
 // CLIENTS
 // ═══════════════════════════════════════════════
 async function loadClients() {
-  const data = await api('GET','/api/clients');
-  if (!data) return;
-  clientsData = data.clients || [];
-  populateClientSelects();
-}
-
-function populateClientSelects() {
+  const d = await api('GET','/api/clients');
+  clientsData = d?.clients||[];
   const opts = clientsData.map(c=>`<option value="${c.id}">${esc(c.name)}</option>`).join('');
-  const optsBlank = '<option value="">Tous les clients</option>'+opts;
-  ['content-filter-client','time-filter-client'].forEach(id => {
-    const el=document.getElementById(id); if(el) el.innerHTML=optsBlank;
+  const blank = '<option value="">Tous les clients</option>'+opts;
+  ['kanban-filter-client','time-filter-client','cal-filter-client'].forEach(id=>{
+    const el=document.getElementById(id); if(el) el.innerHTML=blank;
   });
-  ['content-client','time-client'].forEach(id => {
+  ['content-client','time-client'].forEach(id=>{
     const el=document.getElementById(id); if(el) el.innerHTML=opts;
   });
+}
+
+// ═══════════════════════════════════════════════
+// TASK DEFAULTS
+// ═══════════════════════════════════════════════
+async function loadDefaults() {
+  const d = await api('GET','/api/task-defaults');
+  taskDefaults = d?.defaults||[];
+}
+
+function renderDefaults() {
+  const tbody = document.getElementById('defaults-table');
+  tbody.innerHTML = taskDefaults.map(def=>`
+    <tr>
+      <td>${def.emoji} ${esc(def.stage)}</td>
+      <td><input id="def-label-${def.stage}" value="${esc(def.label)}" style="width:120px;"></td>
+      <td><input id="def-hours-${def.stage}" type="number" step="0.25" min="0" value="${def.default_hours}" style="width:70px;"></td>
+      <td><button class="btn-primary" style="font-size:0.6rem;padding:0.3rem 0.7rem;" onclick="saveDefault('${def.stage}')">Sauvegarder</button></td>
+    </tr>`).join('');
+}
+
+async function saveDefault(stage) {
+  const hours = +document.getElementById('def-hours-'+stage).value;
+  const label = document.getElementById('def-label-'+stage).value.trim();
+  await api('PUT','/api/task-defaults/'+stage, { default_hours: hours, label });
+  showToast('Durée mise à jour pour '+stage);
+  await loadDefaults();
 }
 
 // ═══════════════════════════════════════════════
 // RENTABILITÉ
 // ═══════════════════════════════════════════════
 async function loadRentabilite() {
-  const month = document.getElementById('month-picker').value || currentMonth;
-  document.getElementById('user-month-display').textContent = fmtMonth(month);
+  const month = document.getElementById('month-picker').value;
+  document.getElementById('header-month').textContent = fmtMonth(month);
   const data = await api('GET','/api/rentabilite?month='+month);
   if (!data) return;
-
   const { summary, clients, byMember, alerts } = data;
 
-  // KPIs
   document.getElementById('kpi-mrr').textContent = fmtMUR(summary.totalMRR);
   document.getElementById('kpi-cost').textContent = fmtMUR(summary.totalCost);
   document.getElementById('kpi-margin').textContent = fmtMUR(summary.totalMargin);
-  document.getElementById('kpi-margin').className = 'card-value '+(summary.totalMargin>=0?'':'card-neg');
+  document.getElementById('kpi-margin').className = 'card-value '+(+summary.totalMargin>=0?'card-pos':'card-neg');
   document.getElementById('kpi-margin-pct').textContent = summary.marginPct+'% de marge';
-  document.getElementById('kpi-margin-pct').className = 'card-sub '+(summary.marginPct>=30?'card-pos':summary.marginPct>=0?'card-warn':'card-neg');
-  document.getElementById('kpi-hours-sold').textContent = summary.totalHoursSold+'h vendues';
-  document.getElementById('kpi-hours-spent-sub').textContent = summary.totalHoursSpent.toFixed(1)+'h passées';
+  document.getElementById('kpi-margin-pct').className = 'card-sub '+(+summary.marginPct>=30?'card-pos':+summary.marginPct>=0?'card-warn':'card-neg');
+  document.getElementById('kpi-hours-sold').textContent = summary.totalHoursSold+'h';
+  document.getElementById('kpi-hours-spent-sub').textContent = (+summary.totalHoursSpent).toFixed(1)+'h passées';
   document.getElementById('kpi-clients').textContent = clients.length;
 
-  // Alerts
   const alertEl = document.getElementById('alerts-list');
   if (alerts.length) {
-    alertEl.style.display = 'flex';
-    alertEl.innerHTML = alerts.map(a=>`
-      <div class="alert-item">
-        <span class="alert-icon">⚠</span>
-        <span class="alert-text"><strong>${esc(a.client)}</strong> — Budget dépassé : ${a.hours_spent.toFixed(1)}h passées vs ${a.hours_sold}h vendues (+${a.over}h)</span>
-      </div>`).join('');
-  } else { alertEl.style.display='none'; }
+    alertEl.style.display='flex';
+    alertEl.innerHTML = alerts.map(a=>`<div class="alert-item">⚠ <strong>${esc(a.client)}</strong> — Budget dépassé : ${(+a.hours_spent).toFixed(1)}h passées vs ${a.hours_sold}h vendues (+${a.over}h)</div>`).join('');
+  } else alertEl.style.display='none';
 
-  // Client table
   const tbody = document.getElementById('rentabilite-table');
-  if (!clients.length) {
-    tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;padding:2rem;font-family:'Lora',serif;font-style:italic;color:rgba(239,214,177,0.3);">Aucun client actif avec contrat</td></tr>`;
-  } else {
-    tbody.innerHTML = clients.map(c => {
-      const margin = +c.margin;
-      const hoursSpent = +c.hours_spent;
-      const hoursSold = +c.hours_sold;
-      const hoursRatio = hoursSold > 0 ? hoursSpent/hoursSold : 0;
-      const progClass = hoursRatio>1?'prog-over':hoursRatio>0.8?'prog-warn':'prog-ok';
-      const marginClass = margin>0?'margin-pos':margin<0?'margin-neg':'margin-warn';
-      return `<tr>
-        <td>${esc(c.client_name)}</td>
-        <td><span style="font-size:0.68rem;color:rgba(239,214,177,0.5);">${esc(c.package||'—')}</span></td>
-        <td>${fmtMUR(c.mrr)}</td>
-        <td>${fmtMUR(c.total_cost)}</td>
-        <td class="margin-cell ${marginClass}">${fmtMUR(margin)}</td>
-        <td>
-          <div class="prog-wrap">
-            <div class="prog-track"><div class="prog-fill ${progClass}" style="width:${Math.min(hoursRatio*100,100).toFixed(0)}%"></div></div>
-            <span class="prog-val">${hoursSpent.toFixed(1)}/${hoursSold}h</span>
-          </div>
-        </td>
-        <td style="color:rgba(239,214,177,0.5);">${c.videos_count}</td>
-      </tr>`;
-    }).join('');
-  }
+  tbody.innerHTML = clients.length ? clients.map(c=>{
+    const margin=+c.margin, hs=+c.hours_spent, hv=+c.hours_sold;
+    const ratio=hv>0?hs/hv:0;
+    const pc=ratio>1?'prog-over':ratio>0.8?'prog-warn':'prog-ok';
+    const mc=margin>0?'card-pos':margin<0?'card-neg':'card-warn';
+    return `<tr>
+      <td>${esc(c.client_name)}</td>
+      <td style="color:rgba(239,214,177,0.4);font-size:0.72rem;">${esc(c.package||'—')}</td>
+      <td>${fmtMUR(c.mrr)}</td><td>${fmtMUR(c.total_cost)}</td>
+      <td class="${mc}" style="font-weight:400;">${fmtMUR(margin)}</td>
+      <td><div class="prog-wrap"><div class="prog-track"><div class="prog-fill ${pc}" style="width:${Math.min(ratio*100,100).toFixed(0)}%"></div></div><span class="prog-val">${hs.toFixed(1)}/${hv}h</span></div></td>
+      <td style="color:rgba(239,214,177,0.4);">${c.videos_count}</td>
+    </tr>`;
+  }).join('') : `<tr><td colspan="7" style="text-align:center;padding:2rem;font-family:'Lora',serif;font-style:italic;color:rgba(239,214,177,0.28);">Aucun client actif avec contrat</td></tr>`;
 
-  // Member table
-  const mTbody = document.getElementById('member-table');
-  mTbody.innerHTML = byMember.map(m=>`
+  document.getElementById('member-table').innerHTML = byMember.map(m=>`
     <tr>
-      <td><div style="display:flex;align-items:center;gap:0.6rem;"><div class="avatar" style="background:${m.color||'#618F9B'}">${m.name.charAt(0)}</div>${esc(m.name)}</div></td>
-      <td style="color:rgba(239,214,177,0.5);">${fmtMUR(m.hourly_rate)}/h</td>
+      <td><div style="display:flex;align-items:center;gap:0.5rem;"><div class="avatar" style="background:${m.color||'#618F9B'}">${m.name[0]}</div>${esc(m.name)}</div></td>
+      <td style="color:rgba(239,214,177,0.4);">${fmtMUR(m.hourly_rate)}/h</td>
       <td>${(+m.total_hours).toFixed(1)}h</td>
       <td style="color:var(--teal);">${fmtMUR(m.total_cost)}</td>
     </tr>`).join('');
 }
 
 // ═══════════════════════════════════════════════
-// PRODUCTION / CONTENT
+// CALENDAR
 // ═══════════════════════════════════════════════
-function clearContentForm() {
+function calNav(dir) {
+  calMonth = new Date(calMonth.getFullYear(), calMonth.getMonth()+dir, 1);
+  loadCalendar();
+}
+
+async function loadCalendar() {
+  const y = calMonth.getFullYear(), m = calMonth.getMonth();
+  const monthKey = y+'-'+String(m+1).padStart(2,'0');
+  document.getElementById('cal-month-label').textContent = fmtMonth(monthKey).toUpperCase();
+
+  const clientFilter = document.getElementById('cal-filter-client').value;
+  const data = await api('GET','/api/calendar?month='+monthKey);
+  if (!data) return;
+
+  let { items, tasks } = data;
+  if (clientFilter) {
+    items = items.filter(i=>String(i.client_id)===clientFilter);
+    tasks = tasks.filter(t=>String(t.client_id)===clientFilter);
+  }
+
+  // Build calendar
+  const headers = document.getElementById('cal-headers');
+  const grid = document.getElementById('cal-grid');
+  const days = ['Lun','Mar','Mer','Jeu','Ven','Sam','Dim'];
+  headers.innerHTML = days.map(d=>`<div class="cal-day-hdr">${d}</div>`).join('');
+
+  // First day of month (0=Sun, adjust to Mon-based)
+  const firstDay = new Date(y, m, 1);
+  let startOffset = firstDay.getDay() - 1; if(startOffset<0) startOffset=6;
+  const daysInMonth = new Date(y, m+1, 0).getDate();
+  const daysInPrevMonth = new Date(y, m, 0).getDate();
+  const today = new Date();
+
+  // Group events by date
+  const eventsByDate = {};
+  items.forEach(item => {
+    if (item.shoot_date) {
+      const d = item.shoot_date.split('T')[0];
+      if (!eventsByDate[d]) eventsByDate[d]=[];
+      eventsByDate[d].push({type:'shoot', label:'🎬 '+item.title.substring(0,20), color:'cal-event-shoot', id:item.id, clientName:item.client_name});
+    }
+    if (item.post_date) {
+      const d = item.post_date.split('T')[0];
+      if (!eventsByDate[d]) eventsByDate[d]=[];
+      eventsByDate[d].push({type:'post', label:'📲 '+item.title.substring(0,20), color:'cal-event-post', id:item.id, clientName:item.client_name});
+    }
+  });
+  tasks.forEach(task => {
+    if (task.due_date) {
+      const d = task.due_date.split('T')[0];
+      if (!eventsByDate[d]) eventsByDate[d]=[];
+      eventsByDate[d].push({type:'task', label:task.emoji+' '+task.video_title?.substring(0,16), color:'cal-event-task '+(task.status==='done'?'done':''), id:task.content_item_id, clientName:task.client_name});
+    }
+  });
+
+  const totalCells = startOffset + daysInMonth;
+  const rows = Math.ceil(totalCells/7);
+  let html = '';
+
+  for (let cell=0; cell<rows*7; cell++) {
+    const dayNum = cell - startOffset + 1;
+    const isCurrentMonth = dayNum >= 1 && dayNum <= daysInMonth;
+    let displayNum = dayNum;
+    let dateStr = '';
+    if (!isCurrentMonth) {
+      if (cell < startOffset) displayNum = daysInPrevMonth - startOffset + cell + 1;
+      else displayNum = dayNum - daysInMonth;
+    } else {
+      dateStr = y+'-'+String(m+1).padStart(2,'0')+'-'+String(dayNum).padStart(2,'0');
+    }
+    const isToday = today.getFullYear()===y && today.getMonth()===m && today.getDate()===dayNum;
+    const events = dateStr && eventsByDate[dateStr] ? eventsByDate[dateStr] : [];
+
+    html += `<div class="cal-cell${!isCurrentMonth?' other-month':''}${isToday?' today':''}">
+      <div class="cal-num">${displayNum}</div>
+      ${events.slice(0,3).map(e=>`<div class="cal-event ${e.color}" onclick="openTaskPanel(${e.id})" title="${esc(e.clientName)} · ${esc(e.label)}">${esc(e.label)}</div>`).join('')}
+      ${events.length>3?`<div style="font-size:0.52rem;color:rgba(239,214,177,0.3);padding:1px 4px;">+${events.length-3} autres</div>`:''}
+    </div>`;
+  }
+  grid.innerHTML = html;
+}
+
+// ═══════════════════════════════════════════════
+// KANBAN
+// ═══════════════════════════════════════════════
+const STAGES = [
+  { key:'ideas',    label:'💡 Ideas',         color:'rgba(239,214,177,0.06)' },
+  { key:'script',   label:'✍ Script',         color:'rgba(196,154,60,0.08)' },
+  { key:'shooting', label:'🎬 Shooting',       color:'rgba(97,143,155,0.08)' },
+  { key:'editing',  label:'🎞 Editing',        color:'rgba(150,100,200,0.08)' },
+  { key:'ready',    label:'📲 Ready to Post',  color:'rgba(60,150,100,0.08)' },
+  { key:'posted',   label:'📈 Posted',         color:'rgba(97,143,155,0.12)' },
+  { key:'boosted',  label:'🔥 Boosted',        color:'rgba(200,100,50,0.08)' },
+];
+
+async function loadKanban() {
+  const clientId = document.getElementById('kanban-filter-client').value;
+  let url = '/api/content?';
+  if (clientId) url += 'client_id='+clientId+'&';
+  const data = await api('GET', url);
+  if (!data) return;
+  renderKanban(data.items||[]);
+}
+
+function renderKanban(items) {
+  const byStage = {};
+  STAGES.forEach(s=>byStage[s.key]=[]);
+  items.forEach(v=>{ if(byStage[v.status]) byStage[v.status].push(v); });
+
+  document.getElementById('kanban-board').innerHTML = STAGES.map(s=>`
+    <div class="kanban-col">
+      <div class="kanban-hdr" style="background:${s.color}">
+        <span class="kanban-hdr-label">${s.label}</span>
+        <span class="kanban-hdr-count">${byStage[s.key].length}</span>
+      </div>
+      <div class="kanban-cards">
+        ${byStage[s.key].map(v=>`
+          <div class="kanban-card" onclick="openTaskPanel(${v.id})">
+            <p class="kanban-card-title">${esc(v.title)}</p>
+            <p class="kanban-card-client">${esc(v.client_name)}</p>
+            <div class="kanban-card-meta">
+              <span class="kanban-card-date">${v.post_date?'📅 '+fmtDate(v.post_date):v.shoot_date?'🎬 '+fmtDate(v.shoot_date):'—'}</span>
+              ${v.assignee_name?`<div class="avatar" style="background:${v.assignee_color||'#618F9B'};width:18px;height:18px;font-size:0.5rem;">${v.assignee_name[0]}</div>`:''}
+            </div>
+          </div>`).join('')}
+        ${!byStage[s.key].length?`<div style="padding:0.75rem;text-align:center;font-size:0.65rem;color:rgba(239,214,177,0.18);font-family:'Lora',serif;font-style:italic;">Vide</div>`:''}
+      </div>
+    </div>`).join('');
+}
+
+function openContentModal() {
   document.getElementById('content-id').value='';
   document.getElementById('content-title').value='';
-  document.getElementById('content-status').value='brief';
+  document.getElementById('content-status').value='ideas';
   document.getElementById('content-format').value='';
   document.getElementById('content-hook').value='';
   document.getElementById('content-objective').value='';
   document.getElementById('content-shoot-date').value='';
   document.getElementById('content-post-date').value='';
   document.getElementById('content-assignee').value='';
+  document.getElementById('content-cta').value='';
+  document.getElementById('content-views').value='';
   document.getElementById('content-notes').value='';
   document.getElementById('modal-content-title').textContent='Nouvelle vidéo';
-}
-
-async function loadContent() {
-  const clientId = document.getElementById('content-filter-client').value;
-  const status = document.getElementById('content-filter-status').value;
-  const month = document.getElementById('content-filter-month').value;
-  let url = '/api/content?';
-  if (clientId) url+='client_id='+clientId+'&';
-  if (status) url+='status='+status+'&';
-  if (month) url+='month='+month+'&';
-  const data = await api('GET', url);
-  if (!data) return;
-  renderContentTable(data.items||[]);
-}
-
-const STATUS_LABELS = { brief:'Brief', script:'Script', shooting:'Tournage', editing:'Montage', validation:'Validation', posted:'Publié', boosted:'Boosté' };
-
-function renderContentTable(items) {
-  const tbody = document.getElementById('content-table');
-  if (!items.length) {
-    tbody.innerHTML = `<tr><td colspan="9"><div class="empty"><div class="empty-icon">🎬</div><p class="empty-text">Aucune vidéo — créez votre premier contenu</p></div></td></tr>`;
-    return;
-  }
-  tbody.innerHTML = items.map(v=>`
-    <tr>
-      <td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${esc(v.title)}">${esc(v.title)}</td>
-      <td style="color:rgba(239,214,177,0.5);white-space:nowrap;">${esc(v.client_name)}</td>
-      <td><span class="badge badge-${v.status}">${STATUS_LABELS[v.status]||v.status}</span></td>
-      <td style="color:rgba(239,214,177,0.4);font-size:0.72rem;">${esc(v.format||'—')}</td>
-      <td style="color:rgba(239,214,177,0.4);font-size:0.72rem;">${v.shoot_date?fmtDate(v.shoot_date):'—'}</td>
-      <td style="color:rgba(239,214,177,0.4);font-size:0.72rem;">${v.post_date?fmtDate(v.post_date):'—'}</td>
-      <td>${v.assignee_name?`<div class="avatar" style="background:${v.assignee_color||'#618F9B'}" title="${esc(v.assignee_name)}">${v.assignee_name.charAt(0)}</div>`:'—'}</td>
-      <td style="color:var(--teal);font-size:0.75rem;">${(+v.total_hours).toFixed(1)}h</td>
-      <td><div class="action-btns">
-        <button class="action-btn" onclick="editContent(${v.id})">✎</button>
-        <button class="action-btn del" onclick="deleteContent(${v.id})">✕</button>
-      </div></td>
-    </tr>`).join('');
-}
-
-async function editContent(id) {
-  const data = await api('GET','/api/content?');
-  // find in current loaded — simpler: re-fetch single (we'll use the table data)
-  // Load all then find
-  const all = await api('GET','/api/content?');
-  const v = (all?.items||[]).find(x=>x.id===id); if(!v) return;
-  document.getElementById('content-id').value=v.id;
-  document.getElementById('content-client').value=v.client_id;
-  document.getElementById('content-title').value=v.title;
-  document.getElementById('content-status').value=v.status;
-  document.getElementById('content-format').value=v.format||'';
-  document.getElementById('content-hook').value=v.hook_type||'';
-  document.getElementById('content-objective').value=v.objective||'';
-  document.getElementById('content-shoot-date').value=v.shoot_date?v.shoot_date.split('T')[0]:'';
-  document.getElementById('content-post-date').value=v.post_date?v.post_date.split('T')[0]:'';
-  document.getElementById('content-assignee').value=v.assigned_to||'';
-  document.getElementById('content-notes').value=v.notes||'';
-  document.getElementById('modal-content-title').textContent='Modifier vidéo';
-  document.getElementById('modal-content').classList.add('open');
+  document.getElementById('perf-fields').style.display='none';
+  openModal('modal-content');
 }
 
 async function saveContent() {
@@ -962,24 +966,124 @@ async function saveContent() {
     format: document.getElementById('content-format').value||null,
     hook_type: document.getElementById('content-hook').value||null,
     objective: document.getElementById('content-objective').value||null,
+    cta_type: document.getElementById('content-cta').value||null,
     shoot_date: document.getElementById('content-shoot-date').value||null,
     post_date: document.getElementById('content-post-date').value||null,
     assigned_to: document.getElementById('content-assignee').value||null,
+    tiktok_views: document.getElementById('content-views').value ? +document.getElementById('content-views').value : null,
     notes: document.getElementById('content-notes').value,
   };
   if (!body.client_id||!body.title) { showToast('Client et titre requis','err'); return; }
   const data = id ? await api('PUT','/api/content/'+id,body) : await api('POST','/api/content',body);
   if (!data) return;
   closeModal('modal-content');
-  showToast(id?'Vidéo mise à jour':'Vidéo créée');
-  loadContent();
+  showToast(id?'Vidéo mise à jour':`Vidéo créée + ${taskDefaults.length} tâches auto-créées`);
+  loadKanban();
 }
 
-async function deleteContent(id) {
-  if (!confirm('Supprimer cette vidéo ?')) return;
-  await api('DELETE','/api/content/'+id);
-  showToast('Vidéo supprimée');
-  loadContent();
+async function editCurrentContent() {
+  if (!currentContentId) return;
+  const data = await api('GET','/api/content?');
+  const all = await api('GET','/api/content?');
+  const v = (all?.items||[]).find(x=>x.id===currentContentId);
+  if (!v) return;
+  document.getElementById('content-id').value=v.id;
+  document.getElementById('content-client').value=v.client_id;
+  document.getElementById('content-title').value=v.title;
+  document.getElementById('content-status').value=v.status;
+  document.getElementById('content-format').value=v.format||'';
+  document.getElementById('content-hook').value=v.hook_type||'';
+  document.getElementById('content-objective').value=v.objective||'';
+  document.getElementById('content-shoot-date').value=v.shoot_date?v.shoot_date.split('T')[0]:'';
+  document.getElementById('content-post-date').value=v.post_date?v.post_date.split('T')[0]:'';
+  document.getElementById('content-assignee').value=v.assigned_to||'';
+  document.getElementById('content-cta').value=v.cta_type||'';
+  document.getElementById('content-views').value=v.tiktok_views||'';
+  document.getElementById('content-notes').value=v.notes||'';
+  document.getElementById('modal-content-title').textContent='Modifier vidéo';
+  document.getElementById('perf-fields').style.display='block';
+  openModal('modal-content');
+}
+
+// ═══════════════════════════════════════════════
+// TASK PANEL
+// ═══════════════════════════════════════════════
+async function openTaskPanel(contentId) {
+  currentContentId = contentId;
+  const data = await api('GET','/api/content/'+contentId+'/tasks');
+  if (!data) return;
+
+  // Get video info
+  const allContent = await api('GET','/api/content?');
+  const video = (allContent?.items||[]).find(v=>v.id===contentId);
+
+  document.getElementById('tp-title').textContent = video?.title||'Vidéo';
+  document.getElementById('tp-client').textContent = video?.client_name||'';
+
+  const tasks = data.tasks||[];
+  const done = tasks.filter(t=>t.status==='done').length;
+  const total = tasks.filter(t=>t.status!=='skipped').length;
+  const pct = total>0?Math.round(done/total*100):0;
+  document.getElementById('tp-progress-label').textContent = `${done}/${total} tâches`;
+  document.getElementById('tp-progress-fill').style.width = pct+'%';
+
+  document.getElementById('tp-tasks').innerHTML = tasks.map(t=>`
+    <div class="task-item${t.status==='done'?' done':''}">
+      <div class="task-check${t.status==='done'?' done':''}" onclick="toggleTask(${t.id},'${t.status}')" title="Marquer fait/à faire">
+        ${t.status==='done'?'✓':''}
+      </div>
+      <div class="task-info">
+        <p class="task-stage">${t.emoji||'📋'} ${esc(t.stage_label||t.stage)}</p>
+        <div class="task-meta">
+          <span class="task-hours">${(+t.default_hours).toFixed(1)}h</span>
+          ${t.assignee_name?`<span class="task-assignee">· ${esc(t.assignee_name)}</span>`:''}
+          ${t.due_date?`<span class="task-due">· due ${fmtDate(t.due_date)}</span>`:''}
+        </div>
+      </div>
+      <span class="badge badge-${t.status}" style="font-size:0.5rem;">${t.status==='in_progress'?'En cours':t.status==='done'?'Fait':t.status==='skipped'?'Ignoré':'À faire'}</span>
+      <button class="task-edit-btn" onclick="openTaskEdit(${t.id})">✎</button>
+    </div>`).join('');
+
+  document.getElementById('task-panel-bg').classList.add('open');
+  document.getElementById('task-panel').classList.add('open');
+}
+
+function closeTaskPanel() {
+  document.getElementById('task-panel-bg').classList.remove('open');
+  document.getElementById('task-panel').classList.remove('open');
+}
+
+async function toggleTask(taskId, currentStatus) {
+  const newStatus = currentStatus==='done'?'todo':'done';
+  await api('PUT','/api/tasks/'+taskId, { status:newStatus, assigned_to:null, default_hours:1, due_date:null, notes:'' });
+  openTaskPanel(currentContentId); // refresh
+  if (currentPage==='production') loadKanban();
+}
+
+function openTaskEdit(taskId) {
+  // find task in current panel
+  document.getElementById('task-edit-id').value = taskId;
+  document.getElementById('task-edit-status').value = 'todo';
+  document.getElementById('task-edit-assignee').value = '';
+  document.getElementById('task-edit-hours').value = '';
+  document.getElementById('task-edit-due').value = '';
+  document.getElementById('task-edit-notes').value = '';
+  openModal('modal-task-edit');
+}
+
+async function saveTaskEdit() {
+  const id = document.getElementById('task-edit-id').value;
+  const body = {
+    status: document.getElementById('task-edit-status').value,
+    assigned_to: document.getElementById('task-edit-assignee').value||null,
+    default_hours: +document.getElementById('task-edit-hours').value||1,
+    due_date: document.getElementById('task-edit-due').value||null,
+    notes: document.getElementById('task-edit-notes').value,
+  };
+  await api('PUT','/api/tasks/'+id, body);
+  closeModal('modal-task-edit');
+  showToast('Tâche mise à jour');
+  openTaskPanel(currentContentId);
 }
 
 // ═══════════════════════════════════════════════
@@ -988,223 +1092,151 @@ async function deleteContent(id) {
 async function loadContentForTime() {
   const clientId = document.getElementById('time-client').value;
   if (!clientId) return;
-  const data = await api('GET','/api/content?client_id='+clientId);
+  const d = await api('GET','/api/content?client_id='+clientId);
   const sel = document.getElementById('time-content-item');
-  sel.innerHTML = '<option value="">— Aucune vidéo spécifique —</option>';
-  (data?.items||[]).forEach(v => {
-    sel.innerHTML += `<option value="${v.id}">${esc(v.title.substring(0,50))}</option>`;
-  });
+  sel.innerHTML = '<option value="">— Aucune vidéo —</option>';
+  (d?.items||[]).forEach(v=>{ sel.innerHTML+=`<option value="${v.id}">${esc(v.title.substring(0,45))}</option>`; });
 }
 
 async function loadTime() {
-  const clientId = document.getElementById('time-filter-client').value;
-  const memberId = document.getElementById('time-filter-member').value;
-  const month = document.getElementById('time-filter-month').value;
-  let url = '/api/time?';
-  if (clientId) url+='client_id='+clientId+'&';
-  if (memberId) url+='member_id='+memberId+'&';
-  if (month) url+='month='+month+'&';
-  const data = await api('GET', url);
-  if (!data) return;
-  renderTimeLog(data.entries||[]);
+  const c=document.getElementById('time-filter-client').value;
+  const m=document.getElementById('time-filter-member').value;
+  const mo=document.getElementById('time-filter-month').value;
+  let url='/api/time?';
+  if(c) url+='client_id='+c+'&';
+  if(m) url+='member_id='+m+'&';
+  if(mo) url+='month='+mo+'&';
+  const d=await api('GET',url); if(!d) return;
+  renderTimeLog(d.entries||[]);
 }
 
-const TASK_LABELS = { strategy:'Stratégie', script:'Script', shooting:'Tournage', editing:'Montage', publishing:'Publication', meeting:'Réunion', admin:'Admin' };
+const TASK_LABELS={strategy:'Stratégie',script:'Script',shooting:'Tournage',editing:'Montage',publishing:'Publication',meeting:'Réunion',admin:'Admin'};
 
 function renderTimeLog(entries) {
-  const el = document.getElementById('time-log');
-  if (!entries.length) {
-    el.innerHTML = `<div class="empty"><div class="empty-icon">⏱</div><p class="empty-text">Aucune heure saisie pour cette période</p></div>`;
-    return;
-  }
-  // Group by date
-  const byDate = {};
-  entries.forEach(e => {
-    const d = e.date?.split('T')[0]||e.date;
-    if (!byDate[d]) byDate[d]=[];
-    byDate[d].push(e);
-  });
-  el.innerHTML = Object.entries(byDate).sort((a,b)=>b[0].localeCompare(a[0])).map(([date, items])=>{
-    const totalH = items.reduce((s,e)=>s+(+e.hours),0);
-    const totalCost = items.reduce((s,e)=>s+(+e.cost||0),0);
-    return `<div style="margin-bottom:1.25rem;">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.6rem;">
-        <p style="font-size:0.6rem;letter-spacing:0.15em;text-transform:uppercase;color:rgba(239,214,177,0.3);">${fmtDate(date)}</p>
-        <p style="font-size:0.68rem;color:rgba(239,214,177,0.4);">${totalH.toFixed(1)}h · ${fmtMUR(totalCost)}</p>
+  const el=document.getElementById('time-log');
+  if(!entries.length){el.innerHTML=`<div class="empty"><div class="empty-icon">⏱</div><p class="empty-text">Aucune heure saisie</p></div>`;return;}
+  const byDate={};
+  entries.forEach(e=>{const d=e.date?.split('T')[0]||e.date;if(!byDate[d])byDate[d]=[];byDate[d].push(e);});
+  el.innerHTML=Object.entries(byDate).sort((a,b)=>b[0].localeCompare(a[0])).map(([date,items])=>{
+    const tH=items.reduce((s,e)=>s+(+e.hours),0);
+    const tC=items.reduce((s,e)=>s+(+e.cost||0),0);
+    return `<div style="margin-bottom:1.1rem;">
+      <div style="display:flex;justify-content:space-between;margin-bottom:0.5rem;">
+        <p style="font-size:0.58rem;letter-spacing:0.12em;text-transform:uppercase;color:rgba(239,214,177,0.28);">${fmtDate(date)}</p>
+        <p style="font-size:0.65rem;color:rgba(239,214,177,0.35);">${tH.toFixed(1)}h · ${fmtMUR(tC)}</p>
       </div>
-      <div class="card" style="padding:0.5rem 1rem;">
-        ${items.map(e=>`
-          <div class="time-log-item">
-            <div class="avatar" style="background:${e.color||'#618F9B'}" title="${esc(e.member_name)}">${e.member_name?.charAt(0)||'?'}</div>
-            <div class="time-log-meta">
-              <p class="time-log-task">${TASK_LABELS[e.task_type]||e.task_type} — <span style="color:rgba(239,214,177,0.5);">${esc(e.client_name)}</span>${e.content_title?` · <span style="color:rgba(239,214,177,0.35);font-size:0.68rem;">${esc(e.content_title.substring(0,30))}</span>`:''}</p>
-              ${e.notes?`<p style="font-size:0.65rem;color:rgba(239,214,177,0.3);margin-top:0.1rem;font-family:'Lora',serif;font-style:italic;">${esc(e.notes)}</p>`:''}
-            </div>
-            <p class="time-log-hours">${(+e.hours).toFixed(1)}h</p>
-            <p class="time-log-cost">${fmtMUR(e.cost||0)}</p>
-            <button class="action-btn del" onclick="deleteTime(${e.id})" style="flex-shrink:0;">✕</button>
-          </div>`).join('')}
+      <div class="card" style="padding:0.4rem 0.85rem;">
+        ${items.map(e=>`<div class="time-log-item">
+          <div class="avatar" style="background:${e.color||'#618F9B'};width:22px;height:22px;">${e.member_name?.[0]||'?'}</div>
+          <div style="flex:1;min-width:0;">
+            <p style="font-size:0.75rem;color:var(--cream);">${TASK_LABELS[e.task_type]||e.task_type} — <span style="color:rgba(239,214,177,0.45);">${esc(e.client_name)}</span></p>
+            ${e.content_title?`<p style="font-size:0.62rem;color:rgba(239,214,177,0.28);margin-top:0.1rem;">${esc(e.content_title.substring(0,40))}</p>`:''}
+          </div>
+          <p style="font-size:0.95rem;font-weight:200;color:var(--cream);white-space:nowrap;">${(+e.hours).toFixed(1)}h</p>
+          <p style="font-size:0.68rem;color:var(--teal);white-space:nowrap;">${fmtMUR(e.cost||0)}</p>
+          <button class="action-btn del" onclick="deleteTime(${e.id})">✕</button>
+        </div>`).join('')}
       </div>
     </div>`;
   }).join('');
 }
 
 async function saveTime() {
-  const body = {
-    team_member_id: document.getElementById('time-member').value,
-    client_id: document.getElementById('time-client').value,
-    content_item_id: document.getElementById('time-content-item').value||null,
-    task_type: document.getElementById('time-task').value,
-    hours: +document.getElementById('time-hours').value,
-    date: document.getElementById('time-date').value,
-    notes: document.getElementById('time-notes').value,
-  };
-  if (!body.team_member_id||!body.client_id||!body.hours) { showToast('Membre, client et heures requis','err'); return; }
-  const data = await api('POST','/api/time',body);
-  if (!data) return;
+  const body={team_member_id:document.getElementById('time-member').value,client_id:document.getElementById('time-client').value,content_item_id:document.getElementById('time-content-item').value||null,task_type:document.getElementById('time-task').value,hours:+document.getElementById('time-hours').value,date:document.getElementById('time-date').value,notes:document.getElementById('time-notes').value};
+  if(!body.team_member_id||!body.client_id||!body.hours){showToast('Membre, client et heures requis','err');return;}
+  await api('POST','/api/time',body);
   closeModal('modal-time');
   showToast('Heures enregistrées');
   loadTime();
-  // Refresh rentabilite if on that page
-  if (currentPage==='rentabilite') loadRentabilite();
+  if(currentPage==='rentabilite') loadRentabilite();
 }
 
 async function deleteTime(id) {
   await api('DELETE','/api/time/'+id);
-  showToast('Entrée supprimée');
+  showToast('Supprimé');
   loadTime();
 }
 
 // ═══════════════════════════════════════════════
 // LEADS
 // ═══════════════════════════════════════════════
-const LEAD_STATUSES = ['new','contacted','qualified','proposal','negotiation','won','lost'];
-const LEAD_LABELS = { new:'Nouveau', contacted:'Contacté', qualified:'Qualifié', proposal:'Devis', negotiation:'Négociation', won:'Gagné', lost:'Perdu' };
+const LEAD_ST=['new','contacted','qualified','proposal','negotiation','won','lost'];
+const LEAD_LB={new:'Nouveau',contacted:'Contacté',qualified:'Qualifié',proposal:'Devis',negotiation:'Négociation',won:'Gagné',lost:'Perdu'};
 
-function clearLeadForm() {
-  ['lead-id','lead-company','lead-contact','lead-phone','lead-email','lead-mrr','lead-notes','lead-next-action'].forEach(id => document.getElementById(id).value='');
+function openLeadModal(){
+  ['lead-id','lead-company','lead-contact','lead-phone','lead-mrr','lead-notes','lead-next-action'].forEach(id=>document.getElementById(id).value='');
   document.getElementById('lead-status').value='new';
   document.getElementById('lead-service').value='';
-  document.getElementById('lead-prob').value='20';
   document.getElementById('lead-owner').value='';
   document.getElementById('modal-lead-title').textContent='Nouveau lead';
+  openModal('modal-lead');
 }
 
 async function loadLeads() {
-  const data = await api('GET','/api/leads');
-  if (!data) return;
-  renderLeadsPipeline(data.leads||[]);
+  const d=await api('GET','/api/leads'); if(!d) return;
+  renderLeads(d.leads||[]);
 }
 
-function renderLeadsPipeline(leads) {
-  const el = document.getElementById('leads-pipeline');
-  const byStatus = {};
-  LEAD_STATUSES.forEach(s => byStatus[s]=[]);
-  leads.forEach(l => { if(byStatus[l.status]) byStatus[l.status].push(l); });
-
-  el.innerHTML = `<div class="pipeline">${LEAD_STATUSES.map(s=>`
+function renderLeads(leads) {
+  const byS={};LEAD_ST.forEach(s=>byS[s]=[]);
+  leads.forEach(l=>{if(byS[l.status])byS[l.status].push(l);});
+  document.getElementById('leads-pipeline').innerHTML=`<div class="pipeline">${LEAD_ST.map(s=>`
     <div class="pipeline-col">
-      <div class="pipeline-hdr">
-        <span>${LEAD_LABELS[s]}</span>
-        <span class="pipeline-count">${byStatus[s].length}</span>
-      </div>
+      <div class="pipeline-hdr"><span>${LEAD_LB[s]}</span><span class="pipeline-count">${byS[s].length}</span></div>
       <div class="pipeline-cards">
-        ${byStatus[s].length ? byStatus[s].map(l=>`
-          <div class="pipeline-card" onclick="editLead(${l.id})">
-            <p class="pipeline-card-co">${esc(l.company)}</p>
-            <p class="pipeline-card-name">${esc(l.contact_name||'—')}</p>
-            ${l.estimated_mrr?`<p class="pipeline-card-mrr">${fmtMUR(l.estimated_mrr)}/mois</p>`:''}
-            ${l.next_action_date?`<p class="pipeline-card-date">Suivi : ${fmtDate(l.next_action_date)}</p>`:''}
-          </div>`).join('')
-        : `<div style="padding:1rem;text-align:center;font-family:'Lora',serif;font-style:italic;font-size:0.72rem;color:rgba(239,214,177,0.2);">Vide</div>`}
+        ${byS[s].map(l=>`<div class="pipeline-card" onclick="editLead(${l.id})">
+          <p class="pipeline-card-co">${esc(l.company)}</p>
+          <p class="pipeline-card-name">${esc(l.contact_name||'—')}</p>
+          ${l.estimated_mrr?`<p class="pipeline-card-mrr">${fmtMUR(l.estimated_mrr)}/mois</p>`:''}
+          ${l.next_action_date?`<p class="pipeline-card-date">Suivi : ${fmtDate(l.next_action_date)}</p>`:''}
+        </div>`).join('')||`<div style="padding:0.65rem;text-align:center;font-size:0.62rem;color:rgba(239,214,177,0.18);font-family:'Lora',serif;font-style:italic;">Vide</div>`}
       </div>
-    </div>`).join('')}
-  </div>`;
+    </div>`).join('')}</div>`;
 }
 
 async function editLead(id) {
-  const data = await api('GET','/api/leads');
-  const l = (data?.leads||[]).find(x=>x.id===id); if(!l) return;
+  const d=await api('GET','/api/leads');
+  const l=(d?.leads||[]).find(x=>x.id===id);if(!l)return;
   document.getElementById('lead-id').value=l.id;
   document.getElementById('lead-company').value=l.company;
   document.getElementById('lead-contact').value=l.contact_name||'';
   document.getElementById('lead-phone').value=l.phone||'';
-  document.getElementById('lead-email').value=l.email||'';
   document.getElementById('lead-status').value=l.status;
   document.getElementById('lead-service').value=l.service_type||'';
   document.getElementById('lead-mrr').value=l.estimated_mrr||'';
-  document.getElementById('lead-prob').value=l.probability||20;
   document.getElementById('lead-owner').value=l.owner_id||'';
   document.getElementById('lead-next-action').value=l.next_action_date?l.next_action_date.split('T')[0]:'';
   document.getElementById('lead-notes').value=l.notes||'';
   document.getElementById('modal-lead-title').textContent='Modifier '+l.company;
-  document.getElementById('modal-lead').classList.add('open');
+  openModal('modal-lead');
 }
 
 async function saveLead() {
-  const id = document.getElementById('lead-id').value;
-  const body = {
-    company: document.getElementById('lead-company').value.trim(),
-    contact_name: document.getElementById('lead-contact').value,
-    phone: document.getElementById('lead-phone').value,
-    email: document.getElementById('lead-email').value,
-    status: document.getElementById('lead-status').value,
-    service_type: document.getElementById('lead-service').value,
-    estimated_mrr: +document.getElementById('lead-mrr').value||null,
-    probability: +document.getElementById('lead-prob').value||20,
-    owner_id: document.getElementById('lead-owner').value||null,
-    next_action_date: document.getElementById('lead-next-action').value||null,
-    notes: document.getElementById('lead-notes').value,
-    source: 'referral',
-  };
-  if (!body.company) { showToast('Entreprise requise','err'); return; }
-  const data = id ? await api('PUT','/api/leads/'+id,body) : await api('POST','/api/leads',body);
-  if (!data) return;
+  const id=document.getElementById('lead-id').value;
+  const body={company:document.getElementById('lead-company').value.trim(),contact_name:document.getElementById('lead-contact').value,phone:document.getElementById('lead-phone').value,status:document.getElementById('lead-status').value,service_type:document.getElementById('lead-service').value,estimated_mrr:+document.getElementById('lead-mrr').value||null,owner_id:document.getElementById('lead-owner').value||null,next_action_date:document.getElementById('lead-next-action').value||null,notes:document.getElementById('lead-notes').value,source:'referral',probability:50};
+  if(!body.company){showToast('Entreprise requise','err');return;}
+  await api(id?'PUT':'POST',id?'/api/leads/'+id:'/api/leads',body);
   closeModal('modal-lead');
   showToast(id?'Lead mis à jour':'Lead ajouté');
-  loadLeads();
-}
-
-async function deleteLead(id) {
-  if (!confirm('Supprimer ce lead ?')) return;
-  await api('DELETE','/api/leads/'+id);
-  showToast('Lead supprimé');
   loadLeads();
 }
 
 // ═══════════════════════════════════════════════
 // HELPERS
 // ═══════════════════════════════════════════════
-function fmtMUR(n) {
-  n = Math.round(+n||0);
-  if (Math.abs(n)>=1000000) return (n/1000000).toFixed(1)+'M MUR';
-  if (Math.abs(n)>=1000) return (n/1000).toFixed(1)+'K MUR';
-  return n+' MUR';
-}
-function fmtDate(d) {
-  if (!d) return '—';
-  return new Date(d).toLocaleDateString('fr-FR',{day:'numeric',month:'short'});
-}
-function fmtMonth(m) {
-  if (!m) return '';
-  const [y,mo]=m.split('-');
-  return new Date(+y,+mo-1,1).toLocaleDateString('fr-FR',{month:'long',year:'numeric'});
-}
-function esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function fmtMUR(n){n=Math.round(+n||0);if(Math.abs(n)>=1000000)return(n/1000000).toFixed(1)+'M';if(Math.abs(n)>=1000)return(n/1000).toFixed(1)+'K MUR';return n+' MUR';}
+function fmtDate(d){if(!d)return'—';return new Date(d).toLocaleDateString('fr-FR',{day:'numeric',month:'short'});}
+function fmtMonth(m){if(!m)return'';const[y,mo]=m.split('-');return new Date(+y,+mo-1,1).toLocaleDateString('fr-FR',{month:'long',year:'numeric'});}
+function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
 
-let toastTimer;
-function showToast(msg, type='') {
-  const el = document.getElementById('toast');
-  el.textContent = msg;
-  el.className = 'toast show'+(type?' '+type:'');
-  clearTimeout(toastTimer);
-  toastTimer = setTimeout(()=>el.classList.remove('show'), 3500);
+let _tt;
+function showToast(msg,type=''){
+  const el=document.getElementById('toast');
+  el.textContent=msg;el.className='toast show'+(type?' '+type:'');
+  clearTimeout(_tt);_tt=setTimeout(()=>el.classList.remove('show'),3500);
 }
 
-// Close modals on backdrop click
-document.querySelectorAll('.modal-bg').forEach(bg => {
-  bg.addEventListener('click', e => { if(e.target===bg) bg.classList.remove('open'); });
-});
+document.querySelectorAll('.modal-bg').forEach(bg=>bg.addEventListener('click',e=>{if(e.target===bg)bg.classList.remove('open');}));
 </script>
 </body>
 </html>

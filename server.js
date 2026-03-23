@@ -177,11 +177,11 @@ async function initDB() {
       contact_name TEXT,
       phone TEXT,
       email TEXT,
-      source TEXT DEFAULT 'referral',        -- referral / call / instagram / linkedin / other
-      status TEXT DEFAULT 'new',             -- new / contacted / qualified / proposal / negotiation / won / lost
+      source TEXT DEFAULT 'referral',
+      status TEXT DEFAULT 'new',
       estimated_mrr NUMERIC(10,2),
-      service_type TEXT,                     -- TikTok / Data / Full Package
-      probability INTEGER DEFAULT 20,        -- 0-100%
+      service_type TEXT,
+      probability INTEGER DEFAULT 20,
       close_date DATE,
       owner_id INTEGER REFERENCES team_members(id),
       next_action_date DATE,
@@ -189,6 +189,42 @@ async function initDB() {
       created_at TIMESTAMPTZ DEFAULT NOW(),
       updated_at TIMESTAMPTZ DEFAULT NOW()
     );
+
+    -- Content tasks (auto-created per video, one per stage)
+    CREATE TABLE IF NOT EXISTS content_tasks (
+      id SERIAL PRIMARY KEY,
+      content_item_id INTEGER REFERENCES content_items(id) ON DELETE CASCADE,
+      client_id INTEGER REFERENCES clients(id) ON DELETE CASCADE,
+      stage TEXT NOT NULL,          -- ideas / script / shooting / editing / ready / posted / boosted
+      title TEXT NOT NULL,
+      assigned_to INTEGER REFERENCES team_members(id),
+      default_hours NUMERIC(5,2) DEFAULT 0,
+      status TEXT DEFAULT 'todo',   -- todo / in_progress / done / skipped
+      due_date DATE,
+      done_at TIMESTAMPTZ,
+      notes TEXT,
+      created_at TIMESTAMPTZ DEFAULT NOW()
+    );
+
+    -- Task default durations (configurable per team)
+    CREATE TABLE IF NOT EXISTS task_defaults (
+      stage TEXT PRIMARY KEY,
+      label TEXT NOT NULL,
+      emoji TEXT DEFAULT '📋',
+      default_hours NUMERIC(5,2) DEFAULT 1,
+      sort_order INTEGER DEFAULT 0
+    );
+
+    -- Seed default durations if not present
+    INSERT INTO task_defaults (stage, label, emoji, default_hours, sort_order) VALUES
+      ('ideas',    'Idéation',       '💡', 1.0, 1),
+      ('script',   'Script',         '✍',  2.0, 2),
+      ('shooting', 'Tournage',       '🎬', 4.0, 3),
+      ('editing',  'Montage',        '🎞', 3.0, 4),
+      ('ready',    'Ready to Post',  '📲', 0.5, 5),
+      ('posted',   'Publication',    '📈', 0.5, 6),
+      ('boosted',  'Boost Ads',      '🔥', 1.0, 7)
+    ON CONFLICT (stage) DO NOTHING;
   `);
   console.log('DB ready');
 }
@@ -506,14 +542,31 @@ app.get('/api/content', auth, async (req, res) => {
 app.post('/api/content', auth, async (req, res) => {
   const { client_id, title, status, hook_type, objective, format, cta_type, shoot_date, post_date, assigned_to, notes } = req.body;
   if (!client_id || !title?.trim()) return res.status(400).json({ error: 'client_id et title requis.' });
+  const client = await pool.connect();
   try {
-    const { rows } = await pool.query(`
+    await client.query('BEGIN');
+    // Create content item
+    const { rows } = await client.query(`
       INSERT INTO content_items (client_id,title,status,hook_type,objective,format,cta_type,shoot_date,post_date,assigned_to,notes)
       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11) RETURNING *`,
-      [client_id, title.trim(), status||'brief', hook_type||null, objective||null, format||null, cta_type||null, shoot_date||null, post_date||null, assigned_to||null, notes||'']
+      [client_id, title.trim(), status||'ideas', hook_type||null, objective||null, format||null, cta_type||null, shoot_date||null, post_date||null, assigned_to||null, notes||'']
     );
-    res.json({ item: rows[0] });
-  } catch (err) { res.status(500).json({ error: err.message }); }
+    const item = rows[0];
+    // Auto-create tasks from task_defaults
+    const { rows: defaults } = await client.query('SELECT * FROM task_defaults ORDER BY sort_order');
+    for (const def of defaults) {
+      await client.query(`
+        INSERT INTO content_tasks (content_item_id, client_id, stage, title, assigned_to, default_hours, status)
+        VALUES ($1, $2, $3, $4, $5, $6, 'todo')`,
+        [item.id, client_id, def.stage, def.label, assigned_to||null, def.default_hours]
+      );
+    }
+    await client.query('COMMIT');
+    res.json({ item });
+  } catch (err) {
+    await client.query('ROLLBACK');
+    res.status(500).json({ error: err.message });
+  } finally { client.release(); }
 });
 
 app.put('/api/content/:id', auth, async (req, res) => {
@@ -719,6 +772,93 @@ JSON:
     res.json({ result: JSON.parse(d.choices[0].message.content.replace(/```json|```/g,'').trim()) });
   })
   .catch(err => res.status(500).json({ error: err.message }));
+});
+
+// ── TASK DEFAULTS ────────────────────────────────────
+app.get('/api/task-defaults', auth, async (req, res) => {
+  try {
+    const { rows } = await pool.query('SELECT * FROM task_defaults ORDER BY sort_order');
+    res.json({ defaults: rows });
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+app.put('/api/task-defaults/:stage', auth, async (req, res) => {
+  const { default_hours, label } = req.body;
+  try {
+    const { rows } = await pool.query(
+      'UPDATE task_defaults SET default_hours=$1, label=$2 WHERE stage=$3 RETURNING *',
+      [default_hours, label, req.params.stage]
+    );
+    res.json({ default: rows[0] });
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+// ── CONTENT TASKS ─────────────────────────────────────
+app.get('/api/content/:id/tasks', auth, async (req, res) => {
+  try {
+    const { rows } = await pool.query(`
+      SELECT ct.*, tm.name as assignee_name, tm.color as assignee_color,
+        td.emoji, td.sort_order
+      FROM content_tasks ct
+      LEFT JOIN team_members tm ON tm.id = ct.assigned_to
+      LEFT JOIN task_defaults td ON td.stage = ct.stage
+      WHERE ct.content_item_id = $1
+      ORDER BY td.sort_order`, [req.params.id]);
+    res.json({ tasks: rows });
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+app.put('/api/tasks/:id', auth, async (req, res) => {
+  const { status, assigned_to, default_hours, due_date, notes } = req.body;
+  try {
+    const doneAt = status === 'done' ? 'NOW()' : 'NULL';
+    const { rows } = await pool.query(`
+      UPDATE content_tasks SET status=$1, assigned_to=$2, default_hours=$3, due_date=$4, notes=$5,
+      done_at=${doneAt} WHERE id=$6 RETURNING *`,
+      [status, assigned_to||null, default_hours, due_date||null, notes||'', req.params.id]
+    );
+    res.json({ task: rows[0] });
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+// ── CALENDAR ──────────────────────────────────────────
+// Returns all events (content shoot/post dates + tasks) for a given month
+app.get('/api/calendar', auth, async (req, res) => {
+  const { month } = req.query; // YYYY-MM
+  const m = month || new Date().toISOString().slice(0,7);
+  try {
+    // Content items with shoot and post dates this month
+    const { rows: items } = await pool.query(`
+      SELECT ci.id, ci.title, ci.status, ci.shoot_date, ci.post_date,
+        ci.client_id, c.name as client_name,
+        tm.name as assignee_name, tm.color as assignee_color
+      FROM content_items ci
+      JOIN clients c ON c.id = ci.client_id
+      LEFT JOIN team_members tm ON tm.id = ci.assigned_to
+      WHERE (
+        DATE_TRUNC('month', ci.shoot_date) = DATE_TRUNC('month', ($1||'-01')::date)
+        OR DATE_TRUNC('month', ci.post_date) = DATE_TRUNC('month', ($1||'-01')::date)
+      )
+      ORDER BY COALESCE(ci.shoot_date, ci.post_date) ASC`, [m]);
+
+    // Tasks with due dates this month
+    const { rows: tasks } = await pool.query(`
+      SELECT ct.id, ct.stage, ct.title as stage_label, ct.status, ct.due_date,
+        ct.default_hours, ct.content_item_id,
+        ci.title as video_title, ci.client_id,
+        c.name as client_name,
+        tm.name as assignee_name, tm.color as assignee_color,
+        td.emoji
+      FROM content_tasks ct
+      JOIN content_items ci ON ci.id = ct.content_item_id
+      JOIN clients c ON c.id = ci.client_id
+      LEFT JOIN team_members tm ON tm.id = ct.assigned_to
+      LEFT JOIN task_defaults td ON td.stage = ct.stage
+      WHERE DATE_TRUNC('month', ct.due_date) = DATE_TRUNC('month', ($1||'-01')::date)
+      ORDER BY ct.due_date ASC`, [m]);
+
+    res.json({ items, tasks });
+  } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
 // ── FALLBACK ──────────────────────────────────────────

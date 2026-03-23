@@ -322,6 +322,9 @@ async function initDB() {
     WHERE status='sent' AND due_date < CURRENT_DATE
   `);
 
+  // Add subtitle column if not exists (migration)
+  await pool.query(`ALTER TABLE quotes ADD COLUMN IF NOT EXISTS subtitle TEXT DEFAULT ''`);
+
   console.log('DB ready');
 }
 
@@ -1011,9 +1014,9 @@ app.post('/api/quotes', auth, async (req, res) => {
     const tax = subtotal * (+tax_rate||15) / 100;
     const total = subtotal + tax;
     const { rows } = await client.query(`
-      INSERT INTO quotes (lead_id,client_id,quote_number,title,valid_until,notes,subtotal,tax_rate,total,created_by)
-      VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10) RETURNING *`,
-      [lead_id||null, client_id||null, qnum, title.trim(), valid_until||null, notes||'', subtotal, tax_rate||15, total, created_by||null]
+      INSERT INTO quotes (lead_id,client_id,quote_number,title,subtitle,valid_until,notes,subtotal,tax_rate,total,created_by)
+      VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11) RETURNING *`,
+      [lead_id||null, client_id||null, qnum, title.trim(), subtitle||'', valid_until||null, notes||'', subtotal, tax_rate||0, total, created_by||null]
     );
     const quote = rows[0];
     for (let i=0; i<(items||[]).length; i++) {
@@ -1028,16 +1031,16 @@ app.post('/api/quotes', auth, async (req, res) => {
 });
 
 app.put('/api/quotes/:id', auth, async (req, res) => {
-  const { title, status, valid_until, notes, tax_rate, items } = req.body;
+  const { title, subtitle, status, valid_until, notes, tax_rate, items } = req.body;
   const client = await pool.connect();
   try {
     await client.query('BEGIN');
     const subtotal = (items||[]).reduce((s,i) => s + (+i.quantity||1)*(+i.unit_price||0), 0);
     const total = subtotal + subtotal*(+tax_rate||15)/100;
     const { rows } = await client.query(`
-      UPDATE quotes SET title=$1,status=$2,valid_until=$3,notes=$4,subtotal=$5,tax_rate=$6,total=$7,updated_at=NOW()
-      WHERE id=$8 RETURNING *`,
-      [title, status, valid_until||null, notes, subtotal, tax_rate||15, total, req.params.id]
+      UPDATE quotes SET title=$1,subtitle=$2,status=$3,valid_until=$4,notes=$5,subtotal=$6,tax_rate=$7,total=$8,updated_at=NOW()
+      WHERE id=$9 RETURNING *`,
+      [title, subtitle||'', status, valid_until||null, notes, subtotal, tax_rate||0, total, req.params.id]
     );
     await client.query('DELETE FROM quote_items WHERE quote_id=$1', [req.params.id]);
     for (let i=0; i<(items||[]).length; i++) {
@@ -1404,12 +1407,17 @@ app.get('/api/quotes/:id/pdf', auth, async (req, res) => {
   try {
     // Fetch full quote data
     const [q, items] = await Promise.all([
-      pool.query(`SELECT qu.*, c.name as client_name, l.company as lead_company,
-        cc.contact_name, cc.contact_email, cc.contact_phone
+      pool.query(`SELECT qu.*,
+        COALESCE(c.name, l.company) as client_name,
+        l.company as lead_company,
+        -- Contact: prefer client_contracts, fallback to lead
+        COALESCE(cc.contact_name, l.contact_name) as contact_name,
+        COALESCE(cc.contact_email, l.email)        as contact_email,
+        COALESCE(cc.contact_phone, l.phone)        as contact_phone
         FROM quotes qu
-        LEFT JOIN clients c ON c.id=qu.client_id
-        LEFT JOIN leads l ON l.id=qu.lead_id
-        LEFT JOIN client_contracts cc ON cc.client_id=qu.client_id
+        LEFT JOIN clients c          ON c.id  = qu.client_id
+        LEFT JOIN leads l            ON l.id  = qu.lead_id
+        LEFT JOIN client_contracts cc ON cc.client_id = qu.client_id
         WHERE qu.id=$1`, [req.params.id]),
       pool.query('SELECT * FROM quote_items WHERE quote_id=$1 ORDER BY sort_order', [req.params.id]),
     ]);

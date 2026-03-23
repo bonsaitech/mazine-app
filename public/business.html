@@ -1916,13 +1916,28 @@ async function downloadQuotePDF(quoteId, quoteNumber) {
 async function editQuote(id) {
   const data = await api('GET','/api/quotes/'+id); if(!data) return;
   const q = data.quote;
+  // Split notes into scope_terms and addons
+  const notesParts = (q.notes||'').split('--ADDONS--');
+  const scopeTerms = notesParts[0].trim();
+  const addons = notesParts[1]?.trim() || '';
+
   document.getElementById('quote-id').value=q.id;
   document.getElementById('quote-title').value=q.title;
+  if(document.getElementById('quote-subtitle')) document.getElementById('quote-subtitle').value=q.subtitle||'';
   document.getElementById('quote-status').value=q.status;
   document.getElementById('quote-client').value=q.client_id||'';
+  // Populate lead select
+  const leadSel = document.getElementById('quote-lead');
+  if(leadSel) {
+    api('GET','/api/leads').then(d=>{
+      leadSel.innerHTML='<option value="">— Client existant —</option>';
+      (d?.leads||[]).forEach(l=>leadSel.innerHTML+=`<option value="${l.id}"${q.lead_id===l.id?' selected':''}>${esc(l.company)}</option>`);
+    });
+  }
   document.getElementById('quote-valid').value=q.valid_until?q.valid_until.split('T')[0]:'';
-  document.getElementById('quote-tax').value=q.tax_rate||15;
-  document.getElementById('quote-notes').value=q.notes||'';
+  document.getElementById('quote-tax').value=q.tax_rate!=null?q.tax_rate:15;
+  document.getElementById('quote-notes').value=scopeTerms;
+  if(document.getElementById('quote-addons')) document.getElementById('quote-addons').value=addons;
   document.getElementById('modal-quote-title').textContent='Modifier devis';
   quoteLines = data.items.map(i=>({description:i.description,quantity:+i.quantity,unit_price:+i.unit_price}));
   if (!quoteLines.length) quoteLines=[{description:'',quantity:1,unit_price:0}];

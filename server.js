@@ -225,7 +225,103 @@ async function initDB() {
       ('posted',   'Publication',    '📈', 0.5, 6),
       ('boosted',  'Boost Ads',      '🔥', 1.0, 7)
     ON CONFLICT (stage) DO NOTHING;
+
+    -- ═══════════════════════════════════════
+    -- FINANCE MODULE
+    -- ═══════════════════════════════════════
+
+    -- Quotes (devis)
+    CREATE TABLE IF NOT EXISTS quotes (
+      id SERIAL PRIMARY KEY,
+      lead_id INTEGER REFERENCES leads(id) ON DELETE SET NULL,
+      client_id INTEGER REFERENCES clients(id) ON DELETE SET NULL,
+      quote_number TEXT UNIQUE NOT NULL,
+      title TEXT NOT NULL,
+      status TEXT DEFAULT 'draft',     -- draft / sent / accepted / refused / expired
+      valid_until DATE,
+      notes TEXT,
+      subtotal NUMERIC(12,2) DEFAULT 0,
+      tax_rate NUMERIC(5,2) DEFAULT 15, -- VAT %
+      total NUMERIC(12,2) DEFAULT 0,
+      created_by INTEGER REFERENCES team_members(id),
+      created_at TIMESTAMPTZ DEFAULT NOW(),
+      updated_at TIMESTAMPTZ DEFAULT NOW()
+    );
+
+    -- Quote line items
+    CREATE TABLE IF NOT EXISTS quote_items (
+      id SERIAL PRIMARY KEY,
+      quote_id INTEGER REFERENCES quotes(id) ON DELETE CASCADE,
+      description TEXT NOT NULL,
+      quantity NUMERIC(8,2) DEFAULT 1,
+      unit_price NUMERIC(10,2) DEFAULT 0,
+      total NUMERIC(12,2) DEFAULT 0,
+      sort_order INTEGER DEFAULT 0
+    );
+
+    -- Invoices (factures)
+    CREATE TABLE IF NOT EXISTS invoices (
+      id SERIAL PRIMARY KEY,
+      quote_id INTEGER REFERENCES quotes(id) ON DELETE SET NULL,
+      client_id INTEGER REFERENCES clients(id) ON DELETE CASCADE,
+      invoice_number TEXT UNIQUE NOT NULL,
+      title TEXT NOT NULL,
+      status TEXT DEFAULT 'draft',     -- draft / sent / paid / overdue / cancelled
+      issue_date DATE DEFAULT CURRENT_DATE,
+      due_date DATE,
+      notes TEXT,
+      subtotal NUMERIC(12,2) DEFAULT 0,
+      tax_rate NUMERIC(5,2) DEFAULT 15,
+      total NUMERIC(12,2) DEFAULT 0,
+      paid_amount NUMERIC(12,2) DEFAULT 0,
+      paid_at TIMESTAMPTZ,
+      created_at TIMESTAMPTZ DEFAULT NOW(),
+      updated_at TIMESTAMPTZ DEFAULT NOW()
+    );
+
+    -- Invoice line items
+    CREATE TABLE IF NOT EXISTS invoice_items (
+      id SERIAL PRIMARY KEY,
+      invoice_id INTEGER REFERENCES invoices(id) ON DELETE CASCADE,
+      description TEXT NOT NULL,
+      quantity NUMERIC(8,2) DEFAULT 1,
+      unit_price NUMERIC(10,2) DEFAULT 0,
+      total NUMERIC(12,2) DEFAULT 0,
+      sort_order INTEGER DEFAULT 0
+    );
+
+    -- Payments
+    CREATE TABLE IF NOT EXISTS payments (
+      id SERIAL PRIMARY KEY,
+      invoice_id INTEGER REFERENCES invoices(id) ON DELETE CASCADE,
+      client_id INTEGER REFERENCES clients(id) ON DELETE CASCADE,
+      amount NUMERIC(12,2) NOT NULL,
+      method TEXT DEFAULT 'bank',      -- bank / cash / card / mobile
+      reference TEXT,
+      paid_at DATE DEFAULT CURRENT_DATE,
+      notes TEXT,
+      created_at TIMESTAMPTZ DEFAULT NOW()
+    );
+
+    -- In-app notifications
+    CREATE TABLE IF NOT EXISTS notifications (
+      id SERIAL PRIMARY KEY,
+      type TEXT NOT NULL,              -- task_due / invoice_overdue / shoot_tomorrow / lead_followup / payment_received
+      title TEXT NOT NULL,
+      body TEXT,
+      link TEXT,                       -- /business.html#section
+      read BOOLEAN DEFAULT false,
+      target_member_id INTEGER REFERENCES team_members(id) ON DELETE CASCADE,
+      created_at TIMESTAMPTZ DEFAULT NOW()
+    );
   `);
+
+  // Mark overdue invoices automatically
+  await pool.query(\`
+    UPDATE invoices SET status='overdue'
+    WHERE status='sent' AND due_date < CURRENT_DATE
+  \`);
+
   console.log('DB ready');
 }
 
@@ -860,6 +956,446 @@ app.get('/api/calendar', auth, async (req, res) => {
     res.json({ items, tasks });
   } catch (err) { res.status(500).json({ error: err.message }); }
 });
+
+// ═══════════════════════════════════════════════════════
+// FINANCE MODULE
+// ═══════════════════════════════════════════════════════
+
+// ── QUOTE NUMBER GENERATOR ────────────────────────────
+async function nextQuoteNumber() {
+  const { rows } = await pool.query("SELECT COUNT(*) FROM quotes");
+  const n = +rows[0].count + 1;
+  return 'DEV-' + new Date().getFullYear() + '-' + String(n).padStart(3,'0');
+}
+async function nextInvoiceNumber() {
+  const { rows } = await pool.query("SELECT COUNT(*) FROM invoices");
+  const n = +rows[0].count + 1;
+  return 'FAC-' + new Date().getFullYear() + '-' + String(n).padStart(3,'0');
+}
+
+// ── QUOTES ────────────────────────────────────────────
+app.get('/api/quotes', auth, async (req, res) => {
+  try {
+    const { rows } = await pool.query(`
+      SELECT q.*, c.name as client_name, l.company as lead_company,
+        tm.name as creator_name,
+        (SELECT COUNT(*) FROM quote_items WHERE quote_id=q.id) as item_count
+      FROM quotes q
+      LEFT JOIN clients c ON c.id=q.client_id
+      LEFT JOIN leads l ON l.id=q.lead_id
+      LEFT JOIN team_members tm ON tm.id=q.created_by
+      ORDER BY q.created_at DESC`);
+    res.json({ quotes: rows });
+  } catch(err) { res.status(500).json({ error: err.message }); }
+});
+
+app.get('/api/quotes/:id', auth, async (req, res) => {
+  try {
+    const [q, items] = await Promise.all([
+      pool.query(`SELECT q.*, c.name as client_name, l.company as lead_company FROM quotes q LEFT JOIN clients c ON c.id=q.client_id LEFT JOIN leads l ON l.id=q.lead_id WHERE q.id=$1`, [req.params.id]),
+      pool.query('SELECT * FROM quote_items WHERE quote_id=$1 ORDER BY sort_order', [req.params.id])
+    ]);
+    if (!q.rows.length) return res.status(404).json({ error: 'Devis introuvable.' });
+    res.json({ quote: q.rows[0], items: items.rows });
+  } catch(err) { res.status(500).json({ error: err.message }); }
+});
+
+app.post('/api/quotes', auth, async (req, res) => {
+  const { lead_id, client_id, title, valid_until, notes, tax_rate, items, created_by } = req.body;
+  if (!title?.trim()) return res.status(400).json({ error: 'Titre requis.' });
+  const client = await pool.connect();
+  try {
+    await client.query('BEGIN');
+    const qnum = await nextQuoteNumber();
+    const subtotal = (items||[]).reduce((s,i) => s + (+i.quantity||1)*(+i.unit_price||0), 0);
+    const tax = subtotal * (+tax_rate||15) / 100;
+    const total = subtotal + tax;
+    const { rows } = await client.query(`
+      INSERT INTO quotes (lead_id,client_id,quote_number,title,valid_until,notes,subtotal,tax_rate,total,created_by)
+      VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10) RETURNING *`,
+      [lead_id||null, client_id||null, qnum, title.trim(), valid_until||null, notes||'', subtotal, tax_rate||15, total, created_by||null]
+    );
+    const quote = rows[0];
+    for (let i=0; i<(items||[]).length; i++) {
+      const it = items[i];
+      await client.query('INSERT INTO quote_items (quote_id,description,quantity,unit_price,total,sort_order) VALUES ($1,$2,$3,$4,$5,$6)',
+        [quote.id, it.description, +it.quantity||1, +it.unit_price||0, (+it.quantity||1)*(+it.unit_price||0), i]);
+    }
+    await client.query('COMMIT');
+    res.json({ quote });
+  } catch(err) { await client.query('ROLLBACK'); res.status(500).json({ error: err.message }); }
+  finally { client.release(); }
+});
+
+app.put('/api/quotes/:id', auth, async (req, res) => {
+  const { title, status, valid_until, notes, tax_rate, items } = req.body;
+  const client = await pool.connect();
+  try {
+    await client.query('BEGIN');
+    const subtotal = (items||[]).reduce((s,i) => s + (+i.quantity||1)*(+i.unit_price||0), 0);
+    const total = subtotal + subtotal*(+tax_rate||15)/100;
+    const { rows } = await client.query(`
+      UPDATE quotes SET title=$1,status=$2,valid_until=$3,notes=$4,subtotal=$5,tax_rate=$6,total=$7,updated_at=NOW()
+      WHERE id=$8 RETURNING *`,
+      [title, status, valid_until||null, notes, subtotal, tax_rate||15, total, req.params.id]
+    );
+    await client.query('DELETE FROM quote_items WHERE quote_id=$1', [req.params.id]);
+    for (let i=0; i<(items||[]).length; i++) {
+      const it = items[i];
+      await client.query('INSERT INTO quote_items (quote_id,description,quantity,unit_price,total,sort_order) VALUES ($1,$2,$3,$4,$5,$6)',
+        [req.params.id, it.description, +it.quantity||1, +it.unit_price||0, (+it.quantity||1)*(+it.unit_price||0), i]);
+    }
+    await client.query('COMMIT');
+    res.json({ quote: rows[0] });
+  } catch(err) { await client.query('ROLLBACK'); res.status(500).json({ error: err.message }); }
+  finally { client.release(); }
+});
+
+// Convert quote to invoice
+app.post('/api/quotes/:id/invoice', auth, async (req, res) => {
+  const client = await pool.connect();
+  try {
+    await client.query('BEGIN');
+    const { rows: [quote] } = await client.query('SELECT * FROM quotes WHERE id=$1', [req.params.id]);
+    const { rows: qItems } = await client.query('SELECT * FROM quote_items WHERE quote_id=$1', [req.params.id]);
+    if (!quote) return res.status(404).json({ error: 'Devis introuvable.' });
+    const inum = await nextInvoiceNumber();
+    const dueDate = new Date(); dueDate.setDate(dueDate.getDate()+30);
+    const { rows: [inv] } = await client.query(`
+      INSERT INTO invoices (quote_id,client_id,invoice_number,title,status,due_date,notes,subtotal,tax_rate,total)
+      VALUES ($1,$2,$3,$4,'sent',$5,$6,$7,$8,$9) RETURNING *`,
+      [quote.id, quote.client_id, inum, quote.title, dueDate.toISOString().split('T')[0], quote.notes, quote.subtotal, quote.tax_rate, quote.total]
+    );
+    for (const it of qItems) {
+      await client.query('INSERT INTO invoice_items (invoice_id,description,quantity,unit_price,total,sort_order) VALUES ($1,$2,$3,$4,$5,$6)',
+        [inv.id, it.description, it.quantity, it.unit_price, it.total, it.sort_order]);
+    }
+    await client.query("UPDATE quotes SET status='accepted',updated_at=NOW() WHERE id=$1", [req.params.id]);
+    // Auto-create client if lead
+    if (quote.lead_id && !quote.client_id) {
+      const { rows: [lead] } = await client.query('SELECT * FROM leads WHERE id=$1', [quote.lead_id]);
+      if (lead) {
+        const { rows: [newClient] } = await client.query(
+          "INSERT INTO clients (name) VALUES ($1) ON CONFLICT DO NOTHING RETURNING id",
+          [lead.company]
+        );
+        if (newClient) {
+          await client.query("UPDATE leads SET status='won',updated_at=NOW() WHERE id=$1", [quote.lead_id]);
+          await pool.query('INSERT INTO notifications (type,title,body,link) VALUES ($1,$2,$3,$4)',
+            ['lead_won', '🎉 Lead converti', lead.company+' est maintenant client Mazine', '/business.html']);
+        }
+      }
+    }
+    await client.query('COMMIT');
+    res.json({ invoice: inv });
+  } catch(err) { await client.query('ROLLBACK'); res.status(500).json({ error: err.message }); }
+  finally { client.release(); }
+});
+
+// ── INVOICES ──────────────────────────────────────────
+app.get('/api/invoices', auth, async (req, res) => {
+  const { client_id, status } = req.query;
+  try {
+    let q = `SELECT inv.*, c.name as client_name,
+      inv.total - inv.paid_amount as balance
+      FROM invoices inv
+      JOIN clients c ON c.id=inv.client_id
+      WHERE 1=1`;
+    const params = [];
+    if (client_id) { params.push(client_id); q+=` AND inv.client_id=$${params.length}`; }
+    if (status) { params.push(status); q+=` AND inv.status=$${params.length}`; }
+    q += ' ORDER BY inv.issue_date DESC';
+    const { rows } = await pool.query(q, params);
+    res.json({ invoices: rows });
+  } catch(err) { res.status(500).json({ error: err.message }); }
+});
+
+app.get('/api/invoices/:id', auth, async (req, res) => {
+  try {
+    const [inv, items, pmts] = await Promise.all([
+      pool.query(`SELECT inv.*, c.name as client_name, cc.contact_name, cc.contact_email, cc.contact_phone FROM invoices inv JOIN clients c ON c.id=inv.client_id LEFT JOIN client_contracts cc ON cc.client_id=inv.client_id WHERE inv.id=$1`, [req.params.id]),
+      pool.query('SELECT * FROM invoice_items WHERE invoice_id=$1 ORDER BY sort_order', [req.params.id]),
+      pool.query('SELECT * FROM payments WHERE invoice_id=$1 ORDER BY paid_at DESC', [req.params.id])
+    ]);
+    if (!inv.rows.length) return res.status(404).json({ error: 'Facture introuvable.' });
+    res.json({ invoice: inv.rows[0], items: items.rows, payments: pmts.rows });
+  } catch(err) { res.status(500).json({ error: err.message }); }
+});
+
+app.post('/api/invoices', auth, async (req, res) => {
+  const { client_id, title, issue_date, due_date, notes, tax_rate, items } = req.body;
+  if (!client_id || !title?.trim()) return res.status(400).json({ error: 'Client et titre requis.' });
+  const client = await pool.connect();
+  try {
+    await client.query('BEGIN');
+    const inum = await nextInvoiceNumber();
+    const subtotal = (items||[]).reduce((s,i) => s+(+i.quantity||1)*(+i.unit_price||0), 0);
+    const total = subtotal + subtotal*(+tax_rate||15)/100;
+    const { rows } = await client.query(`
+      INSERT INTO invoices (client_id,invoice_number,title,issue_date,due_date,notes,subtotal,tax_rate,total)
+      VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9) RETURNING *`,
+      [client_id, inum, title.trim(), issue_date||new Date().toISOString().split('T')[0], due_date||null, notes||'', subtotal, tax_rate||15, total]
+    );
+    const inv = rows[0];
+    for (let i=0; i<(items||[]).length; i++) {
+      const it = items[i];
+      await client.query('INSERT INTO invoice_items (invoice_id,description,quantity,unit_price,total,sort_order) VALUES ($1,$2,$3,$4,$5,$6)',
+        [inv.id, it.description, +it.quantity||1, +it.unit_price||0, (+it.quantity||1)*(+it.unit_price||0), i]);
+    }
+    await client.query('COMMIT');
+    res.json({ invoice: inv });
+  } catch(err) { await client.query('ROLLBACK'); res.status(500).json({ error: err.message }); }
+  finally { client.release(); }
+});
+
+app.put('/api/invoices/:id', auth, async (req, res) => {
+  const { title, status, issue_date, due_date, notes, tax_rate, items } = req.body;
+  const client = await pool.connect();
+  try {
+    await client.query('BEGIN');
+    const subtotal = (items||[]).reduce((s,i) => s+(+i.quantity||1)*(+i.unit_price||0), 0);
+    const total = subtotal + subtotal*(+tax_rate||15)/100;
+    const paidAt = status==='paid' ? 'NOW()' : 'NULL';
+    const { rows } = await client.query(`
+      UPDATE invoices SET title=$1,status=$2,issue_date=$3,due_date=$4,notes=$5,subtotal=$6,tax_rate=$7,total=$8,updated_at=NOW(),paid_at=${paidAt}
+      WHERE id=$9 RETURNING *`,
+      [title, status, issue_date, due_date||null, notes, subtotal, tax_rate||15, total, req.params.id]
+    );
+    await client.query('DELETE FROM invoice_items WHERE invoice_id=$1', [req.params.id]);
+    for (let i=0; i<(items||[]).length; i++) {
+      const it = items[i];
+      await client.query('INSERT INTO invoice_items (invoice_id,description,quantity,unit_price,total,sort_order) VALUES ($1,$2,$3,$4,$5,$6)',
+        [req.params.id, it.description, +it.quantity||1, +it.unit_price||0, (+it.quantity||1)*(+it.unit_price||0), i]);
+    }
+    await client.query('COMMIT');
+    res.json({ invoice: rows[0] });
+  } catch(err) { await client.query('ROLLBACK'); res.status(500).json({ error: err.message }); }
+  finally { client.release(); }
+});
+
+// ── PAYMENTS ──────────────────────────────────────────
+app.post('/api/payments', auth, async (req, res) => {
+  const { invoice_id, client_id, amount, method, reference, paid_at, notes } = req.body;
+  if (!invoice_id || !amount) return res.status(400).json({ error: 'invoice_id et amount requis.' });
+  const client = await pool.connect();
+  try {
+    await client.query('BEGIN');
+    const { rows } = await client.query(
+      'INSERT INTO payments (invoice_id,client_id,amount,method,reference,paid_at,notes) VALUES ($1,$2,$3,$4,$5,$6,$7) RETURNING *',
+      [invoice_id, client_id, amount, method||'bank', reference||'', paid_at||new Date().toISOString().split('T')[0], notes||'']
+    );
+    // Update paid_amount on invoice
+    await client.query(`
+      UPDATE invoices SET
+        paid_amount = (SELECT COALESCE(SUM(amount),0) FROM payments WHERE invoice_id=$1),
+        status = CASE WHEN (SELECT COALESCE(SUM(amount),0) FROM payments WHERE invoice_id=$1) >= total THEN 'paid' ELSE status END,
+        paid_at = CASE WHEN (SELECT COALESCE(SUM(amount),0) FROM payments WHERE invoice_id=$1) >= total THEN NOW() ELSE paid_at END,
+        updated_at = NOW()
+      WHERE id=$1`, [invoice_id]
+    );
+    // Notification
+    const { rows: [inv] } = await client.query('SELECT title, client_id FROM invoices WHERE id=$1', [invoice_id]);
+    await client.query('INSERT INTO notifications (type,title,body,link) VALUES ($1,$2,$3,$4)',
+      ['payment_received', '💰 Paiement reçu', fmtMURNode(amount)+' reçu pour '+inv.title, '/business.html']);
+    await client.query('COMMIT');
+    res.json({ payment: rows[0] });
+  } catch(err) { await client.query('ROLLBACK'); res.status(500).json({ error: err.message }); }
+  finally { client.release(); }
+});
+
+app.delete('/api/payments/:id', auth, async (req, res) => {
+  try {
+    const { rows: [pmt] } = await pool.query('SELECT invoice_id FROM payments WHERE id=$1', [req.params.id]);
+    await pool.query('DELETE FROM payments WHERE id=$1', [req.params.id]);
+    if (pmt) await pool.query(`UPDATE invoices SET paid_amount=(SELECT COALESCE(SUM(amount),0) FROM payments WHERE invoice_id=$1), updated_at=NOW() WHERE id=$1`, [pmt.invoice_id]);
+    res.json({ ok: true });
+  } catch(err) { res.status(500).json({ error: err.message }); }
+});
+
+// ── NOTIFICATIONS ─────────────────────────────────────
+app.get('/api/notifications', auth, async (req, res) => {
+  const { member_id } = req.query;
+  try {
+    // Auto-generate notifications for overdue/upcoming events
+    const today = new Date().toISOString().split('T')[0];
+    const tomorrow = new Date(Date.now()+86400000).toISOString().split('T')[0];
+
+    // Shoots tomorrow
+    const { rows: shoots } = await pool.query(
+      "SELECT ci.id, ci.title, c.name as cname FROM content_items ci JOIN clients c ON c.id=ci.client_id WHERE ci.shoot_date=$1 AND ci.status NOT IN ('posted','boosted')",
+      [tomorrow]
+    );
+    for (const s of shoots) {
+      await pool.query(`INSERT INTO notifications (type,title,body,link) SELECT $1,$2,$3,$4 WHERE NOT EXISTS (SELECT 1 FROM notifications WHERE type=$1 AND body=$3 AND created_at > NOW()-INTERVAL '1 day')`,
+        ['shoot_tomorrow', '🎬 Tournage demain', s.cname+' · '+s.title.substring(0,40), '/business.html']);
+    }
+
+    // Overdue invoices
+    const { rows: overdue } = await pool.query(
+      "SELECT id, invoice_number, total-paid_amount as balance FROM invoices WHERE status='overdue'"
+    );
+    for (const inv of overdue) {
+      await pool.query(`INSERT INTO notifications (type,title,body,link) SELECT $1,$2,$3,$4 WHERE NOT EXISTS (SELECT 1 FROM notifications WHERE type=$1 AND body=$3 AND created_at > NOW()-INTERVAL '1 day')`,
+        ['invoice_overdue', '⚠ Facture en retard', 'Facture '+inv.invoice_number+' — '+fmtMURNode(inv.balance)+' impayé', '/business.html']);
+    }
+
+    // Tasks overdue
+    const { rows: tasks } = await pool.query(
+      `SELECT ct.id, ct.stage, ci.title, c.name as cname FROM content_tasks ct JOIN content_items ci ON ci.id=ct.content_item_id JOIN clients c ON c.id=ci.client_id WHERE ct.due_date < $1 AND ct.status NOT IN ('done','skipped')`,
+      [today]
+    );
+    for (const t of tasks) {
+      await pool.query(`INSERT INTO notifications (type,title,body,link) SELECT $1,$2,$3,$4 WHERE NOT EXISTS (SELECT 1 FROM notifications WHERE type=$1 AND body=$3 AND created_at > NOW()-INTERVAL '1 day')`,
+        ['task_due', '📋 Tâche en retard', t.cname+' · '+t.stage+' · '+t.title.substring(0,30), '/business.html']);
+    }
+
+    // Leads needing follow-up
+    const { rows: followups } = await pool.query(
+      "SELECT id, company FROM leads WHERE next_action_date <= $1 AND status NOT IN ('won','lost')",
+      [today]
+    );
+    for (const l of followups) {
+      await pool.query(`INSERT INTO notifications (type,title,body,link) SELECT $1,$2,$3,$4 WHERE NOT EXISTS (SELECT 1 FROM notifications WHERE type=$1 AND body=$3 AND created_at > NOW()-INTERVAL '1 day')`,
+        ['lead_followup', '📞 Suivi lead', 'Relancer '+l.company, '/business.html']);
+    }
+
+    // Return all unread + recent read
+    let q = 'SELECT * FROM notifications WHERE (read=false OR created_at > NOW()-INTERVAL '7 days')';
+    const params = [];
+    if (member_id) { params.push(member_id); q += ` AND (target_member_id=$${params.length} OR target_member_id IS NULL)`; }
+    else q += ' AND target_member_id IS NULL';
+    q += ' ORDER BY created_at DESC LIMIT 50';
+    const { rows } = await pool.query(q, params);
+    const unread = rows.filter(n=>!n.read).length;
+    res.json({ notifications: rows, unread });
+  } catch(err) { res.status(500).json({ error: err.message }); }
+});
+
+app.put('/api/notifications/:id/read', auth, async (req, res) => {
+  try {
+    await pool.query('UPDATE notifications SET read=true WHERE id=$1', [req.params.id]);
+    res.json({ ok: true });
+  } catch(err) { res.status(500).json({ error: err.message }); }
+});
+
+app.put('/api/notifications/read-all', auth, async (req, res) => {
+  try {
+    await pool.query('UPDATE notifications SET read=true WHERE read=false');
+    res.json({ ok: true });
+  } catch(err) { res.status(500).json({ error: err.message }); }
+});
+
+// ── DASHBOARD (My Day) ────────────────────────────────
+app.get('/api/dashboard', auth, async (req, res) => {
+  const { member_id } = req.query;
+  const today = new Date().toISOString().split('T')[0];
+  const monthStart = today.slice(0,7)+'-01';
+  try {
+    const queries = [
+      // My tasks today/overdue
+      pool.query(`SELECT ct.*, td.emoji, ci.title as video_title, c.name as client_name
+        FROM content_tasks ct
+        JOIN content_items ci ON ci.id=ct.content_item_id
+        JOIN clients c ON c.id=ci.client_id
+        LEFT JOIN task_defaults td ON td.stage=ct.stage
+        WHERE ct.assigned_to=$1 AND ct.status IN ('todo','in_progress')
+        AND (ct.due_date IS NULL OR ct.due_date <= $2)
+        ORDER BY ct.due_date ASC NULLS LAST LIMIT 10`, [member_id, today]),
+      // My videos in progress
+      pool.query(`SELECT ci.*, c.name as client_name
+        FROM content_items ci JOIN clients c ON c.id=ci.client_id
+        WHERE ci.assigned_to=$1 AND ci.status NOT IN ('posted','boosted')
+        ORDER BY ci.post_date ASC NULLS LAST LIMIT 8`, [member_id]),
+      // My hours this week
+      pool.query(`SELECT COALESCE(SUM(hours),0) as week_hours,
+        COALESCE(SUM(hours*tm.hourly_rate),0) as week_cost
+        FROM time_entries te JOIN team_members tm ON tm.id=te.team_member_id
+        WHERE te.team_member_id=$1 AND te.date >= DATE_TRUNC('week', CURRENT_DATE)`, [member_id]),
+      // My hours this month
+      pool.query(`SELECT COALESCE(SUM(hours),0) as month_hours
+        FROM time_entries WHERE team_member_id=$1 AND date >= $2`, [member_id, monthStart]),
+      // Shoots today (all team)
+      pool.query(`SELECT ci.*, c.name as client_name, tm.name as assignee_name, tm.color as assignee_color
+        FROM content_items ci JOIN clients c ON c.id=ci.client_id
+        LEFT JOIN team_members tm ON tm.id=ci.assigned_to
+        WHERE ci.shoot_date=$1`, [today]),
+      // Posts today
+      pool.query(`SELECT ci.*, c.name as client_name
+        FROM content_items ci JOIN clients c ON c.id=ci.client_id
+        WHERE ci.post_date=$1`, [today]),
+      // Revenue this month
+      pool.query(`SELECT COALESCE(SUM(amount),0) as revenue
+        FROM payments WHERE paid_at >= $1`, [monthStart]),
+      // Pending invoices
+      pool.query(`SELECT COUNT(*) as count, COALESCE(SUM(total-paid_amount),0) as total
+        FROM invoices WHERE status IN ('sent','overdue')`),
+    ];
+    const [myTasks, myVideos, weekHours, monthHours, shootsToday, postsToday, revenue, pendingInv] = await Promise.all(queries);
+    res.json({
+      myTasks: myTasks.rows,
+      myVideos: myVideos.rows,
+      weekHours: +weekHours.rows[0].week_hours,
+      monthHours: +monthHours.rows[0].month_hours,
+      shootsToday: shootsToday.rows,
+      postsToday: postsToday.rows,
+      revenueThisMonth: +revenue.rows[0].revenue,
+      pendingInvoices: { count: +pendingInv.rows[0].count, total: +pendingInv.rows[0].total },
+    });
+  } catch(err) { res.status(500).json({ error: err.message }); }
+});
+
+// ── LEAD → CLIENT (convert) ───────────────────────────
+app.post('/api/leads/:id/convert', auth, async (req, res) => {
+  const { mazine_start_date, mrr, package: pkg, hours_sold_per_month } = req.body;
+  const client = await pool.connect();
+  try {
+    await client.query('BEGIN');
+    const { rows: [lead] } = await client.query('SELECT * FROM leads WHERE id=$1', [req.params.id]);
+    if (!lead) return res.status(404).json({ error: 'Lead introuvable.' });
+    // Create client
+    const { rows: [newClient] } = await client.query(
+      'INSERT INTO clients (name, mazine_start_date) VALUES ($1,$2) RETURNING *',
+      [lead.company, mazine_start_date||new Date().toISOString().split('T')[0]]
+    );
+    // Create contract
+    await client.query(`INSERT INTO client_contracts (client_id,package,mrr,hours_sold_per_month,contract_start,contact_name,contact_phone,contact_email,status)
+      VALUES ($1,$2,$3,$4,$5,$6,$7,$8,'active')`,
+      [newClient.id, pkg||'', mrr||0, hours_sold_per_month||0, mazine_start_date||new Date().toISOString().split('T')[0], lead.contact_name||'', lead.phone||'', lead.email||'']
+    );
+    // Update lead
+    await client.query("UPDATE leads SET status='won', updated_at=NOW() WHERE id=$1", [req.params.id]);
+    // Notification
+    await client.query('INSERT INTO notifications (type,title,body,link) VALUES ($1,$2,$3,$4)',
+      ['lead_won', '🎉 Nouveau client !', lead.company+' a été converti en client', '/']
+    );
+    await client.query('COMMIT');
+    res.json({ client: newClient });
+  } catch(err) { await client.query('ROLLBACK'); res.status(500).json({ error: err.message }); }
+  finally { client.release(); }
+});
+
+// ── FINANCE SUMMARY ───────────────────────────────────
+app.get('/api/finance/summary', auth, async (req, res) => {
+  const { month } = req.query;
+  const m = month || new Date().toISOString().slice(0,7);
+  try {
+    const [issued, paid, overdue, mrr] = await Promise.all([
+      pool.query(`SELECT COALESCE(SUM(total),0) as total, COUNT(*) as count FROM invoices WHERE DATE_TRUNC('month',issue_date)=DATE_TRUNC('month',($1||'-01')::date)`, [m]),
+      pool.query(`SELECT COALESCE(SUM(amount),0) as total, COUNT(*) as count FROM payments WHERE DATE_TRUNC('month',paid_at)=DATE_TRUNC('month',($1||'-01')::date)`, [m]),
+      pool.query(`SELECT COALESCE(SUM(total-paid_amount),0) as total, COUNT(*) as count FROM invoices WHERE status IN ('overdue','sent')`),
+      pool.query(`SELECT COALESCE(SUM(mrr),0) as total FROM client_contracts WHERE status='active'`),
+    ]);
+    res.json({
+      invoiced: { total: +issued.rows[0].total, count: +issued.rows[0].count },
+      received: { total: +paid.rows[0].total, count: +paid.rows[0].count },
+      overdue:  { total: +overdue.rows[0].total, count: +overdue.rows[0].count },
+      mrr:      +mrr.rows[0].total,
+    });
+  } catch(err) { res.status(500).json({ error: err.message }); }
+});
+
+// ── HELPER (server-side) ──────────────────────────────
+function fmtMURNode(n) { n=Math.round(+n||0); if(Math.abs(n)>=1000) return (n/1000).toFixed(1)+'K MUR'; return n+' MUR'; }
 
 // ── FALLBACK ──────────────────────────────────────────
 app.get('*', (req, res) => {

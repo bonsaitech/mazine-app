@@ -1904,8 +1904,146 @@ function showToast(msg, type='info') {
 
 // EXPORT PDF
 function exportPDF() {
-  showToast('Ouverture de la fenêtre d\'impression…');
-  setTimeout(()=>window.print(), 400);
+  const month = currentMonth;
+  const ai = aiCache[month] || aiCache['all'];
+  const { parsed, scored, top5 } = G;
+  const clientName = currentClient?.name || 'Client';
+  const period = document.getElementById('dash-period')?.textContent || monthLabel(month);
+  const now = new Date().toLocaleDateString('fr-FR',{day:'numeric',month:'long',year:'numeric'});
+
+  const fp = { overview: filterByMonth(parsed.overview, month), followers: filterByMonth(parsed.followers, month) };
+  const totalViews  = sumMetric(fp.overview,'views');
+  const totalLikes  = sumMetric(fp.overview,'likes');
+  const totalShares = sumMetric(fp.overview,'shares');
+  const lastFol     = fp.followers.length ? fp.followers[fp.followers.length-1].followers : null;
+  const follGain    = sumMetric(fp.followers,'diff');
+  const avgEng      = top5.length ? (top5.reduce((s,v)=>s+v.engRate,0)/top5.length).toFixed(1) : '—';
+
+  // Top5 filtered by month if post dates available
+  const hasPostDates = scored.filter(v=>v.dk).length > scored.length * 0.3;
+  let displayTop5 = top5;
+  if (month !== 'all' && hasPostDates) {
+    const ms = scored.filter(v=>v.dk===month).slice(0,5);
+    if (ms.length) displayTop5 = ms;
+  }
+
+  // Build sections
+  const kpiHtml = `<div style="display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-bottom:18px;">
+    ${[
+      {l:'Total vues', v:fmt(totalViews), s:month==='all'?'365 jours':monthLabel(month)},
+      {l:'Abonnés', v:lastFol?fmt(lastFol):'—', s:follGain>0?'+'+fmt(follGain)+' ce mois':''},
+      {l:'Total likes', v:fmt(totalLikes), s:''},
+      {l:'Partages', v:fmt(totalShares), s:''},
+      {l:'Engagement moy.', v:avgEng+'%', s:'top 5'},
+    ].map(k=>`<div style="background:#f0f6f7;border-radius:5px;padding:9px 11px;border-left:3px solid #618F9B;">
+      <p style="font-size:7pt;letter-spacing:0.12em;text-transform:uppercase;color:#888;margin-bottom:3px;">${k.l}</p>
+      <p style="font-weight:200;font-size:16pt;color:#1a2a2e;line-height:1;">${k.v}</p>
+      ${k.s?`<p style="font-family:'Lora',serif;font-style:italic;font-size:7pt;color:#618F9B;margin-top:2px;">${k.s}</p>`:''}
+    </div>`).join('')}
+  </div>`;
+
+  const syntheseHtml = ai?.synthese ? `
+    <p style="font-size:7pt;letter-spacing:0.18em;text-transform:uppercase;color:#aaa;margin-bottom:7px;margin-top:16px;">Synthèse IA Mazine</p>
+    <div style="background:#f0f6f7;border:1px solid #c8dde2;border-radius:6px;padding:11px 14px;margin-bottom:16px;">
+      <p style="font-size:7pt;letter-spacing:0.18em;text-transform:uppercase;color:#618F9B;margin-bottom:4px;">✦ Analyse · ${month==='all'?'Vue globale':monthLabel(month)}</p>
+      <p style="font-family:'Lora',serif;font-size:9pt;line-height:1.7;color:#2a3a3e;">${esc(ai.synthese)}</p>
+    </div>` : '';
+
+  const videosHtml = `
+    <p style="font-size:7pt;letter-spacing:0.18em;text-transform:uppercase;color:#aaa;margin-bottom:7px;">Top ${displayTop5.length} vidéos</p>
+    <div style="margin-bottom:16px;">
+      ${displayTop5.map((v,i)=>{
+        const aiV=(ai?.videos||[]).find(x=>x.rank===i+1)||{};
+        return `<div style="display:flex;gap:10px;align-items:flex-start;padding:8px 0;border-bottom:1px solid #eee;">
+          <span style="font-weight:200;font-size:13pt;color:#618F9B;opacity:0.5;min-width:18px;">0${i+1}</span>
+          <div style="flex:1;min-width:0;">
+            <p style="font-size:9pt;font-weight:400;color:#1a2a2e;margin-bottom:2px;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;">${esc(v.title||'Sans titre')}</p>
+            ${aiV.pourquoi?`<p style="font-family:'Lora',serif;font-style:italic;font-size:8pt;color:#618F9B;margin-bottom:2px;">${esc(aiV.pourquoi)}</p>`:''}
+            <p style="font-size:7.5pt;color:#888;">${fmt(v.views)} vues · ${fmt(v.likes)} likes · ${fmt(v.shares)} partages · ${v.shareRate}% viral</p>
+          </div>
+          <div style="text-align:right;min-width:35px;">
+            <span style="font-weight:200;font-size:12pt;color:#1a2a2e;">${v.engRate}<span style="font-size:7pt;color:#618F9B;">%</span></span>
+            <div style="font-size:6pt;text-transform:uppercase;color:#aaa;letter-spacing:0.1em;">eng.</div>
+          </div>
+        </div>`;
+      }).join('')}
+    </div>`;
+
+  const diagHtml = ai?.diagnostic ? `
+    <p style="font-size:7pt;letter-spacing:0.18em;text-transform:uppercase;color:#aaa;margin-bottom:7px;margin-top:16px;">Diagnostic</p>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px;">
+      <div>
+        <p style="font-size:6pt;letter-spacing:0.15em;text-transform:uppercase;color:#aaa;margin-bottom:5px;">Points forts</p>
+        <ul style="list-style:none;display:flex;flex-direction:column;gap:4px;">
+          ${(ai.diagnostic.points_forts||[]).map(p=>`<li style="font-family:'Lora',serif;font-size:8.5pt;color:#618F9B;line-height:1.4;">✓ ${esc(p)}</li>`).join('')}
+        </ul>
+      </div>
+      <div>
+        <p style="font-size:6pt;letter-spacing:0.15em;text-transform:uppercase;color:#aaa;margin-bottom:5px;">Leviers de croissance</p>
+        <ul style="list-style:none;display:flex;flex-direction:column;gap:4px;">
+          ${(ai.diagnostic.points_amelioration||[]).map(p=>`<li style="font-family:'Lora',serif;font-size:8.5pt;color:#444;line-height:1.4;">→ ${esc(p)}</li>`).join('')}
+        </ul>
+      </div>
+    </div>` : '';
+
+  const b = ai?.brief_prochain_contenu;
+  const briefHtml = b ? `
+    <p style="font-size:7pt;letter-spacing:0.18em;text-transform:uppercase;color:#aaa;margin-bottom:7px;">Brief — Prochain contenu</p>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px;">
+      ${[
+        {l:'Angle prioritaire', v:b.angle_prioritaire, warn:false},
+        {l:'Format recommandé', v:b.format_recommande, warn:false},
+        {l:"Type d'accroche", v:b.accroche_type, warn:false},
+        {l:'À éviter', v:b.a_eviter, warn:true},
+      ].map(x=>`<div style="background:${x.warn?'#fff0f0':'#f5f5f5'};border-radius:5px;padding:8px 10px;${x.warn?'border-left:3px solid #e08080;':''}">
+        <p style="font-size:6pt;letter-spacing:0.15em;text-transform:uppercase;color:${x.warn?'#c06060':'#aaa'};margin-bottom:3px;">${x.l}</p>
+        <p style="font-family:'Lora',serif;font-size:8pt;line-height:1.5;color:${x.warn?'#c06060':'#333'};">${esc(x.v||'—')}</p>
+      </div>`).join('')}
+    </div>` : '';
+
+  const recoHtml = ai?.recommandations?.length ? `
+    <p style="font-size:7pt;letter-spacing:0.18em;text-transform:uppercase;color:#aaa;margin-bottom:7px;">Recommandations stratégiques</p>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+      ${ai.recommandations.map((r,i)=>`<div style="background:#f5f5f5;border-radius:5px;padding:8px 10px;border-top:2px solid #618F9B;">
+        <p style="font-size:6pt;letter-spacing:0.15em;text-transform:uppercase;color:#618F9B;margin-bottom:3px;">Recommandation ${i+1}</p>
+        <p style="font-family:'Lora',serif;font-size:8pt;line-height:1.5;color:#333;">${esc(r)}</p>
+      </div>`).join('')}
+    </div>` : '';
+
+  const html = `<!DOCTYPE html><html lang="fr"><head><meta charset="UTF-8">
+<title>Rapport Mazine — ${esc(clientName)} — ${period}</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@200;400&family=Lora:ital,wght@0,400;1,400&display=swap" rel="stylesheet">
+<style>
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:'Plus Jakarta Sans',sans-serif;background:#fff;color:#1a2a2e;font-size:10pt;}
+  @page{size:A4;margin:1.8cm 1.5cm;}
+  @media print{body{-webkit-print-color-adjust:exact;print-color-adjust:exact;}}
+</style>
+</head><body style="padding:0;">
+  <div style="display:flex;align-items:flex-start;justify-content:space-between;padding-bottom:12px;border-bottom:2px solid #618F9B;margin-bottom:18px;">
+    <div>
+      <div style="font-weight:200;font-size:1.5rem;letter-spacing:0.3em;text-transform:uppercase;color:#1a2a2e;">Ma<span style="color:#618F9B;">zine</span></div>
+      <div style="font-size:7pt;letter-spacing:0.15em;text-transform:uppercase;color:#888;margin-top:2px;">Analytics Report</div>
+    </div>
+    <div style="text-align:right;">
+      <p style="font-size:7pt;letter-spacing:0.2em;text-transform:uppercase;color:#888;">${esc(clientName)}</p>
+      <p style="font-family:'Lora',serif;font-style:italic;font-size:10pt;color:#618F9B;">${period}</p>
+      <p style="font-size:7pt;color:#aaa;margin-top:2px;">Généré le ${now}</p>
+    </div>
+  </div>
+  ${kpiHtml}${syntheseHtml}${videosHtml}${diagHtml}${briefHtml}${recoHtml}
+  <div style="margin-top:24px;padding-top:10px;border-top:1px solid #ddd;display:flex;justify-content:space-between;">
+    <span style="font-size:7pt;letter-spacing:0.18em;text-transform:uppercase;color:#ccc;">Mazine Analytics · ${esc(clientName)} · ${period}</span>
+    <span style="font-size:7pt;letter-spacing:0.18em;text-transform:uppercase;color:#ccc;">Confidentiel · mazine.mu</span>
+  </div>
+<script>window.onload=function(){setTimeout(function(){window.print();},600);}<\/script>
+</body></html>`;
+
+  const win = window.open('','_blank');
+  if (!win) { showToast('Autorisez les popups pour exporter en PDF', 'err'); return; }
+  win.document.write(html);
+  win.document.close();
+  showToast('Rapport généré — Enregistrer en PDF via la boîte d\'impression');
 }
 
 function reset() {

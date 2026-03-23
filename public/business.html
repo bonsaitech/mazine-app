@@ -239,12 +239,24 @@ tbody tr:hover td { background: rgba(239,214,177,0.015); }
 .empty-icon { font-size: 1.8rem; margin-bottom: 0.6rem; opacity: 0.25; }
 .empty-text { font-family: 'Lora', serif; font-style: italic; font-size: 0.82rem; color: rgba(239,214,177,0.28); }
 
+/* ── FINANCE LINE ITEMS ── */
+.line-item-grid { display:grid; grid-template-columns:1fr 80px 110px 90px 30px; gap:0.4rem; margin-bottom:0.4rem; align-items:center; }
+.line-input { background:rgba(239,214,177,0.04); border:0.5px solid rgba(239,214,177,0.11); border-radius:0.5rem; padding:0.5rem 0.75rem; color:var(--cream); font-family:'Plus Jakarta Sans',sans-serif; font-size:0.78rem; outline:none; width:100%; }
+.line-input:focus { border-color:var(--teal); }
+
+/* ── DASHBOARD GRID ── */
+.dash-grid-2 { display:grid; grid-template-columns:1fr 1fr; gap:1rem; margin-bottom:1rem; }
+.dash-grid-4 { display:grid; grid-template-columns:repeat(4,1fr); gap:0.65rem; margin-bottom:1.25rem; }
+
 /* ── RESPONSIVE ── */
 @media (max-width: 900px) { .kpi-row { grid-template-columns: repeat(3,1fr); } }
 @media (max-width: 640px) {
   header { padding: 0.75rem 1rem; }
   .page { padding: 1rem; }
   .kpi-row { grid-template-columns: repeat(2,1fr); gap: 0.45rem; }
+  .dash-grid-2 { grid-template-columns: 1fr; }
+  .dash-grid-4 { grid-template-columns: repeat(2,1fr); gap:0.45rem; }
+  .line-item-grid { grid-template-columns: 1fr; }
   .field-row,.field-row3 { grid-template-columns: 1fr; }
   .kanban { flex-direction: column; overflow-x: visible; }
   .kanban-col { width: 100%; }
@@ -261,22 +273,36 @@ tbody tr:hover td { background: rgba(239,214,177,0.015); }
 <header>
   <div class="logo">Ma<span>zine</span></div>
   <div class="nav-tabs">
-    <button class="nav-tab active" onclick="switchPage('rentabilite')">Rentabilité</button>
+    <button class="nav-tab active" onclick="switchPage('dashboard')">Mon Dashboard</button>
+    <button class="nav-tab" onclick="switchPage('rentabilite')">Rentabilité</button>
     <button class="nav-tab" onclick="switchPage('calendar')">Calendrier</button>
     <button class="nav-tab" onclick="switchPage('production')">Production</button>
     <button class="nav-tab" onclick="switchPage('time')">Temps</button>
+    <button class="nav-tab" onclick="switchPage('finance')">Finance</button>
     <button class="nav-tab" onclick="switchPage('leads')">Leads</button>
     <button class="nav-tab" onclick="switchPage('settings')">Réglages</button>
     <button class="nav-tab switch" onclick="goToAnalytics()">↗ Analytics</button>
   </div>
   <div style="display:flex;gap:0.4rem;align-items:center;">
     <span id="header-month" style="font-size:0.58rem;color:rgba(239,214,177,0.28);letter-spacing:0.1em;text-transform:uppercase;"></span>
+    <div style="position:relative;">
+      <button class="btn-sm" onclick="toggleNotifPanel()" id="notif-btn" style="position:relative;">
+        🔔 <span id="notif-badge" style="display:none;position:absolute;top:-4px;right:-4px;background:var(--neg);color:#fff;border-radius:50%;width:16px;height:16px;font-size:0.48rem;display:none;align-items:center;justify-content:center;" id="notif-badge">0</span>
+      </button>
+      <div id="notif-panel" style="display:none;position:absolute;right:0;top:calc(100% + 0.5rem);width:320px;background:#192a30;border:0.5px solid rgba(239,214,177,0.1);border-radius:0.85rem;z-index:300;max-height:400px;overflow-y:auto;box-shadow:0 8px 32px rgba(0,0,0,0.4);">
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:0.85rem 1rem;border-bottom:0.5px solid rgba(239,214,177,0.07);">
+          <p style="font-size:0.6rem;letter-spacing:0.15em;text-transform:uppercase;color:rgba(239,214,177,0.4);">Notifications</p>
+          <button onclick="markAllRead()" style="font-size:0.58rem;color:var(--teal);background:none;border:none;cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif;">Tout lire</button>
+        </div>
+        <div id="notif-list"></div>
+      </div>
+    </div>
     <button class="btn-sm" onclick="logout()">Déco.</button>
   </div>
 </header>
 
 <!-- ══════════ RENTABILITÉ ══════════ -->
-<div class="page active" id="page-rentabilite">
+<div class="page" id="page-rentabilite">
   <div class="sec-hdr">
     <div class="sec-hdr-left"><h2>Rentabilité</h2><p>Marge nette · Heures vendues vs passées</p></div>
     <div class="sec-hdr-right">
@@ -384,6 +410,62 @@ tbody tr:hover td { background: rgba(239,214,177,0.015); }
         <tbody id="defaults-table"></tbody>
       </table>
     </div>
+  </div>
+</div>
+
+<!-- ══════════ MY DASHBOARD ══════════ -->
+<div class="page" id="page-dashboard">
+  <div class="sec-hdr">
+    <div class="sec-hdr-left"><h2 id="dashboard-greeting">Mon Dashboard</h2><p id="dashboard-date" style="font-family:'Lora',serif;font-style:italic;font-size:0.78rem;color:var(--cream-dim);margin-top:0.1rem;"></p></div>
+    <div class="sec-hdr-right">
+      <select class="filter-sel" id="dashboard-member" onchange="loadDashboard()"><option value="">Sélectionner un membre</option></select>
+    </div>
+  </div>
+  <div class="dash-grid-4">
+    <div class="card"><p class="card-label">Heures cette semaine</p><p class="card-value" id="d-week-hours">—</p></div>
+    <div class="card"><p class="card-label">Heures ce mois</p><p class="card-value" id="d-month-hours">—</p></div>
+    <div class="card"><p class="card-label">Revenus encaissés</p><p class="card-value card-pos" id="d-revenue">—</p></div>
+    <div class="card"><p class="card-label">Factures en attente</p><p class="card-value card-warn" id="d-pending">—</p></div>
+  </div>
+  <div class="dash-grid-2">
+    <div class="card"><p class="card-label" style="margin-bottom:0.75rem;">🎬 Tournages aujourd'hui</p><div id="d-shoots-today"></div></div>
+    <div class="card"><p class="card-label" style="margin-bottom:0.75rem;">📲 Publications aujourd'hui</p><div id="d-posts-today"></div></div>
+  </div>
+  <div class="dash-grid-2">
+    <div class="card"><p class="card-label" style="margin-bottom:0.75rem;">📋 Mes tâches</p><div id="d-my-tasks"></div></div>
+    <div class="card"><p class="card-label" style="margin-bottom:0.75rem;">🎬 Mes vidéos en cours</p><div id="d-my-videos"></div></div>
+  </div>
+</div>
+
+<!-- ══════════ FINANCE ══════════ -->
+<div class="page" id="page-finance">
+  <div class="sec-hdr">
+    <div class="sec-hdr-left"><h2>Finance</h2><p>Devis · Factures · Paiements</p></div>
+    <div class="sec-hdr-right">
+      <input type="month" class="filter-sel" id="finance-month" onchange="loadFinanceSummary()" style="cursor:pointer;">
+      <button class="btn-ghost" onclick="openQuoteModal()">+ Devis</button>
+      <button class="btn-primary" onclick="openInvoiceModal()">+ Facture</button>
+    </div>
+  </div>
+  <div class="dash-grid-4">
+    <div class="card"><p class="card-label">MRR Actif</p><p class="card-value card-pos" id="f-mrr">—</p></div>
+    <div class="card"><p class="card-label">Facturé ce mois</p><p class="card-value" id="f-invoiced">—</p></div>
+    <div class="card"><p class="card-label">Encaissé ce mois</p><p class="card-value card-pos" id="f-received">—</p></div>
+    <div class="card"><p class="card-label">En attente / retard</p><p class="card-value card-warn" id="f-overdue">—</p></div>
+  </div>
+  <div style="display:flex;gap:0.35rem;margin-bottom:1rem;">
+    <button class="nav-tab active" id="ftab-quotes" onclick="showFinanceTab('quotes')">Devis</button>
+    <button class="nav-tab" id="ftab-invoices" onclick="showFinanceTab('invoices')">Factures</button>
+    <button class="nav-tab" id="ftab-payments" onclick="showFinanceTab('payments')">Paiements</button>
+  </div>
+  <div id="finance-quotes">
+    <div class="table-wrap"><table><thead><tr><th>N°</th><th>Titre</th><th>Client/Lead</th><th>Montant HT</th><th>Total TTC</th><th>Statut</th><th>Validité</th><th></th></tr></thead><tbody id="quotes-table"></tbody></table></div>
+  </div>
+  <div id="finance-invoices" style="display:none;">
+    <div class="table-wrap"><table><thead><tr><th>N°</th><th>Titre</th><th>Client</th><th>Total</th><th>Payé</th><th>Reste</th><th>Statut</th><th>Échéance</th><th></th></tr></thead><tbody id="invoices-table"></tbody></table></div>
+  </div>
+  <div id="finance-payments" style="display:none;">
+    <div class="table-wrap"><table><thead><tr><th>Date</th><th>Facture</th><th>Montant</th><th>Méthode</th><th>Référence</th><th></th></tr></thead><tbody id="payments-table"></tbody></table></div>
   </div>
 </div>
 
@@ -583,6 +665,107 @@ tbody tr:hover td { background: rgba(239,214,177,0.015); }
 
 <div class="toast" id="toast"></div>
 
+<!-- Modal: Devis -->
+<div class="modal-bg" id="modal-quote">
+  <div class="modal modal-wide">
+    <h3 id="modal-quote-title">Nouveau devis</h3>
+    <input type="hidden" id="quote-id">
+    <div class="field-row">
+      <div class="field"><label>Titre *</label><input type="text" id="quote-title" placeholder="ex: Package TikTok Growth - Jan 2026"></div>
+      <div class="field"><label>Statut</label>
+        <select id="quote-status"><option value="draft">Brouillon</option><option value="sent">Envoyé</option><option value="accepted">Accepté</option><option value="refused">Refusé</option></select>
+      </div>
+    </div>
+    <div class="field-row">
+      <div class="field"><label>Client (existant)</label><select id="quote-client"><option value="">— Lead uniquement —</option></select></div>
+      <div class="field"><label>Lead (prospect)</label><select id="quote-lead"><option value="">— Client existant —</option></select></div>
+    </div>
+    <div class="field-row">
+      <div class="field"><label>Valide jusqu'au</label><input type="date" id="quote-valid"></div>
+      <div class="field"><label>TVA %</label><input type="number" id="quote-tax" value="15" min="0" max="100"></div>
+    </div>
+    <p style="font-size:0.55rem;letter-spacing:0.15em;text-transform:uppercase;color:rgba(239,214,177,0.3);margin-bottom:0.65rem;margin-top:0.25rem;">Lignes</p>
+    <div id="quote-lines"></div>
+    <button onclick="addQuoteLine()" style="background:transparent;border:0.5px dashed rgba(239,214,177,0.15);color:rgba(239,214,177,0.4);padding:0.45rem 1rem;border-radius:0.5rem;font-size:0.68rem;cursor:pointer;width:100%;margin-bottom:0.85rem;font-family:'Plus Jakarta Sans',sans-serif;">+ Ajouter une ligne</button>
+    <div style="text-align:right;font-size:0.78rem;color:rgba(239,214,177,0.5);" id="quote-total-preview"></div>
+    <div class="field"><label>Notes</label><textarea id="quote-notes" placeholder="Conditions, délais..."></textarea></div>
+    <div class="modal-footer">
+      <button class="btn-ghost" onclick="closeModal('modal-quote')">Annuler</button>
+      <button class="btn-primary" onclick="saveQuote()">Enregistrer</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: Facture -->
+<div class="modal-bg" id="modal-invoice">
+  <div class="modal modal-wide">
+    <h3 id="modal-invoice-title">Nouvelle facture</h3>
+    <input type="hidden" id="invoice-id">
+    <div class="field-row">
+      <div class="field"><label>Client *</label><select id="invoice-client"></select></div>
+      <div class="field"><label>Statut</label>
+        <select id="invoice-status"><option value="draft">Brouillon</option><option value="sent">Envoyée</option><option value="paid">Payée ✓</option><option value="overdue">En retard</option><option value="cancelled">Annulée</option></select>
+      </div>
+    </div>
+    <div class="field"><label>Titre *</label><input type="text" id="invoice-title" placeholder="ex: Prestation TikTok janvier 2026"></div>
+    <div class="field-row">
+      <div class="field"><label>Date d'émission</label><input type="date" id="invoice-issue"></div>
+      <div class="field"><label>Date d'échéance</label><input type="date" id="invoice-due"></div>
+      <div class="field"><label>TVA %</label><input type="number" id="invoice-tax" value="15" min="0"></div>
+    </div>
+    <p style="font-size:0.55rem;letter-spacing:0.15em;text-transform:uppercase;color:rgba(239,214,177,0.3);margin-bottom:0.65rem;">Lignes</p>
+    <div id="invoice-lines"></div>
+    <button onclick="addInvoiceLine()" style="background:transparent;border:0.5px dashed rgba(239,214,177,0.15);color:rgba(239,214,177,0.4);padding:0.45rem 1rem;border-radius:0.5rem;font-size:0.68rem;cursor:pointer;width:100%;margin-bottom:0.85rem;font-family:'Plus Jakarta Sans',sans-serif;">+ Ajouter une ligne</button>
+    <div style="text-align:right;font-size:0.78rem;color:rgba(239,214,177,0.5);" id="invoice-total-preview"></div>
+    <div class="field"><label>Notes</label><textarea id="invoice-notes"></textarea></div>
+    <div class="modal-footer">
+      <button class="btn-ghost" onclick="closeModal('modal-invoice')">Annuler</button>
+      <button class="btn-primary" onclick="saveInvoice()">Enregistrer</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: Paiement -->
+<div class="modal-bg" id="modal-payment">
+  <div class="modal" style="max-width:420px;">
+    <h3>Enregistrer un paiement</h3>
+    <input type="hidden" id="payment-invoice-id">
+    <input type="hidden" id="payment-client-id">
+    <div class="field"><label>Montant (MUR) *</label><input type="number" id="payment-amount" step="100" placeholder="ex: 25000"></div>
+    <div class="field-row">
+      <div class="field"><label>Méthode</label>
+        <select id="payment-method"><option value="bank">Virement</option><option value="cash">Cash</option><option value="card">Carte</option><option value="mobile">Mobile</option></select>
+      </div>
+      <div class="field"><label>Date</label><input type="date" id="payment-date"></div>
+    </div>
+    <div class="field"><label>Référence</label><input type="text" id="payment-ref" placeholder="ex: TXN-2026-001"></div>
+    <div class="modal-footer">
+      <button class="btn-ghost" onclick="closeModal('modal-payment')">Annuler</button>
+      <button class="btn-primary" onclick="savePayment()">Enregistrer</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: Convertir lead en client -->
+<div class="modal-bg" id="modal-convert">
+  <div class="modal" style="max-width:420px;">
+    <h3>Convertir en client</h3>
+    <input type="hidden" id="convert-lead-id">
+    <div class="field"><label>Date de début partenariat</label><input type="date" id="convert-start"></div>
+    <div class="field-row">
+      <div class="field"><label>Package</label>
+        <select id="convert-package"><option value="">—</option><option>Starter</option><option>Growth</option><option>Performance</option><option>Custom</option></select>
+      </div>
+      <div class="field"><label>MRR (MUR)</label><input type="number" id="convert-mrr" placeholder="25000"></div>
+    </div>
+    <div class="field"><label>Heures vendues / mois</label><input type="number" id="convert-hours" placeholder="20" step="0.5"></div>
+    <div class="modal-footer">
+      <button class="btn-ghost" onclick="closeModal('modal-convert')">Annuler</button>
+      <button class="btn-primary" onclick="convertLead()">Créer le client →</button>
+    </div>
+  </div>
+</div>
+
 <script>
 // ═══════════════════════════════════════════════
 // STATE
@@ -605,7 +788,26 @@ document.addEventListener('DOMContentLoaded', async () => {
   document.getElementById('time-date').value = new Date().toISOString().split('T')[0];
   document.getElementById('header-month').textContent = fmtMonth(now);
   await Promise.all([loadTeam(), loadClients(), loadDefaults()]);
-  loadRentabilite();
+
+  // Populate dashboard member select
+  const dmSel = document.getElementById('dashboard-member');
+  teamData.forEach(m => dmSel.innerHTML += `<option value="${m.id}">${m.name}</option>`);
+
+  // Populate finance client selects
+  clientsData.forEach(c => {
+    document.getElementById('quote-client').innerHTML += `<option value="${c.id}">${c.name}</option>`;
+    document.getElementById('invoice-client').innerHTML += `<option value="${c.id}">${c.name}</option>`;
+  });
+
+  // Set finance month
+  document.getElementById('finance-month').value = new Date().toISOString().slice(0,7);
+
+  // Load notifications every 60s
+  loadNotifications();
+  setInterval(loadNotifications, 60000);
+
+  // Default to dashboard page
+  switchPage('dashboard');
 });
 
 function goToAnalytics() { window.location.href = '/'; }
@@ -618,14 +820,16 @@ function logout() {
 // ═══════════════════════════════════════════════
 // NAVIGATION
 // ═══════════════════════════════════════════════
-const PAGES = ['rentabilite','calendar','production','time','leads','settings'];
+const PAGES = ['dashboard','rentabilite','calendar','production','time','finance','leads','settings'];
 function switchPage(page) {
   PAGES.forEach(p => document.getElementById('page-'+p).classList.toggle('active', p===page));
   document.querySelectorAll('.nav-tab:not(.switch)').forEach((t,i) => t.classList.toggle('active', PAGES[i]===page));
   currentPage = page;
+  if (page==='dashboard') loadDashboard();
   if (page==='calendar') loadCalendar();
   if (page==='production') loadKanban();
   if (page==='time') loadTime();
+  if (page==='finance') { loadFinanceSummary(); loadQuotes(); loadInvoices(); }
   if (page==='leads') loadLeads();
   if (page==='settings') renderSettings();
 }
@@ -658,6 +862,8 @@ function populateTeamSelects() {
   });
   const tf = document.getElementById('time-filter-member');
   if (tf) tf.innerHTML='<option value="">Toute l\'équipe</option>'+opts;
+  const dm = document.getElementById('dashboard-member');
+  if (dm) { const prev=dm.value; dm.innerHTML='<option value="">— Vue globale —</option>'+opts; if(prev) dm.value=prev; }
 }
 
 function renderSettings() {
@@ -1189,6 +1395,7 @@ function renderLeads(leads) {
           <p class="pipeline-card-name">${esc(l.contact_name||'—')}</p>
           ${l.estimated_mrr?`<p class="pipeline-card-mrr">${fmtMUR(l.estimated_mrr)}/mois</p>`:''}
           ${l.next_action_date?`<p class="pipeline-card-date">Suivi : ${fmtDate(l.next_action_date)}</p>`:''}
+          ${(s==='negotiation'||s==='proposal')?`<button onclick="event.stopPropagation();openConvertModal(${l.id})" style="margin-top:0.5rem;width:100%;background:var(--teal);color:var(--dark);border:none;padding:0.3rem 0;font-family:'Plus Jakarta Sans',sans-serif;font-size:0.58rem;letter-spacing:0.08em;text-transform:uppercase;border-radius:0.35rem;cursor:pointer;">→ Convertir</button>`:''}
         </div>`).join('')||`<div style="padding:0.65rem;text-align:center;font-size:0.62rem;color:rgba(239,214,177,0.18);font-family:'Lora',serif;font-style:italic;">Vide</div>`}
       </div>
     </div>`).join('')}</div>`;
@@ -1237,6 +1444,412 @@ function showToast(msg,type=''){
 }
 
 document.querySelectorAll('.modal-bg').forEach(bg=>bg.addEventListener('click',e=>{if(e.target===bg)bg.classList.remove('open');}));
+
+// ═══════════════════════════════════════════════
+// MY DASHBOARD
+// ═══════════════════════════════════════════════
+async function loadDashboard() {
+  const memberId = document.getElementById('dashboard-member').value;
+  const today = new Date();
+  document.getElementById('dashboard-date').textContent = today.toLocaleDateString('fr-FR',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
+  if (!memberId) {
+    // Show global stats only
+    const finData = await api('GET','/api/finance/summary?month='+today.toISOString().slice(0,7));
+    if (finData) {
+      document.getElementById('d-revenue').textContent = fmtMUR(finData.received.total);
+      document.getElementById('d-pending').textContent = fmtMUR(finData.overdue.total);
+    }
+    // Shoots and posts today
+    const cal = await api('GET','/api/calendar?month='+today.toISOString().slice(0,7));
+    if (cal) {
+      const todayStr = today.toISOString().split('T')[0];
+      const shoots = (cal.items||[]).filter(i=>i.shoot_date?.split('T')[0]===todayStr);
+      const posts  = (cal.items||[]).filter(i=>i.post_date?.split('T')[0]===todayStr);
+      renderDashEvents('d-shoots-today', shoots, 'shoot');
+      renderDashEvents('d-posts-today', posts, 'post');
+    }
+    document.getElementById('d-week-hours').textContent = '—';
+    document.getElementById('d-month-hours').textContent = '—';
+    document.getElementById('d-my-tasks').innerHTML = '<p class="empty-text">Sélectionnez un membre</p>';
+    document.getElementById('d-my-videos').innerHTML = '<p class="empty-text">Sélectionnez un membre</p>';
+    return;
+  }
+  const data = await api('GET','/api/dashboard?member_id='+memberId);
+  if (!data) return;
+  document.getElementById('d-week-hours').textContent = (+data.weekHours).toFixed(1)+'h';
+  document.getElementById('d-month-hours').textContent = (+data.monthHours).toFixed(1)+'h';
+  document.getElementById('d-revenue').textContent = fmtMUR(data.revenueThisMonth);
+  document.getElementById('d-pending').textContent = fmtMUR(data.pendingInvoices.total)+' ('+data.pendingInvoices.count+')';
+  renderDashEvents('d-shoots-today', data.shootsToday||[], 'shoot');
+  renderDashEvents('d-posts-today', data.postsToday||[], 'post');
+
+  // Tasks
+  const tEl = document.getElementById('d-my-tasks');
+  tEl.innerHTML = (data.myTasks||[]).length ? data.myTasks.map(t=>`
+    <div style="display:flex;align-items:center;gap:0.6rem;padding:0.5rem 0;border-bottom:0.5px solid rgba(239,214,177,0.04);">
+      <span style="font-size:0.85rem;">${t.emoji||'📋'}</span>
+      <div style="flex:1;min-width:0;">
+        <p style="font-size:0.74rem;color:var(--cream);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${esc(t.video_title?.substring(0,30)||'—')}</p>
+        <p style="font-size:0.6rem;color:rgba(239,214,177,0.35);">${esc(t.client_name)} · ${t.stage}</p>
+      </div>
+      ${t.due_date?`<span style="font-size:0.6rem;color:${new Date(t.due_date)<new Date()?'var(--neg)':'rgba(239,214,177,0.3)'};">${fmtDate(t.due_date)}</span>`:''}
+    </div>`).join('') : '<p class="empty-text">Aucune tâche en attente</p>';
+
+  // Videos
+  const vEl = document.getElementById('d-my-videos');
+  vEl.innerHTML = (data.myVideos||[]).length ? data.myVideos.map(v=>`
+    <div style="display:flex;align-items:center;gap:0.6rem;padding:0.5rem 0;border-bottom:0.5px solid rgba(239,214,177,0.04);cursor:pointer;" onclick="openTaskPanel(${v.id})">
+      <span class="badge badge-${v.status}" style="flex-shrink:0;font-size:0.52rem;">${v.status}</span>
+      <div style="flex:1;min-width:0;"><p style="font-size:0.74rem;color:var(--cream);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${esc(v.title?.substring(0,35))}</p>
+      <p style="font-size:0.6rem;color:rgba(239,214,177,0.35);">${esc(v.client_name)}</p></div>
+      ${v.post_date?`<span style="font-size:0.6rem;color:rgba(239,214,177,0.3);">${fmtDate(v.post_date)}</span>`:''}
+    </div>`).join('') : '<p class="empty-text">Aucune vidéo en cours</p>';
+}
+
+function renderDashEvents(elId, items, type) {
+  const el = document.getElementById(elId);
+  if (!items.length) { el.innerHTML = '<p class="empty-text">Rien aujourd'hui</p>'; return; }
+  el.innerHTML = items.map(i=>`
+    <div style="display:flex;align-items:center;gap:0.6rem;padding:0.45rem 0;border-bottom:0.5px solid rgba(239,214,177,0.04);">
+      <div style="flex:1;min-width:0;">
+        <p style="font-size:0.74rem;color:var(--cream);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${esc(i.title?.substring(0,35)||i.title)}</p>
+        <p style="font-size:0.6rem;color:rgba(239,214,177,0.35);">${esc(i.client_name||i.cname||'')}</p>
+      </div>
+      ${i.assignee_name?`<div class="avatar" style="background:${i.assignee_color||'#618F9B'};width:20px;height:20px;">${i.assignee_name[0]}</div>`:''}
+    </div>`).join('');
+}
+
+// ═══════════════════════════════════════════════
+// NOTIFICATIONS
+// ═══════════════════════════════════════════════
+let notifOpen = false;
+async function loadNotifications() {
+  const data = await api('GET','/api/notifications');
+  if (!data) return;
+  const badge = document.getElementById('notif-badge');
+  if (data.unread > 0) {
+    badge.textContent = data.unread > 9 ? '9+' : data.unread;
+    badge.style.display = 'flex';
+  } else badge.style.display = 'none';
+
+  const list = document.getElementById('notif-list');
+  if (!data.notifications.length) {
+    list.innerHTML = '<p style="padding:1.25rem;text-align:center;font-family:'Lora',serif;font-style:italic;font-size:0.78rem;color:rgba(239,214,177,0.3);">Aucune notification</p>';
+    return;
+  }
+  list.innerHTML = data.notifications.map(n=>`
+    <div onclick="readNotif(${n.id})" style="padding:0.75rem 1rem;border-bottom:0.5px solid rgba(239,214,177,0.06);cursor:pointer;background:${n.read?'transparent':'rgba(97,143,155,0.05)'};transition:background 0.2s;">
+      <p style="font-size:0.75rem;color:var(--cream);margin-bottom:0.15rem;">${esc(n.title)}</p>
+      <p style="font-size:0.65rem;color:rgba(239,214,177,0.4);">${esc(n.body||'')}</p>
+      <p style="font-size:0.55rem;color:rgba(239,214,177,0.2);margin-top:0.2rem;">${fmtTimeAgo(n.created_at)}</p>
+    </div>`).join('');
+}
+
+function toggleNotifPanel() {
+  notifOpen = !notifOpen;
+  document.getElementById('notif-panel').style.display = notifOpen ? 'block' : 'none';
+  if (notifOpen) loadNotifications();
+}
+
+async function readNotif(id) {
+  await api('PUT','/api/notifications/'+id+'/read');
+  loadNotifications();
+}
+
+async function markAllRead() {
+  await api('PUT','/api/notifications/read-all');
+  loadNotifications();
+}
+
+document.addEventListener('click', e => {
+  if (notifOpen && !document.getElementById('notif-btn')?.contains(e.target) && !document.getElementById('notif-panel')?.contains(e.target)) {
+    notifOpen = false;
+    document.getElementById('notif-panel').style.display = 'none';
+  }
+});
+
+function fmtTimeAgo(dt) {
+  const diff = Date.now() - new Date(dt);
+  const m = Math.floor(diff/60000);
+  if (m < 2) return 'À l'instant';
+  if (m < 60) return m+'min';
+  const h = Math.floor(m/60);
+  if (h < 24) return h+'h';
+  return Math.floor(h/24)+'j';
+}
+
+// ═══════════════════════════════════════════════
+// FINANCE — QUOTES
+// ═══════════════════════════════════════════════
+let quoteLines = [], invoiceLines = [];
+
+function showFinanceTab(tab) {
+  ['quotes','invoices','payments'].forEach(t => {
+    document.getElementById('finance-'+t).style.display = t===tab?'block':'none';
+    document.getElementById('ftab-'+t).classList.toggle('active', t===tab);
+  });
+  if (tab==='quotes') loadQuotes();
+  if (tab==='invoices') loadInvoices();
+  if (tab==='payments') loadPayments();
+}
+
+async function loadFinanceSummary() {
+  const month = document.getElementById('finance-month').value || new Date().toISOString().slice(0,7);
+  const data = await api('GET','/api/finance/summary?month='+month);
+  if (!data) return;
+  document.getElementById('f-mrr').textContent = fmtMUR(data.mrr);
+  document.getElementById('f-invoiced').textContent = fmtMUR(data.invoiced.total);
+  document.getElementById('f-received').textContent = fmtMUR(data.received.total);
+  document.getElementById('f-overdue').textContent = fmtMUR(data.overdue.total)+(data.overdue.count?' ('+data.overdue.count+')':'');
+}
+
+const Q_STATUS = {draft:'Brouillon',sent:'Envoyé',accepted:'Accepté',refused:'Refusé',expired:'Expiré'};
+const I_STATUS = {draft:'Brouillon',sent:'Envoyée',paid:'Payée ✓',overdue:'En retard',cancelled:'Annulée'};
+
+async function loadQuotes() {
+  const data = await api('GET','/api/quotes');
+  if (!data) return;
+  const tbody = document.getElementById('quotes-table');
+  tbody.innerHTML = data.quotes.length ? data.quotes.map(q=>`
+    <tr>
+      <td style="font-family:monospace;font-size:0.72rem;color:rgba(239,214,177,0.5);">${esc(q.quote_number)}</td>
+      <td>${esc(q.title)}</td>
+      <td style="color:rgba(239,214,177,0.5);">${esc(q.client_name||q.lead_company||'—')}</td>
+      <td>${fmtMUR(q.subtotal)}</td>
+      <td style="color:var(--teal);font-weight:400;">${fmtMUR(q.total)}</td>
+      <td><span class="badge badge-${q.status==='accepted'?'won':q.status==='refused'?'lost':q.status==='sent'?'contacted':'new'}">${Q_STATUS[q.status]||q.status}</span></td>
+      <td style="color:rgba(239,214,177,0.4);font-size:0.72rem;">${q.valid_until?fmtDate(q.valid_until):'—'}</td>
+      <td><div class="action-btns">
+        <button class="action-btn" onclick="editQuote(${q.id})" title="Modifier">✎</button>
+        ${q.status!=='accepted'?`<button class="action-btn" onclick="quoteToInvoice(${q.id})" title="Convertir en facture" style="font-size:0.6rem;">→ FAC</button>`:''}
+      </div></td>
+    </tr>`).join('')
+  : `<tr><td colspan="8"><div class="empty"><div class="empty-icon">📋</div><p class="empty-text">Aucun devis</p></div></td></tr>`;
+}
+
+function openQuoteModal() {
+  quoteLines = [{description:'', quantity:1, unit_price:0}];
+  document.getElementById('quote-id').value='';
+  document.getElementById('quote-title').value='';
+  document.getElementById('quote-status').value='draft';
+  document.getElementById('quote-client').value='';
+  document.getElementById('quote-lead').value='';
+  document.getElementById('quote-valid').value='';
+  document.getElementById('quote-tax').value='15';
+  document.getElementById('quote-notes').value='';
+  document.getElementById('modal-quote-title').textContent='Nouveau devis';
+  renderQuoteLines();
+  // Populate lead select
+  api('GET','/api/leads').then(d=>{
+    const sel=document.getElementById('quote-lead');
+    sel.innerHTML='<option value="">— Client existant —</option>';
+    (d?.leads||[]).forEach(l=>sel.innerHTML+=`<option value="${l.id}">${esc(l.company)}</option>`);
+  });
+  openModal('modal-quote');
+}
+
+function renderQuoteLines() {
+  const el = document.getElementById('quote-lines');
+  el.innerHTML = quoteLines.map((l,i)=>`
+    <div style="display:grid;grid-template-columns:1fr 80px 110px 90px 30px;gap:0.4rem;margin-bottom:0.4rem;align-items:center;">
+      <input type="text" value="${esc(l.description)}" onchange="quoteLines[${i}].description=this.value" placeholder="Description..." style="background:rgba(239,214,177,0.04);border:0.5px solid rgba(239,214,177,0.11);border-radius:0.5rem;padding:0.5rem 0.75rem;color:var(--cream);font-family:'Plus Jakarta Sans',sans-serif;font-size:0.78rem;outline:none;">
+      <input type="number" value="${l.quantity}" onchange="quoteLines[${i}].quantity=+this.value;renderQuoteLines()" placeholder="Qté" min="0" step="0.5" style="background:rgba(239,214,177,0.04);border:0.5px solid rgba(239,214,177,0.11);border-radius:0.5rem;padding:0.5rem 0.5rem;color:var(--cream);font-family:'Plus Jakarta Sans',sans-serif;font-size:0.78rem;outline:none;text-align:center;">
+      <input type="number" value="${l.unit_price}" onchange="quoteLines[${i}].unit_price=+this.value;renderQuoteLines()" placeholder="Prix unit." min="0" step="100" style="background:rgba(239,214,177,0.04);border:0.5px solid rgba(239,214,177,0.11);border-radius:0.5rem;padding:0.5rem 0.5rem;color:var(--cream);font-family:'Plus Jakarta Sans',sans-serif;font-size:0.78rem;outline:none;">
+      <span style="font-size:0.75rem;color:var(--teal);text-align:right;padding-right:0.3rem;">${fmtMUR((l.quantity||0)*(l.unit_price||0))}</span>
+      <button onclick="quoteLines.splice(${i},1);renderQuoteLines()" style="background:transparent;border:none;color:rgba(239,214,177,0.3);cursor:pointer;font-size:0.9rem;">✕</button>
+    </div>`).join('');
+  const sub = quoteLines.reduce((s,l)=>s+(+l.quantity||0)*(+l.unit_price||0),0);
+  const tax = +document.getElementById('quote-tax')?.value||15;
+  document.getElementById('quote-total-preview').innerHTML = `HT: ${fmtMUR(sub)} · TVA ${tax}%: ${fmtMUR(sub*tax/100)} · <strong>TTC: ${fmtMUR(sub*(1+tax/100))}</strong>`;
+}
+
+function addQuoteLine() { quoteLines.push({description:'',quantity:1,unit_price:0}); renderQuoteLines(); }
+
+async function saveQuote() {
+  const id = document.getElementById('quote-id').value;
+  const body = {
+    title:document.getElementById('quote-title').value.trim(),
+    status:document.getElementById('quote-status').value,
+    client_id:document.getElementById('quote-client').value||null,
+    lead_id:document.getElementById('quote-lead').value||null,
+    valid_until:document.getElementById('quote-valid').value||null,
+    tax_rate:+document.getElementById('quote-tax').value||15,
+    notes:document.getElementById('quote-notes').value,
+    items:quoteLines,
+  };
+  if (!body.title) { showToast('Titre requis','err'); return; }
+  await api(id?'PUT':'POST', id?'/api/quotes/'+id:'/api/quotes', body);
+  closeModal('modal-quote');
+  showToast(id?'Devis mis à jour':'Devis créé');
+  loadQuotes();
+}
+
+async function editQuote(id) {
+  const data = await api('GET','/api/quotes/'+id); if(!data) return;
+  const q = data.quote;
+  document.getElementById('quote-id').value=q.id;
+  document.getElementById('quote-title').value=q.title;
+  document.getElementById('quote-status').value=q.status;
+  document.getElementById('quote-client').value=q.client_id||'';
+  document.getElementById('quote-valid').value=q.valid_until?q.valid_until.split('T')[0]:'';
+  document.getElementById('quote-tax').value=q.tax_rate||15;
+  document.getElementById('quote-notes').value=q.notes||'';
+  document.getElementById('modal-quote-title').textContent='Modifier devis';
+  quoteLines = data.items.map(i=>({description:i.description,quantity:+i.quantity,unit_price:+i.unit_price}));
+  if (!quoteLines.length) quoteLines=[{description:'',quantity:1,unit_price:0}];
+  renderQuoteLines();
+  openModal('modal-quote');
+}
+
+async function quoteToInvoice(quoteId) {
+  if (!confirm('Convertir ce devis en facture ?')) return;
+  const data = await api('POST','/api/quotes/'+quoteId+'/invoice');
+  if (data?.invoice) { showToast('Facture créée — '+data.invoice.invoice_number); showFinanceTab('invoices'); }
+}
+
+// ═══════════════════════════════════════════════
+// FINANCE — INVOICES
+// ═══════════════════════════════════════════════
+async function loadInvoices() {
+  const data = await api('GET','/api/invoices');
+  if (!data) return;
+  const tbody = document.getElementById('invoices-table');
+  tbody.innerHTML = data.invoices.length ? data.invoices.map(inv=>{
+    const balance = +inv.total - +inv.paid_amount;
+    const overdue = inv.status==='overdue';
+    return `<tr>
+      <td style="font-family:monospace;font-size:0.72rem;color:rgba(239,214,177,0.5);">${esc(inv.invoice_number)}</td>
+      <td>${esc(inv.title)}</td>
+      <td style="color:rgba(239,214,177,0.5);">${esc(inv.client_name)}</td>
+      <td>${fmtMUR(inv.total)}</td>
+      <td style="color:var(--teal);">${fmtMUR(inv.paid_amount)}</td>
+      <td style="color:${balance>0?(overdue?'var(--neg)':'var(--warn)'):'rgba(239,214,177,0.3)'};">${balance>0?fmtMUR(balance):'—'}</td>
+      <td><span class="badge badge-${inv.status==='paid'?'won':inv.status==='overdue'?'lost':inv.status==='sent'?'contacted':'new'}">${I_STATUS[inv.status]||inv.status}</span></td>
+      <td style="color:${overdue?'var(--neg)':'rgba(239,214,177,0.4)'};font-size:0.72rem;">${inv.due_date?fmtDate(inv.due_date):'—'}</td>
+      <td><div class="action-btns">
+        <button class="action-btn" onclick="editInvoice(${inv.id})">✎</button>
+        ${inv.status!=='paid'?`<button class="action-btn" onclick="openPaymentModal(${inv.id},${inv.client_id},${balance})" title="Enregistrer paiement" style="color:var(--teal);">💰</button>`:''}
+      </div></td>
+    </tr>`;}).join('')
+  : `<tr><td colspan="9"><div class="empty"><div class="empty-icon">🧾</div><p class="empty-text">Aucune facture</p></div></td></tr>`;
+}
+
+function openInvoiceModal() {
+  invoiceLines = [{description:'',quantity:1,unit_price:0}];
+  document.getElementById('invoice-id').value='';
+  document.getElementById('invoice-title').value='';
+  document.getElementById('invoice-status').value='draft';
+  document.getElementById('invoice-client').value='';
+  document.getElementById('invoice-issue').value=new Date().toISOString().split('T')[0];
+  const due=new Date(); due.setDate(due.getDate()+30);
+  document.getElementById('invoice-due').value=due.toISOString().split('T')[0];
+  document.getElementById('invoice-tax').value='15';
+  document.getElementById('invoice-notes').value='';
+  document.getElementById('modal-invoice-title').textContent='Nouvelle facture';
+  renderInvoiceLines();
+  openModal('modal-invoice');
+}
+
+function renderInvoiceLines() {
+  const el = document.getElementById('invoice-lines');
+  el.innerHTML = invoiceLines.map((l,i)=>`
+    <div style="display:grid;grid-template-columns:1fr 80px 110px 90px 30px;gap:0.4rem;margin-bottom:0.4rem;align-items:center;">
+      <input type="text" value="${esc(l.description)}" onchange="invoiceLines[${i}].description=this.value" placeholder="Description..." style="background:rgba(239,214,177,0.04);border:0.5px solid rgba(239,214,177,0.11);border-radius:0.5rem;padding:0.5rem 0.75rem;color:var(--cream);font-family:'Plus Jakarta Sans',sans-serif;font-size:0.78rem;outline:none;">
+      <input type="number" value="${l.quantity}" onchange="invoiceLines[${i}].quantity=+this.value;renderInvoiceLines()" placeholder="Qté" min="0" step="0.5" style="background:rgba(239,214,177,0.04);border:0.5px solid rgba(239,214,177,0.11);border-radius:0.5rem;padding:0.5rem 0.5rem;color:var(--cream);font-family:'Plus Jakarta Sans',sans-serif;font-size:0.78rem;outline:none;text-align:center;">
+      <input type="number" value="${l.unit_price}" onchange="invoiceLines[${i}].unit_price=+this.value;renderInvoiceLines()" placeholder="Prix unit." min="0" step="100" style="background:rgba(239,214,177,0.04);border:0.5px solid rgba(239,214,177,0.11);border-radius:0.5rem;padding:0.5rem 0.5rem;color:var(--cream);font-family:'Plus Jakarta Sans',sans-serif;font-size:0.78rem;outline:none;">
+      <span style="font-size:0.75rem;color:var(--teal);text-align:right;padding-right:0.3rem;">${fmtMUR((l.quantity||0)*(l.unit_price||0))}</span>
+      <button onclick="invoiceLines.splice(${i},1);renderInvoiceLines()" style="background:transparent;border:none;color:rgba(239,214,177,0.3);cursor:pointer;font-size:0.9rem;">✕</button>
+    </div>`).join('');
+  const sub=invoiceLines.reduce((s,l)=>s+(+l.quantity||0)*(+l.unit_price||0),0);
+  const tax=+document.getElementById('invoice-tax')?.value||15;
+  document.getElementById('invoice-total-preview').innerHTML=`HT: ${fmtMUR(sub)} · TVA ${tax}%: ${fmtMUR(sub*tax/100)} · <strong>TTC: ${fmtMUR(sub*(1+tax/100))}</strong>`;
+}
+
+function addInvoiceLine() { invoiceLines.push({description:'',quantity:1,unit_price:0}); renderInvoiceLines(); }
+
+async function saveInvoice() {
+  const id=document.getElementById('invoice-id').value;
+  const body={client_id:document.getElementById('invoice-client').value,title:document.getElementById('invoice-title').value.trim(),status:document.getElementById('invoice-status').value,issue_date:document.getElementById('invoice-issue').value,due_date:document.getElementById('invoice-due').value||null,tax_rate:+document.getElementById('invoice-tax').value||15,notes:document.getElementById('invoice-notes').value,items:invoiceLines};
+  if(!body.client_id||!body.title){showToast('Client et titre requis','err');return;}
+  await api(id?'PUT':'POST',id?'/api/invoices/'+id:'/api/invoices',body);
+  closeModal('modal-invoice');
+  showToast(id?'Facture mise à jour':'Facture créée');
+  loadInvoices();
+}
+
+async function editInvoice(id) {
+  const data=await api('GET','/api/invoices/'+id);if(!data)return;
+  const inv=data.invoice;
+  document.getElementById('invoice-id').value=inv.id;
+  document.getElementById('invoice-client').value=inv.client_id;
+  document.getElementById('invoice-title').value=inv.title;
+  document.getElementById('invoice-status').value=inv.status;
+  document.getElementById('invoice-issue').value=inv.issue_date?inv.issue_date.split('T')[0]:'';
+  document.getElementById('invoice-due').value=inv.due_date?inv.due_date.split('T')[0]:'';
+  document.getElementById('invoice-tax').value=inv.tax_rate||15;
+  document.getElementById('invoice-notes').value=inv.notes||'';
+  document.getElementById('modal-invoice-title').textContent='Modifier facture';
+  invoiceLines=data.items.map(i=>({description:i.description,quantity:+i.quantity,unit_price:+i.unit_price}));
+  if(!invoiceLines.length) invoiceLines=[{description:'',quantity:1,unit_price:0}];
+  renderInvoiceLines();
+  openModal('modal-invoice');
+}
+
+// ═══════════════════════════════════════════════
+// PAYMENTS
+// ═══════════════════════════════════════════════
+function openPaymentModal(invoiceId, clientId, balance) {
+  document.getElementById('payment-invoice-id').value=invoiceId;
+  document.getElementById('payment-client-id').value=clientId;
+  document.getElementById('payment-amount').value=balance||'';
+  document.getElementById('payment-date').value=new Date().toISOString().split('T')[0];
+  document.getElementById('payment-ref').value='';
+  openModal('modal-payment');
+}
+
+async function savePayment() {
+  const body={invoice_id:+document.getElementById('payment-invoice-id').value,client_id:+document.getElementById('payment-client-id').value,amount:+document.getElementById('payment-amount').value,method:document.getElementById('payment-method').value,reference:document.getElementById('payment-ref').value,paid_at:document.getElementById('payment-date').value};
+  if(!body.amount){showToast('Montant requis','err');return;}
+  await api('POST','/api/payments',body);
+  closeModal('modal-payment');
+  showToast('Paiement enregistré');
+  loadInvoices();
+  loadFinanceSummary();
+  loadNotifications();
+}
+
+async function loadPayments() {
+  const data=await api('GET','/api/invoices');if(!data)return;
+  // collect all payments via invoices — simplified view
+  const tbody=document.getElementById('payments-table');
+  tbody.innerHTML=`<tr><td colspan="6" style="text-align:center;padding:1.5rem;font-family:'Lora',serif;font-style:italic;color:rgba(239,214,177,0.3);">Sélectionnez une facture pour voir ses paiements</td></tr>`;
+}
+
+// ═══════════════════════════════════════════════
+// LEAD → CLIENT CONVERT
+// ═══════════════════════════════════════════════
+function openConvertModal(leadId) {
+  document.getElementById('convert-lead-id').value=leadId;
+  document.getElementById('convert-start').value=new Date().toISOString().split('T')[0];
+  document.getElementById('convert-mrr').value='';
+  document.getElementById('convert-hours').value='';
+  document.getElementById('convert-package').value='';
+  openModal('modal-convert');
+}
+
+async function convertLead() {
+  const id=document.getElementById('convert-lead-id').value;
+  const body={mazine_start_date:document.getElementById('convert-start').value,mrr:+document.getElementById('convert-mrr').value||0,package:document.getElementById('convert-package').value,hours_sold_per_month:+document.getElementById('convert-hours').value||0};
+  const data=await api('POST','/api/leads/'+id+'/convert',body);
+  if(!data)return;
+  closeModal('modal-convert');
+  showToast('🎉 Client créé — '+data.client?.name);
+  loadLeads();
+  loadNotifications();
+  setTimeout(()=>switchPage('rentabilite'),1500);
+}
+
+
 </script>
 </body>
 </html>

@@ -1039,7 +1039,7 @@ function renderContractsTable() {
   rows += uncontracted.map(c => `
     <tr style="opacity:0.55;">
       <td><strong style="color:var(--cream);">${esc(c.name)}</strong></td>
-      <td colspan="5"><span style="font-family:'Lora',serif;font-style:italic;font-size:0.75rem;color:rgba(239,214,177,0.3);">Aucun contrat configuré</span></td>
+      <td colspan="5"><span style="font-family:Lora,serif;font-style:italic;font-size:0.75rem;color:rgba(239,214,177,0.3);">Aucun contrat configuré</span></td>
       <td></td>
       <td><button class="btn-primary" style="font-size:0.6rem;padding:0.3rem 0.75rem;" onclick="newContract(${c.id},'${esc(c.name)}')">+ Configurer</button></td>
     </tr>`).join('');
@@ -1195,7 +1195,7 @@ async function loadRentabilite() {
       <td><div class="prog-wrap"><div class="prog-track"><div class="prog-fill ${pc}" style="width:${Math.min(ratio*100,100).toFixed(0)}%"></div></div><span class="prog-val">${hs.toFixed(1)}/${hv}h</span></div></td>
       <td style="color:rgba(239,214,177,0.4);">${c.videos_count}</td>
     </tr>`;
-  }).join('') : `<tr><td colspan="7" style="text-align:center;padding:2rem;font-family:'Lora',serif;font-style:italic;color:rgba(239,214,177,0.28);">Aucun client actif avec contrat</td></tr>`;
+  }).join('') : `<tr><td colspan="7" style="text-align:center;padding:2rem;font-family:Lora,serif;font-style:italic;color:rgba(239,214,177,0.28);">Aucun client actif avec contrat</td></tr>`;
 
   document.getElementById('member-table').innerHTML = byMember.map(m=>`
     <tr>
@@ -1334,7 +1334,7 @@ function renderKanban(items) {
               ${v.assignee_name?`<div class="avatar" style="background:${v.assignee_color||'#618F9B'};width:18px;height:18px;font-size:0.5rem;">${v.assignee_name[0]}</div>`:''}
             </div>
           </div>`).join('')}
-        ${!byStage[s.key].length?`<div style="padding:0.75rem;text-align:center;font-size:0.65rem;color:rgba(239,214,177,0.18);font-family:'Lora',serif;font-style:italic;">Vide</div>`:''}
+        ${!byStage[s.key].length?`<div style="padding:0.75rem;text-align:center;font-size:0.65rem;color:rgba(239,214,177,0.18);font-family:Lora,serif;font-style:italic;">Vide</div>`:''}
       </div>
     </div>`).join('');
 }
@@ -1590,7 +1590,7 @@ function renderLeads(leads) {
           ${l.estimated_mrr?`<p class="pipeline-card-mrr">${fmtMUR(l.estimated_mrr)}/mois</p>`:''}
           ${l.next_action_date?`<p class="pipeline-card-date">Suivi : ${fmtDate(l.next_action_date)}</p>`:''}
           ${(s==='negotiation'||s==='proposal')?`<button onclick="event.stopPropagation();openConvertModal(${l.id})" style="margin-top:0.5rem;width:100%;background:var(--teal);color:var(--dark);border:none;padding:0.3rem 0;font-family:'Plus Jakarta Sans',sans-serif;font-size:0.58rem;letter-spacing:0.08em;text-transform:uppercase;border-radius:0.35rem;cursor:pointer;">→ Convertir</button>`:''}
-        </div>`).join('')||`<div style="padding:0.65rem;text-align:center;font-size:0.62rem;color:rgba(239,214,177,0.18);font-family:'Lora',serif;font-style:italic;">Vide</div>`}
+        </div>`).join('')||`<div style="padding:0.65rem;text-align:center;font-size:0.62rem;color:rgba(239,214,177,0.18);font-family:Lora,serif;font-style:italic;">Vide</div>`}
       </div>
     </div>`).join('')}</div>`;
 }
@@ -1702,7 +1702,7 @@ async function loadDashboard() {
 
 function renderDashEvents(elId, items, type) {
   const el = document.getElementById(elId);
-  if (!items.length) { el.innerHTML = '<p class="empty-text">Rien aujourd'hui</p>'; return; }
+  if (!items.length) { el.innerHTML = '<p class="empty-text">Rien aujourd\'hui</p>'; return; }
   el.innerHTML = items.map(i=>`
     <div style="display:flex;align-items:center;gap:0.6rem;padding:0.45rem 0;border-bottom:0.5px solid rgba(239,214,177,0.04);">
       <div style="flex:1;min-width:0;">
@@ -1728,7 +1728,7 @@ async function loadNotifications() {
 
   const list = document.getElementById('notif-list');
   if (!data.notifications.length) {
-    list.innerHTML = '<p style="padding:1.25rem;text-align:center;font-family:'Lora',serif;font-style:italic;font-size:0.78rem;color:rgba(239,214,177,0.3);">Aucune notification</p>';
+    list.innerHTML = '<p style="padding:1.25rem;text-align:center;font-family:Lora,serif;font-style:italic;font-size:0.78rem;color:rgba(239,214,177,0.3);">Aucune notification</p>';
     return;
   }
   list.innerHTML = data.notifications.map(n=>`
@@ -1765,7 +1765,7 @@ document.addEventListener('click', e => {
 function fmtTimeAgo(dt) {
   const diff = Date.now() - new Date(dt);
   const m = Math.floor(diff/60000);
-  if (m < 2) return 'À l'instant';
+  if (m < 2) return 'À l\'instant';
   if (m < 60) return m+'min';
   const h = Math.floor(m/60);
   if (h < 24) return h+'h';
@@ -2016,7 +2016,7 @@ async function loadPayments() {
   const data=await api('GET','/api/invoices');if(!data)return;
   // collect all payments via invoices — simplified view
   const tbody=document.getElementById('payments-table');
-  tbody.innerHTML=`<tr><td colspan="6" style="text-align:center;padding:1.5rem;font-family:'Lora',serif;font-style:italic;color:rgba(239,214,177,0.3);">Sélectionnez une facture pour voir ses paiements</td></tr>`;
+  tbody.innerHTML=`<tr><td colspan="6" style="text-align:center;padding:1.5rem;font-family:Lora,serif;font-style:italic;color:rgba(239,214,177,0.3);">Sélectionnez une facture pour voir ses paiements</td></tr>`;
 }
 
 // ═══════════════════════════════════════════════

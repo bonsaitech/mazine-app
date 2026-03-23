@@ -1814,6 +1814,7 @@ async function loadQuotes() {
       <td><span class="badge badge-${q.status==='accepted'?'won':q.status==='refused'?'lost':q.status==='sent'?'contacted':'new'}">${Q_STATUS[q.status]||q.status}</span></td>
       <td style="color:rgba(239,214,177,0.4);font-size:0.72rem;">${q.valid_until?fmtDate(q.valid_until):'—'}</td>
       <td><div class="action-btns">
+        <button class="action-btn" onclick="downloadQuotePDF(${q.id}, '${q.quote_number}')" title="Télécharger PDF" style="color:var(--teal);">↓</button>
         <button class="action-btn" onclick="editQuote(${q.id})" title="Modifier">✎</button>
         ${q.status!=='accepted'?`<button class="action-btn" onclick="quoteToInvoice(${q.id})" title="Convertir en facture" style="font-size:0.6rem;">→ FAC</button>`:''}
       </div></td>
@@ -1876,6 +1877,33 @@ async function saveQuote() {
   closeModal('modal-quote');
   showToast(id?'Devis mis à jour':'Devis créé');
   loadQuotes();
+}
+
+async function downloadQuotePDF(quoteId, quoteNumber) {
+  showToast('Génération du PDF…');
+  try {
+    const res = await fetch('/api/quotes/' + quoteId + '/pdf', {
+      headers: { 'Authorization': 'Bearer ' + token }
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(()=>({}));
+      showToast(err.error || 'Erreur PDF', 'err');
+      return;
+    }
+    // Trigger download
+    const blob = await res.blob();
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'Mazine_Devis_' + quoteNumber + '.pdf';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    showToast('PDF téléchargé ✓');
+  } catch(err) {
+    showToast('Erreur : ' + err.message, 'err');
+  }
 }
 
 async function editQuote(id) {

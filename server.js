@@ -1394,6 +1394,95 @@ app.get('/api/finance/summary', auth, async (req, res) => {
   } catch(err) { res.status(500).json({ error: err.message }); }
 });
 
+// ── CARBONE PDF (devis) ──────────────────────────────
+app.get('/api/quotes/:id/pdf', auth, async (req, res) => {
+  const CARBONE_KEY = process.env.CARBONE_API_KEY;
+  const TEMPLATE_ID = process.env.CARBONE_TEMPLATE_QUOTE_ID;
+  if (!CARBONE_KEY || !TEMPLATE_ID) {
+    return res.status(500).json({ error: 'CARBONE_API_KEY ou CARBONE_TEMPLATE_QUOTE_ID manquant dans les variables Railway.' });
+  }
+  try {
+    // Fetch full quote data
+    const [q, items] = await Promise.all([
+      pool.query(`SELECT qu.*, c.name as client_name, l.company as lead_company,
+        cc.contact_name, cc.contact_email, cc.contact_phone
+        FROM quotes qu
+        LEFT JOIN clients c ON c.id=qu.client_id
+        LEFT JOIN leads l ON l.id=qu.lead_id
+        LEFT JOIN client_contracts cc ON cc.client_id=qu.client_id
+        WHERE qu.id=$1`, [req.params.id]),
+      pool.query('SELECT * FROM quote_items WHERE quote_id=$1 ORDER BY sort_order', [req.params.id]),
+    ]);
+    if (!q.rows.length) return res.status(404).json({ error: 'Devis introuvable.' });
+    const quote = q.rows[0];
+
+    // Format numbers
+    const fmt = n => {
+      n = Math.round((+n||0) * 100) / 100;
+      return new Intl.NumberFormat('fr-FR', { minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(n) + ' MUR';
+    };
+    const fmtDate = d => d ? new Date(d).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' }) : '—';
+
+    // Build Carbone data payload
+    const data = {
+      quote_number:    quote.quote_number,
+      title:           quote.title,
+      issue_date:      fmtDate(new Date()),
+      valid_until:     fmtDate(quote.valid_until),
+      client_name:     quote.client_name || quote.lead_company || '—',
+      contact_name:    quote.contact_name || '—',
+      contact_email:   quote.contact_email || '',
+      contact_phone:   quote.contact_phone || '',
+      subtotal_fmt:    fmt(quote.subtotal),
+      tax_rate:        quote.tax_rate || 15,
+      tax_amount_fmt:  fmt((+quote.subtotal) * (+quote.tax_rate||15) / 100),
+      total_fmt:       fmt(quote.total),
+      notes:           quote.notes || '',
+      items: items.rows.map(i => ({
+        description:    i.description,
+        quantity:       +i.quantity,
+        unit_price_fmt: fmt(i.unit_price),
+        total_fmt:      fmt(i.total),
+      })),
+    };
+
+    // Step 1: Render via Carbone Cloud API
+    // CARBONE_TEMPLATE_QUOTE_ID = templateId obtenu après upload du fichier mazine_devis_template.html sur app.carbone.io
+    const renderRes = await fetch(`https://api.carbone.io/render/${TEMPLATE_ID}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'carbone-version': '4',
+        'Authorization': 'Bearer ' + CARBONE_KEY,
+      },
+      body: JSON.stringify({ data, convertTo: 'pdf' }),
+    });
+
+    const renderJson = await renderRes.json();
+    if (renderJson.error) return res.status(500).json({ error: 'Carbone render error: ' + renderJson.error });
+    const renderId = renderJson.data?.renderId;
+    if (!renderId) return res.status(500).json({ error: 'Pas de renderId dans la réponse Carbone.' });
+
+    // Step 2: Download the rendered PDF
+    const pdfRes = await fetch(`https://api.carbone.io/render/${renderId}`, {
+      headers: { 'Authorization': 'Bearer ' + CARBONE_KEY },
+    });
+    if (!pdfRes.ok) return res.status(500).json({ error: 'Impossible de télécharger le PDF Carbone.' });
+
+    const pdfBuffer = await pdfRes.arrayBuffer();
+    const filename = `Mazine_Devis_${quote.quote_number}.pdf`;
+
+    res.set({
+      'Content-Type': 'application/pdf',
+      'Content-Disposition': `attachment; filename="${filename}"`,
+      'Content-Length': pdfBuffer.byteLength,
+    });
+    res.send(Buffer.from(pdfBuffer));
+  } catch(err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 // ── HELPER (server-side) ──────────────────────────────
 function fmtMURNode(n) { n=Math.round(+n||0); if(Math.abs(n)>=1000) return (n/1000).toFixed(1)+'K MUR'; return n+' MUR'; }
 

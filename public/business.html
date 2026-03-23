@@ -401,6 +401,17 @@ tbody tr:hover td { background: rgba(239,214,177,0.015); }
     <tbody id="team-table"></tbody></table>
   </div>
 
+  <p style="font-size:0.52rem;letter-spacing:0.15em;text-transform:uppercase;color:rgba(239,214,177,0.28);margin-bottom:0.75rem;">Contrats clients</p>
+  <div style="margin-bottom:1.5rem;">
+    <p style="font-family:'Lora',serif;font-style:italic;font-size:0.78rem;color:var(--cream-dim);margin-bottom:0.85rem;">Configurez le MRR, les heures vendues et les informations de contact pour chaque client.</p>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Client</th><th>Package</th><th>MRR (MUR)</th><th>H. vendues/mois</th><th>Début contrat</th><th>Contact</th><th>Statut</th><th></th></tr></thead>
+        <tbody id="contracts-table"></tbody>
+      </table>
+    </div>
+  </div>
+
   <p style="font-size:0.52rem;letter-spacing:0.15em;text-transform:uppercase;color:rgba(239,214,177,0.28);margin-bottom:0.75rem;">Durées par défaut des tâches</p>
   <div class="card" style="margin-bottom:1.5rem;">
     <p style="font-family:'Lora',serif;font-style:italic;font-size:0.78rem;color:var(--cream-dim);margin-bottom:1rem;">Ces durées s'appliquent automatiquement à chaque nouvelle vidéo créée.</p>
@@ -665,6 +676,76 @@ tbody tr:hover td { background: rgba(239,214,177,0.015); }
 
 <div class="toast" id="toast"></div>
 
+<!-- Modal: Contrat client -->
+<div class="modal-bg" id="modal-contract">
+  <div class="modal">
+    <h3 id="modal-contract-title">Configurer le contrat</h3>
+    <input type="hidden" id="contract-id">
+    <input type="hidden" id="contract-client-id">
+    <div class="field">
+      <label>Client</label>
+      <p id="contract-client-name" style="font-size:0.9rem;color:var(--cream);padding:0.4rem 0;"></p>
+    </div>
+    <div class="field-row">
+      <div class="field">
+        <label>Package</label>
+        <select id="contract-package">
+          <option value="">—</option>
+          <option value="Starter">Starter</option>
+          <option value="Growth">Growth</option>
+          <option value="Performance">Performance</option>
+          <option value="Custom">Custom</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Statut</label>
+        <select id="contract-status">
+          <option value="active">Actif</option>
+          <option value="paused">En pause</option>
+          <option value="churned">Churned</option>
+        </select>
+      </div>
+    </div>
+    <div class="field-row">
+      <div class="field">
+        <label>MRR (MUR) *</label>
+        <input type="number" id="contract-mrr" placeholder="ex: 25000" min="0" step="500">
+      </div>
+      <div class="field">
+        <label>Heures vendues / mois *</label>
+        <input type="number" id="contract-hours" placeholder="ex: 20" min="0" step="0.5">
+      </div>
+    </div>
+    <div class="field">
+      <label>Date début contrat</label>
+      <input type="date" id="contract-start">
+    </div>
+    <p style="font-size:0.52rem;letter-spacing:0.15em;text-transform:uppercase;color:rgba(239,214,177,0.28);margin:0.85rem 0 0.5rem;">Contact client</p>
+    <div class="field-row">
+      <div class="field">
+        <label>Nom du contact</label>
+        <input type="text" id="contract-contact-name" placeholder="Prénom Nom">
+      </div>
+      <div class="field">
+        <label>Téléphone</label>
+        <input type="tel" id="contract-contact-phone" placeholder="+230">
+      </div>
+    </div>
+    <div class="field">
+      <label>Email</label>
+      <input type="email" id="contract-contact-email" placeholder="contact@...">
+    </div>
+    <div class="field">
+      <label>Notes</label>
+      <textarea id="contract-notes" placeholder="Objectifs, spécificités du contrat..."></textarea>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-ghost" onclick="closeModal('modal-contract')">Annuler</button>
+      <button class="btn-primary" onclick="saveContract()">Enregistrer</button>
+    </div>
+  </div>
+</div>
+
 <!-- Modal: Devis -->
 <div class="modal-bg" id="modal-quote">
   <div class="modal modal-wide">
@@ -788,6 +869,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   document.getElementById('time-date').value = new Date().toISOString().split('T')[0];
   document.getElementById('header-month').textContent = fmtMonth(now);
   await Promise.all([loadTeam(), loadClients(), loadDefaults()]);
+  await loadContracts();
 
   // Populate dashboard member select
   const dmSel = document.getElementById('dashboard-member');
@@ -867,6 +949,7 @@ function populateTeamSelects() {
 }
 
 function renderSettings() {
+  loadContracts(); // always refresh contracts when entering settings
   const tbody = document.getElementById('team-table');
   tbody.innerHTML = teamData.map(m=>`
     <tr>
@@ -916,6 +999,117 @@ async function deleteTeam(id) {
   showToast('Membre supprimé');
   await loadTeam();
   renderSettings();
+}
+
+// ═══════════════════════════════════════════════
+// CONTRACTS
+// ═══════════════════════════════════════════════
+let contractsData = [];
+
+async function loadContracts() {
+  const d = await api('GET', '/api/contracts');
+  contractsData = d?.contracts || [];
+  renderContractsTable();
+}
+
+function renderContractsTable() {
+  const tbody = document.getElementById('contracts-table');
+  if (!tbody) return;
+
+  // Also show clients WITHOUT a contract so they can be configured
+  const contractedIds = new Set(contractsData.map(c => +c.client_id));
+  const uncontracted = clientsData.filter(c => !contractedIds.has(c.id));
+
+  let rows = '';
+
+  // Clients with contracts
+  rows += contractsData.map(c => `
+    <tr>
+      <td><strong style="color:var(--cream);">${esc(c.client_name)}</strong></td>
+      <td><span style="font-size:0.72rem;color:rgba(239,214,177,0.5);">${esc(c.package||'—')}</span></td>
+      <td style="color:var(--teal);font-weight:400;">${fmtMUR(c.mrr)}</td>
+      <td style="color:rgba(239,214,177,0.5);">${(+c.hours_sold_per_month).toFixed(1)}h</td>
+      <td style="color:rgba(239,214,177,0.4);font-size:0.72rem;">${c.contract_start ? fmtDate(c.contract_start) : '—'}</td>
+      <td style="color:rgba(239,214,177,0.4);font-size:0.72rem;">${esc(c.contact_name||'—')}</td>
+      <td><span class="badge badge-${c.status==='active'?'won':c.status==='paused'?'contacted':'lost'}" style="font-size:0.55rem;">${c.status==='active'?'Actif':c.status==='paused'?'Pause':'Churned'}</span></td>
+      <td><button class="action-btn" onclick="editContract(${c.id}, ${c.client_id})">✎</button></td>
+    </tr>`).join('');
+
+  // Clients without contracts — prompt to configure
+  rows += uncontracted.map(c => `
+    <tr style="opacity:0.55;">
+      <td><strong style="color:var(--cream);">${esc(c.name)}</strong></td>
+      <td colspan="5"><span style="font-family:'Lora',serif;font-style:italic;font-size:0.75rem;color:rgba(239,214,177,0.3);">Aucun contrat configuré</span></td>
+      <td></td>
+      <td><button class="btn-primary" style="font-size:0.6rem;padding:0.3rem 0.75rem;" onclick="newContract(${c.id},'${esc(c.name)}')">+ Configurer</button></td>
+    </tr>`).join('');
+
+  if (!rows) {
+    tbody.innerHTML = `<tr><td colspan="8"><div class="empty"><div class="empty-icon">📋</div><p class="empty-text">Aucun client — créez-en un depuis Analytics</p></div></td></tr>`;
+    return;
+  }
+  tbody.innerHTML = rows;
+}
+
+function newContract(clientId, clientName) {
+  document.getElementById('contract-id').value = '';
+  document.getElementById('contract-client-id').value = clientId;
+  document.getElementById('contract-client-name').textContent = clientName;
+  document.getElementById('contract-package').value = '';
+  document.getElementById('contract-status').value = 'active';
+  document.getElementById('contract-mrr').value = '';
+  document.getElementById('contract-hours').value = '';
+  document.getElementById('contract-start').value = new Date().toISOString().split('T')[0];
+  document.getElementById('contract-contact-name').value = '';
+  document.getElementById('contract-contact-phone').value = '';
+  document.getElementById('contract-contact-email').value = '';
+  document.getElementById('contract-notes').value = '';
+  document.getElementById('modal-contract-title').textContent = 'Configurer — ' + clientName;
+  openModal('modal-contract');
+}
+
+function editContract(contractId, clientId) {
+  const c = contractsData.find(x => x.id === contractId);
+  if (!c) return;
+  document.getElementById('contract-id').value = c.id;
+  document.getElementById('contract-client-id').value = clientId;
+  document.getElementById('contract-client-name').textContent = c.client_name;
+  document.getElementById('contract-package').value = c.package || '';
+  document.getElementById('contract-status').value = c.status || 'active';
+  document.getElementById('contract-mrr').value = c.mrr || '';
+  document.getElementById('contract-hours').value = c.hours_sold_per_month || '';
+  document.getElementById('contract-start').value = c.contract_start ? c.contract_start.split('T')[0] : '';
+  document.getElementById('contract-contact-name').value = c.contact_name || '';
+  document.getElementById('contract-contact-phone').value = c.contact_phone || '';
+  document.getElementById('contract-contact-email').value = c.contact_email || '';
+  document.getElementById('contract-notes').value = c.notes || '';
+  document.getElementById('modal-contract-title').textContent = 'Modifier — ' + c.client_name;
+  openModal('modal-contract');
+}
+
+async function saveContract() {
+  const id = document.getElementById('contract-id').value;
+  const clientId = document.getElementById('contract-client-id').value;
+  const body = {
+    client_id: clientId,
+    package: document.getElementById('contract-package').value || null,
+    mrr: +document.getElementById('contract-mrr').value || 0,
+    hours_sold_per_month: +document.getElementById('contract-hours').value || 0,
+    contract_start: document.getElementById('contract-start').value || null,
+    status: document.getElementById('contract-status').value || 'active',
+    contact_name: document.getElementById('contract-contact-name').value,
+    contact_phone: document.getElementById('contract-contact-phone').value,
+    contact_email: document.getElementById('contract-contact-email').value,
+    notes: document.getElementById('contract-notes').value,
+  };
+  if (!body.client_id) { showToast('Client requis', 'err'); return; }
+  const data = id
+    ? await api('PUT', '/api/contracts/' + id, body)
+    : await api('POST', '/api/contracts', body);
+  if (!data) return;
+  closeModal('modal-contract');
+  showToast(id ? 'Contrat mis à jour' : 'Contrat créé — visible dans Rentabilité');
+  await loadContracts();
 }
 
 // ═══════════════════════════════════════════════

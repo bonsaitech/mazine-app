@@ -779,7 +779,7 @@ app.get('/api/rentabilite', auth, async (req, res) => {
     // Per client profitability
     const { rows: clients } = await pool.query(`
       SELECT
-        c.id, c.name,
+        c.id, c.name as client_name,
         COALESCE(cc.mrr, 0) as mrr,
         COALESCE(cc.hours_sold_per_month, 0) as hours_sold,
         COALESCE(cc.package, '—') as package,
@@ -795,7 +795,7 @@ app.get('/api/rentabilite', auth, async (req, res) => {
       LEFT JOIN content_items ci ON ci.client_id = c.id
         AND DATE_TRUNC('month', COALESCE(ci.post_date, ci.created_at)) = DATE_TRUNC('month', ($1 || '-01')::date)
       WHERE cc.status = 'active' OR cc.status IS NULL
-      GROUP BY c.id, c.name, cc.mrr, cc.hours_sold_per_month, cc.package
+      GROUP BY c.id, c.name, cc.id, cc.mrr, cc.hours_sold_per_month, cc.package
       ORDER BY margin ASC`,
       [monthFilter]
     );
@@ -825,7 +825,7 @@ app.get('/api/rentabilite', auth, async (req, res) => {
     // Alerts: clients over budget
     const alerts = clients
       .filter(c => +c.hours_sold > 0 && +c.hours_spent > +c.hours_sold)
-      .map(c => ({ client: c.name, hours_spent: +c.hours_spent, hours_sold: +c.hours_sold, over: +(c.hours_spent - c.hours_sold).toFixed(1) }));
+      .map(c => ({ client: c.client_name, hours_spent: +c.hours_spent, hours_sold: +c.hours_sold, over: +(c.hours_spent - c.hours_sold).toFixed(1) }));
 
     res.json({
       month: monthFilter,

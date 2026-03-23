@@ -317,10 +317,10 @@ async function initDB() {
   `);
 
   // Mark overdue invoices automatically
-  await pool.query(\`
+  await pool.query(`
     UPDATE invoices SET status='overdue'
     WHERE status='sent' AND due_date < CURRENT_DATE
-  \`);
+  `);
 
   console.log('DB ready');
 }
@@ -1260,7 +1260,7 @@ app.get('/api/notifications', auth, async (req, res) => {
     }
 
     // Return all unread + recent read
-    let q = 'SELECT * FROM notifications WHERE (read=false OR created_at > NOW()-INTERVAL '7 days')';
+    let q = `SELECT * FROM notifications WHERE (read=false OR created_at > NOW()-INTERVAL '7 days')`;
     const params = [];
     if (member_id) { params.push(member_id); q += ` AND (target_member_id=$${params.length} OR target_member_id IS NULL)`; }
     else q += ' AND target_member_id IS NULL';

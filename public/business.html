@@ -1818,7 +1818,7 @@ async function loadQuotes() {
       <td>${esc(q.title)}</td>
       <td style="color:rgba(239,214,177,0.5);">${esc(q.client_name||q.lead_company||'—')}</td>
       <td>${fmtMUR(q.subtotal)}</td>
-      <td style="color:var(--teal);font-weight:400;">${fmtMUR(q.total)}</td>
+      <td style="color:var(--teal);font-weight:400;">${fmtMUR(+q.subtotal * (1 + (+q.tax_rate||0)/100))}</td>
       <td><span class="badge badge-${q.status==='accepted'?'won':q.status==='refused'?'lost':q.status==='sent'?'contacted':'new'}">${Q_STATUS[q.status]||q.status}</span></td>
       <td style="color:rgba(239,214,177,0.4);font-size:0.72rem;">${q.valid_until?fmtDate(q.valid_until):'—'}</td>
       <td><div class="action-btns">

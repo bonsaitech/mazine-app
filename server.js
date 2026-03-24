@@ -322,8 +322,21 @@ async function initDB() {
     WHERE status='sent' AND due_date < CURRENT_DATE
   `);
 
-  // Add subtitle column if not exists (migration)
+  // Migrations
   await pool.query(`ALTER TABLE quotes ADD COLUMN IF NOT EXISTS subtitle TEXT DEFAULT ''`);
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS products (
+      id SERIAL PRIMARY KEY,
+      name TEXT NOT NULL,
+      description TEXT DEFAULT '',
+      category TEXT DEFAULT 'Service',
+      unit_price NUMERIC(10,2) NOT NULL DEFAULT 0,
+      unit TEXT DEFAULT 'forfait',        -- forfait / heure / mois / vidéo
+      active BOOLEAN DEFAULT true,
+      sort_order INTEGER DEFAULT 0,
+      created_at TIMESTAMPTZ DEFAULT NOW()
+    )
+  `);
 
   console.log('DB ready');
 }
@@ -1394,6 +1407,44 @@ app.get('/api/finance/summary', auth, async (req, res) => {
       overdue:  { total: +overdue.rows[0].total, count: +overdue.rows[0].count },
       mrr:      +mrr.rows[0].total,
     });
+  } catch(err) { res.status(500).json({ error: err.message }); }
+});
+
+// ── PRODUCTS / CATALOGUE ─────────────────────────────
+app.get('/api/products', auth, async (req, res) => {
+  try {
+    const { rows } = await pool.query('SELECT * FROM products WHERE active=true ORDER BY category, sort_order, name');
+    res.json({ products: rows });
+  } catch(err) { res.status(500).json({ error: err.message }); }
+});
+
+app.post('/api/products', auth, async (req, res) => {
+  const { name, description, category, unit_price, unit } = req.body;
+  if (!name?.trim()) return res.status(400).json({ error: 'Nom requis.' });
+  try {
+    const { rows } = await pool.query(
+      'INSERT INTO products (name,description,category,unit_price,unit) VALUES ($1,$2,$3,$4,$5) RETURNING *',
+      [name.trim(), description||'', category||'Service', unit_price||0, unit||'forfait']
+    );
+    res.json({ product: rows[0] });
+  } catch(err) { res.status(500).json({ error: err.message }); }
+});
+
+app.put('/api/products/:id', auth, async (req, res) => {
+  const { name, description, category, unit_price, unit } = req.body;
+  try {
+    const { rows } = await pool.query(
+      'UPDATE products SET name=$1,description=$2,category=$3,unit_price=$4,unit=$5 WHERE id=$6 RETURNING *',
+      [name, description||'', category||'Service', unit_price||0, unit||'forfait', req.params.id]
+    );
+    res.json({ product: rows[0] });
+  } catch(err) { res.status(500).json({ error: err.message }); }
+});
+
+app.delete('/api/products/:id', auth, async (req, res) => {
+  try {
+    await pool.query('UPDATE products SET active=false WHERE id=$1', [req.params.id]);
+    res.json({ ok: true });
   } catch(err) { res.status(500).json({ error: err.message }); }
 });
 

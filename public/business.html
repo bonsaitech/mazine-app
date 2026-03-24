@@ -582,6 +582,10 @@ tbody tr:hover td { background: rgba(239,214,177,0.015); }
     </div>
     <div class="field-row">
       <div class="field"><label>Téléphone</label><input type="tel" id="lead-phone" placeholder="+230"></div>
+      <div class="field"><label>Email</label><input type="email" id="lead-email" placeholder="contact@..."></div>
+    </div>
+    <div class="field-row">
+      <div class="field"></div>
       <div class="field"><label>Statut</label>
         <select id="lead-status">
           <option value="new">Nouveau</option><option value="contacted">Contacté</option>
@@ -1566,7 +1570,7 @@ const LEAD_ST=['new','contacted','qualified','proposal','negotiation','won','los
 const LEAD_LB={new:'Nouveau',contacted:'Contacté',qualified:'Qualifié',proposal:'Devis',negotiation:'Négociation',won:'Gagné',lost:'Perdu'};
 
 function openLeadModal(){
-  ['lead-id','lead-company','lead-contact','lead-phone','lead-mrr','lead-notes','lead-next-action'].forEach(id=>document.getElementById(id).value='');
+  ['lead-id','lead-company','lead-contact','lead-phone','lead-email','lead-mrr','lead-notes','lead-next-action'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
   document.getElementById('lead-status').value='new';
   document.getElementById('lead-service').value='';
   document.getElementById('lead-owner').value='';
@@ -1604,6 +1608,7 @@ async function editLead(id) {
   document.getElementById('lead-company').value=l.company;
   document.getElementById('lead-contact').value=l.contact_name||'';
   document.getElementById('lead-phone').value=l.phone||'';
+  if(document.getElementById('lead-email')) document.getElementById('lead-email').value=l.email||'';
   document.getElementById('lead-status').value=l.status;
   document.getElementById('lead-service').value=l.service_type||'';
   document.getElementById('lead-mrr').value=l.estimated_mrr||'';
@@ -1616,7 +1621,8 @@ async function editLead(id) {
 
 async function saveLead() {
   const id=document.getElementById('lead-id').value;
-  const body={company:document.getElementById('lead-company').value.trim(),contact_name:document.getElementById('lead-contact').value,phone:document.getElementById('lead-phone').value,status:document.getElementById('lead-status').value,service_type:document.getElementById('lead-service').value,estimated_mrr:+document.getElementById('lead-mrr').value||null,owner_id:document.getElementById('lead-owner').value||null,next_action_date:document.getElementById('lead-next-action').value||null,notes:document.getElementById('lead-notes').value,source:'referral',probability:50};
+  const email=document.getElementById('lead-email')?.value||'';
+  const body={company:document.getElementById('lead-company').value.trim(),contact_name:document.getElementById('lead-contact').value,phone:document.getElementById('lead-phone').value,email,status:document.getElementById('lead-status').value,service_type:document.getElementById('lead-service').value,estimated_mrr:+document.getElementById('lead-mrr').value||null,owner_id:document.getElementById('lead-owner').value||null,next_action_date:document.getElementById('lead-next-action').value||null,notes:document.getElementById('lead-notes').value,source:'referral',probability:50};
   if(!body.company){showToast('Entreprise requise','err');return;}
   await api(id?'PUT':'POST',id?'/api/leads/'+id:'/api/leads',body);
   closeModal('modal-lead');
@@ -1858,7 +1864,7 @@ function renderQuoteLines() {
       <button onclick="quoteLines.splice(${i},1);renderQuoteLines()" style="background:transparent;border:none;color:rgba(239,214,177,0.3);cursor:pointer;font-size:0.9rem;">✕</button>
     </div>`).join('');
   const sub = quoteLines.reduce((s,l)=>s+(+l.quantity||0)*(+l.unit_price||0),0);
-  const tax = +document.getElementById('quote-tax')?.value||15;
+  const taxVal = document.getElementById('quote-tax')?.value; const tax = taxVal !== '' && taxVal != null ? +taxVal : 15;
   document.getElementById('quote-total-preview').innerHTML = `HT: ${fmtMUR(sub)} · TVA ${tax}%: ${fmtMUR(sub*tax/100)} · <strong>TTC: ${fmtMUR(sub*(1+tax/100))}</strong>`;
 }
 

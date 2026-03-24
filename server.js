@@ -1011,7 +1011,7 @@ app.post('/api/quotes', auth, async (req, res) => {
     await client.query('BEGIN');
     const qnum = await nextQuoteNumber();
     const subtotal = (items||[]).reduce((s,i) => s + (+i.quantity||1)*(+i.unit_price||0), 0);
-    const tax = subtotal * (+tax_rate||15) / 100;
+    const tax = subtotal * (tax_rate != null ? +tax_rate : 15) / 100;
     const total = subtotal + tax;
     const { rows } = await client.query(`
       INSERT INTO quotes (lead_id,client_id,quote_number,title,subtitle,valid_until,notes,subtotal,tax_rate,total,created_by)
@@ -1036,7 +1036,7 @@ app.put('/api/quotes/:id', auth, async (req, res) => {
   try {
     await client.query('BEGIN');
     const subtotal = (items||[]).reduce((s,i) => s + (+i.quantity||1)*(+i.unit_price||0), 0);
-    const total = subtotal + subtotal*(+tax_rate||15)/100;
+    const total = subtotal + subtotal*(tax_rate != null ? +tax_rate : 15)/100;
     const { rows } = await client.query(`
       UPDATE quotes SET title=$1,subtitle=$2,status=$3,valid_until=$4,notes=$5,subtotal=$6,tax_rate=$7,total=$8,updated_at=NOW()
       WHERE id=$9 RETURNING *`,
@@ -1438,7 +1438,7 @@ app.get('/api/quotes/:id/pdf', auth, async (req, res) => {
     const scopeTerms = notesParts[0].trim();
     const addons     = notesParts[1]?.trim() || '';
 
-    const taxAmt = (+quote.subtotal) * (+quote.tax_rate||15) / 100;
+    const taxAmt = (+quote.subtotal) * (quote.tax_rate != null ? +quote.tax_rate : 15) / 100;
     const data = {
       quote_number:    quote.quote_number,
       title:           quote.title,

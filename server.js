@@ -324,6 +324,10 @@ async function initDB() {
 
   // Migrations
   await pool.query(`ALTER TABLE quotes ADD COLUMN IF NOT EXISTS subtitle TEXT DEFAULT ''`);
+  await pool.query(`ALTER TABLE content_items ADD COLUMN IF NOT EXISTS video_type TEXT DEFAULT 'brand_universe'`);
+  await pool.query(`ALTER TABLE client_contracts ADD COLUMN IF NOT EXISTS target_brand_universe INT DEFAULT 0`);
+  await pool.query(`ALTER TABLE client_contracts ADD COLUMN IF NOT EXISTS target_carrousel INT DEFAULT 0`);
+  await pool.query(`ALTER TABLE client_contracts ADD COLUMN IF NOT EXISTS target_authority INT DEFAULT 0`);
   await pool.query(`
     CREATE TABLE IF NOT EXISTS products (
       id SERIAL PRIMARY KEY,
@@ -620,12 +624,14 @@ app.post('/api/contracts', auth, async (req, res) => {
 });
 
 app.put('/api/contracts/:id', auth, async (req, res) => {
-  const { package: pkg, mrr, hours_sold_per_month, contract_start, contract_end, status, contact_name, contact_phone, contact_email, notes } = req.body;
+  const { package: pkg, mrr, hours_sold_per_month, contract_start, contract_end, status, contact_name, contact_phone, contact_email, notes, target_brand_universe, target_carrousel, target_authority } = req.body;
   try {
     const { rows } = await pool.query(`
-      UPDATE client_contracts SET package=$1,mrr=$2,hours_sold_per_month=$3,contract_start=$4,contract_end=$5,status=$6,contact_name=$7,contact_phone=$8,contact_email=$9,notes=$10,updated_at=NOW()
-      WHERE id=$11 RETURNING *`,
-      [pkg, mrr, hours_sold_per_month, contract_start||null, contract_end||null, status, contact_name, contact_phone, contact_email, notes, req.params.id]
+      UPDATE client_contracts SET package=$1,mrr=$2,hours_sold_per_month=$3,contract_start=$4,contract_end=$5,status=$6,contact_name=$7,contact_phone=$8,contact_email=$9,notes=$10,
+        target_brand_universe=$11,target_carrousel=$12,target_authority=$13,updated_at=NOW()
+      WHERE id=$14 RETURNING *`,
+      [pkg, mrr, hours_sold_per_month, contract_start||null, contract_end||null, status, contact_name, contact_phone, contact_email, notes,
+       target_brand_universe||0, target_carrousel||0, target_authority||0, req.params.id]
     );
     res.json({ contract: rows[0] });
   } catch (err) { res.status(500).json({ error: err.message }); }
@@ -802,7 +808,14 @@ app.get('/api/rentabilite', auth, async (req, res) => {
         COALESCE(SUM(te.hours), 0) as hours_spent,
         COALESCE(SUM(te.hours * tm.hourly_rate), 0) as total_cost,
         COALESCE(cc.mrr, 0) - COALESCE(SUM(te.hours * tm.hourly_rate), 0) as margin,
-        COUNT(DISTINCT ci.id) as videos_count
+        -- Video counts by type (posted or boosted this month)
+        COUNT(DISTINCT ci.id) FILTER (WHERE ci.status IN ('posted','boosted')) as videos_total,
+        COUNT(DISTINCT ci.id) FILTER (WHERE ci.status IN ('posted','boosted') AND ci.video_type='brand_universe') as videos_brand,
+        COUNT(DISTINCT ci.id) FILTER (WHERE ci.status IN ('posted','boosted') AND ci.video_type='carrousel') as videos_carrousel,
+        COUNT(DISTINCT ci.id) FILTER (WHERE ci.status IN ('posted','boosted') AND ci.video_type='authority') as videos_authority,
+        COALESCE(cc.target_brand_universe, 0) as target_brand,
+        COALESCE(cc.target_carrousel, 0) as target_carrousel,
+        COALESCE(cc.target_authority, 0) as target_authority
       FROM clients c
       LEFT JOIN client_contracts cc ON cc.client_id = c.id AND cc.status = 'active'
       LEFT JOIN time_entries te ON te.client_id = c.id
@@ -811,7 +824,8 @@ app.get('/api/rentabilite', auth, async (req, res) => {
       LEFT JOIN content_items ci ON ci.client_id = c.id
         AND DATE_TRUNC('month', COALESCE(ci.post_date, ci.created_at)) = DATE_TRUNC('month', ($1 || '-01')::date)
       WHERE cc.status = 'active' OR cc.status IS NULL
-      GROUP BY c.id, c.name, cc.id, cc.mrr, cc.hours_sold_per_month, cc.package
+      GROUP BY c.id, c.name, cc.id, cc.mrr, cc.hours_sold_per_month, cc.package,
+               cc.target_brand_universe, cc.target_carrousel, cc.target_authority
       ORDER BY margin ASC`,
       [monthFilter]
     );

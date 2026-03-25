@@ -359,7 +359,7 @@ tbody tr:hover td { background: rgba(239,214,177,0.015); }
   </div>
   <p style="font-size:0.52rem;letter-spacing:0.18em;text-transform:uppercase;color:rgba(239,214,177,0.28);margin-bottom:0.75rem;">Par client</p>
   <div class="table-wrap" style="margin-bottom:1.25rem;">
-    <table><thead><tr><th>Client</th><th>Package</th><th>MRR</th><th>Coût</th><th>Marge</th><th>Heures</th><th>Vidéos</th></tr></thead>
+    <table><thead><tr><th>Client</th><th>Package</th><th>MRR</th><th>Coût</th><th>Marge</th><th>Heures</th><th>Publications</th></tr></thead>
     <tbody id="rentabilite-table"></tbody></table>
   </div>
   <p style="font-size:0.52rem;letter-spacing:0.18em;text-transform:uppercase;color:rgba(239,214,177,0.28);margin-bottom:0.75rem;">Par membre</p>
@@ -546,6 +546,16 @@ tbody tr:hover td { background: rgba(239,214,177,0.015); }
       <div class="field"><label>Assigné à</label><select id="content-assignee"><option value="">Non assigné</option></select></div>
     </div>
     <div class="field"><label>Titre / Hook *</label><input type="text" id="content-title" placeholder="ex: LaRivière – Why Mauritian restaurants fail – Jan W2"></div>
+    <div class="field-row">
+      <div class="field"><label>Type de contenu *</label>
+        <select id="content-video-type">
+          <option value="brand_universe">🌍 Brand Universe Video</option>
+          <option value="carrousel">📊 Strategic Carrousel</option>
+          <option value="authority">🎤 Authority Video (FaceCam / VO)</option>
+        </select>
+      </div>
+      <div class="field" style="opacity:0;pointer-events:none;"></div>
+    </div>
     <div class="field-row">
       <div class="field"><label>Statut</label>
         <select id="content-status">
@@ -1184,6 +1194,7 @@ function newContract(clientId, clientName) {
   document.getElementById('contract-contact-phone').value = '';
   document.getElementById('contract-contact-email').value = '';
   document.getElementById('contract-notes').value = '';
+  ['contract-target-brand','contract-target-carrousel','contract-target-authority'].forEach(id=>{const el=document.getElementById(id);if(el)el.value=0;});
   document.getElementById('modal-contract-title').textContent = 'Configurer — ' + clientName;
   openModal('modal-contract');
 }
@@ -1203,6 +1214,9 @@ function editContract(contractId, clientId) {
   document.getElementById('contract-contact-phone').value = c.contact_phone || '';
   document.getElementById('contract-contact-email').value = c.contact_email || '';
   document.getElementById('contract-notes').value = c.notes || '';
+  if(document.getElementById('contract-target-brand'))     document.getElementById('contract-target-brand').value     = c.target_brand_universe||0;
+  if(document.getElementById('contract-target-carrousel')) document.getElementById('contract-target-carrousel').value = c.target_carrousel||0;
+  if(document.getElementById('contract-target-authority')) document.getElementById('contract-target-authority').value = c.target_authority||0;
   document.getElementById('modal-contract-title').textContent = 'Modifier — ' + c.client_name;
   openModal('modal-contract');
 }
@@ -1221,6 +1235,9 @@ async function saveContract() {
     contact_phone: document.getElementById('contract-contact-phone').value,
     contact_email: document.getElementById('contract-contact-email').value,
     notes: document.getElementById('contract-notes').value,
+    target_brand_universe: +document.getElementById('contract-target-brand')?.value || 0,
+    target_carrousel:      +document.getElementById('contract-target-carrousel')?.value || 0,
+    target_authority:      +document.getElementById('contract-target-authority')?.value || 0,
   };
   if (!body.client_id) { showToast('Client requis', 'err'); return; }
   const data = id
@@ -1307,13 +1324,45 @@ async function loadRentabilite() {
     const ratio=hv>0?hs/hv:0;
     const pc=ratio>1?'prog-over':ratio>0.8?'prog-warn':'prog-ok';
     const mc=margin>0?'card-pos':margin<0?'card-neg':'card-warn';
+    // Publication gauges
+    const vb = +c.videos_brand, vc2 = +c.videos_carrousel, va = +c.videos_authority;
+    const tb = +c.target_brand||0, tc2 = +c.target_carrousel||0, ta = +c.target_authority||0;
+    const totalPubs = vb + vc2 + va;
+    const totalTarget = tb + tc2 + ta;
+
+    function pubGauge(count, target, label, emoji) {
+      if (!target) return '';
+      const pct = Math.min((count / target) * 100, 100).toFixed(0);
+      const col = count >= target ? 'var(--pos)' : count >= target * 0.5 ? 'var(--warn)' : 'var(--neg)';
+      return `<div style="margin-bottom:3px;">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:2px;">
+          <span style="font-size:0.58rem;color:rgba(239,214,177,0.45);">${emoji} ${label}</span>
+          <span style="font-size:0.65rem;font-weight:600;color:${col};">${count}/${target}</span>
+        </div>
+        <div style="height:3px;background:rgba(97,143,155,0.12);border-radius:2px;overflow:hidden;">
+          <div style="height:100%;width:${pct}%;background:${col};border-radius:2px;transition:width 0.4s;"></div>
+        </div>
+      </div>`;
+    }
+
+    const pubCell = (totalTarget > 0)
+      ? `<div style="min-width:140px;">
+          ${pubGauge(vb,  tb,  'Brand Universe', '🌍')}
+          ${pubGauge(vc2, tc2, 'Carrousel',      '📊')}
+          ${pubGauge(va,  ta,  'Authority',       '🎤')}
+          <div style="margin-top:4px;font-size:0.6rem;color:rgba(239,214,177,0.3);border-top:1px solid rgba(239,214,177,0.06);padding-top:3px;">
+            Total ${totalPubs}/${totalTarget} publications
+          </div>
+        </div>`
+      : `<span style="color:rgba(239,214,177,0.28);font-size:0.72rem;">${totalPubs} publiées</span>`;
+
     return `<tr>
       <td>${esc(c.client_name)}</td>
       <td style="color:rgba(239,214,177,0.4);font-size:0.72rem;">${esc(c.package||'—')}</td>
       <td>${fmtMUR(c.mrr)}</td><td>${fmtMUR(c.total_cost)}</td>
       <td class="${mc}" style="font-weight:400;">${fmtMUR(margin)}</td>
       <td><div class="prog-wrap"><div class="prog-track"><div class="prog-fill ${pc}" style="width:${Math.min(ratio*100,100).toFixed(0)}%"></div></div><span class="prog-val">${hs.toFixed(1)}/${hv}h</span></div></td>
-      <td style="color:rgba(239,214,177,0.4);">${c.videos_count}</td>
+      <td>${pubCell}</td>
     </tr>`;
   }).join('') : `<tr><td colspan="7" style="text-align:center;padding:2rem;font-family:Lora,serif;font-style:italic;color:rgba(239,214,177,0.28);">Aucun client actif avec contrat</td></tr>`;
 
@@ -1448,6 +1497,7 @@ function renderKanban(items) {
         ${byStage[s.key].map(v=>`
           <div class="kanban-card" onclick="openTaskPanel(${v.id})">
             <p class="kanban-card-title">${esc(v.title)}</p>
+            ${v.video_type ? `<span style="font-size:0.55rem;letter-spacing:0.06em;color:var(--teal);opacity:0.75;">${{brand_universe:'🌍 Brand Universe',carrousel:'📊 Carrousel',authority:'🎤 Authority'}[v.video_type]||''}</span>` : ''}
             <p class="kanban-card-client">${esc(v.client_name)}</p>
             <div class="kanban-card-meta">
               <span class="kanban-card-date">${v.post_date?'📅 '+fmtDate(v.post_date):v.shoot_date?'🎬 '+fmtDate(v.shoot_date):'—'}</span>
@@ -1462,6 +1512,7 @@ function renderKanban(items) {
 function openContentModal() {
   document.getElementById('content-id').value='';
   document.getElementById('content-title').value='';
+  if(document.getElementById('content-video-type')) document.getElementById('content-video-type').value='brand_universe';
   document.getElementById('content-status').value='ideas';
   document.getElementById('content-format').value='';
   document.getElementById('content-hook').value='';
@@ -1482,6 +1533,7 @@ async function saveContent() {
   const body = {
     client_id: document.getElementById('content-client').value,
     title: document.getElementById('content-title').value.trim(),
+    video_type: document.getElementById('content-video-type')?.value || 'brand_universe',
     status: document.getElementById('content-status').value,
     format: document.getElementById('content-format').value||null,
     hook_type: document.getElementById('content-hook').value||null,
@@ -1510,6 +1562,7 @@ async function editCurrentContent() {
   document.getElementById('content-id').value=v.id;
   document.getElementById('content-client').value=v.client_id;
   document.getElementById('content-title').value=v.title;
+  if(document.getElementById('content-video-type')) document.getElementById('content-video-type').value=v.video_type||'brand_universe';
   document.getElementById('content-status').value=v.status;
   document.getElementById('content-format').value=v.format||'';
   document.getElementById('content-hook').value=v.hook_type||'';

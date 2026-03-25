@@ -1325,7 +1325,10 @@ async function loadRentabilite() {
   const month = document.getElementById('month-picker').value;
   document.getElementById('header-month').textContent = fmtMonth(month);
   const data = await api('GET','/api/rentabilite?month='+month);
-  if (!data) return;
+  if (!data) {
+    showToast('Erreur de chargement Rentabilité — vérifiez la console', 'err');
+    return;
+  }
   const { summary, clients, byMember, alerts } = data;
 
   document.getElementById('kpi-mrr').textContent = fmtMUR(summary.totalMRR);
@@ -1390,7 +1393,7 @@ async function loadRentabilite() {
       <td><div class="prog-wrap"><div class="prog-track"><div class="prog-fill ${pc}" style="width:${Math.min(ratio*100,100).toFixed(0)}%"></div></div><span class="prog-val">${hs.toFixed(1)}/${hv}h</span></div></td>
       <td>${pubCell}</td>
     </tr>`;
-  }).join('') : `<tr><td colspan="7" style="text-align:center;padding:2rem;font-family:Lora,serif;font-style:italic;color:rgba(239,214,177,0.28);">Aucun client actif avec contrat</td></tr>`;
+  }).join('') : `<tr><td colspan="7" style="text-align:center;padding:2rem;font-family:Lora,serif;font-style:italic;color:rgba(239,214,177,0.28);">Aucun client avec contrat actif — configurez les contrats dans Réglages</td></tr>`;
 
   document.getElementById('member-table').innerHTML = byMember.map(m=>`
     <tr>

@@ -798,24 +798,29 @@ app.get('/api/rentabilite', auth, async (req, res) => {
   const { month } = req.query;
   const monthFilter = month || new Date().toISOString().slice(0,7);
   try {
+    // Ensure migration columns exist (safe to run every time)
+    await pool.query(`ALTER TABLE content_items     ADD COLUMN IF NOT EXISTS video_type TEXT DEFAULT 'brand_universe'`);
+    await pool.query(`ALTER TABLE client_contracts  ADD COLUMN IF NOT EXISTS target_brand_universe INT DEFAULT 0`);
+    await pool.query(`ALTER TABLE client_contracts  ADD COLUMN IF NOT EXISTS target_carrousel       INT DEFAULT 0`);
+    await pool.query(`ALTER TABLE client_contracts  ADD COLUMN IF NOT EXISTS target_authority       INT DEFAULT 0`);
+
     // Per client profitability
     const { rows: clients } = await pool.query(`
       SELECT
         c.id, c.name as client_name,
-        COALESCE(cc.mrr, 0) as mrr,
+        COALESCE(cc.mrr, 0)                  as mrr,
         COALESCE(cc.hours_sold_per_month, 0) as hours_sold,
-        COALESCE(cc.package, '—') as package,
-        COALESCE(SUM(te.hours), 0) as hours_spent,
-        COALESCE(SUM(te.hours * tm.hourly_rate), 0) as total_cost,
+        COALESCE(cc.package, '—')            as package,
+        COALESCE(SUM(te.hours), 0)                           as hours_spent,
+        COALESCE(SUM(te.hours * tm.hourly_rate), 0)          as total_cost,
         COALESCE(cc.mrr, 0) - COALESCE(SUM(te.hours * tm.hourly_rate), 0) as margin,
-        -- Video counts by type (posted or boosted this month)
-        COUNT(DISTINCT ci.id) FILTER (WHERE ci.status IN ('posted','boosted')) as videos_total,
-        COUNT(DISTINCT ci.id) FILTER (WHERE ci.status IN ('posted','boosted') AND ci.video_type='brand_universe') as videos_brand,
-        COUNT(DISTINCT ci.id) FILTER (WHERE ci.status IN ('posted','boosted') AND ci.video_type='carrousel') as videos_carrousel,
-        COUNT(DISTINCT ci.id) FILTER (WHERE ci.status IN ('posted','boosted') AND ci.video_type='authority') as videos_authority,
+        COUNT(DISTINCT ci.id) FILTER (WHERE ci.status IN ('posted','boosted'))                                         as videos_total,
+        COUNT(DISTINCT ci.id) FILTER (WHERE ci.status IN ('posted','boosted') AND ci.video_type = 'brand_universe')    as videos_brand,
+        COUNT(DISTINCT ci.id) FILTER (WHERE ci.status IN ('posted','boosted') AND ci.video_type = 'carrousel')         as videos_carrousel,
+        COUNT(DISTINCT ci.id) FILTER (WHERE ci.status IN ('posted','boosted') AND ci.video_type = 'authority')         as videos_authority,
         COALESCE(cc.target_brand_universe, 0) as target_brand,
-        COALESCE(cc.target_carrousel, 0) as target_carrousel,
-        COALESCE(cc.target_authority, 0) as target_authority
+        COALESCE(cc.target_carrousel, 0)      as target_carrousel,
+        COALESCE(cc.target_authority, 0)      as target_authority
       FROM clients c
       LEFT JOIN client_contracts cc ON cc.client_id = c.id AND cc.status = 'active'
       LEFT JOIN time_entries te ON te.client_id = c.id
@@ -823,10 +828,10 @@ app.get('/api/rentabilite', auth, async (req, res) => {
       LEFT JOIN team_members tm ON tm.id = te.team_member_id
       LEFT JOIN content_items ci ON ci.client_id = c.id
         AND DATE_TRUNC('month', COALESCE(ci.post_date, ci.created_at)) = DATE_TRUNC('month', ($1 || '-01')::date)
-      WHERE cc.status = 'active' OR cc.status IS NULL
+      WHERE cc.client_id IS NOT NULL
       GROUP BY c.id, c.name, cc.id, cc.mrr, cc.hours_sold_per_month, cc.package,
                cc.target_brand_universe, cc.target_carrousel, cc.target_authority
-      ORDER BY margin ASC`,
+      ORDER BY cc.mrr DESC NULLS LAST`,
       [monthFilter]
     );
 

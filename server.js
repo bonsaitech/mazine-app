@@ -323,11 +323,18 @@ async function initDB() {
   `);
 
   // Migrations
-  await pool.query(`ALTER TABLE quotes ADD COLUMN IF NOT EXISTS subtitle TEXT DEFAULT ''`);
-  await pool.query(`ALTER TABLE content_items ADD COLUMN IF NOT EXISTS video_type TEXT DEFAULT 'brand_universe'`);
+  await pool.query(`ALTER TABLE quotes         ADD COLUMN IF NOT EXISTS subtitle           TEXT DEFAULT ''`);
+  await pool.query(`ALTER TABLE content_items  ADD COLUMN IF NOT EXISTS video_type         TEXT DEFAULT 'brand_universe'`);
+  await pool.query(`ALTER TABLE content_items  ADD COLUMN IF NOT EXISTS type_of_action     TEXT DEFAULT 'awareness'`);
+  await pool.query(`ALTER TABLE content_items  ADD COLUMN IF NOT EXISTS actors             TEXT DEFAULT ''`);
+  await pool.query(`ALTER TABLE content_items  ADD COLUMN IF NOT EXISTS voice_over         TEXT DEFAULT ''`);
   await pool.query(`ALTER TABLE client_contracts ADD COLUMN IF NOT EXISTS target_brand_universe INT DEFAULT 0`);
-  await pool.query(`ALTER TABLE client_contracts ADD COLUMN IF NOT EXISTS target_carrousel INT DEFAULT 0`);
-  await pool.query(`ALTER TABLE client_contracts ADD COLUMN IF NOT EXISTS target_authority INT DEFAULT 0`);
+  await pool.query(`ALTER TABLE client_contracts ADD COLUMN IF NOT EXISTS target_carrousel       INT DEFAULT 0`);
+  await pool.query(`ALTER TABLE client_contracts ADD COLUMN IF NOT EXISTS target_authority       INT DEFAULT 0`);
+  await pool.query(`ALTER TABLE clients         ADD COLUMN IF NOT EXISTS meeting_notes     TEXT DEFAULT ''`);
+  await pool.query(`ALTER TABLE clients         ADD COLUMN IF NOT EXISTS monthly_events    TEXT DEFAULT ''`);
+  await pool.query(`ALTER TABLE time_entries    ADD COLUMN IF NOT EXISTS content_type      TEXT DEFAULT ''`);
+  await pool.query(`ALTER TABLE time_entries    ADD COLUMN IF NOT EXISTS internal_project  TEXT DEFAULT ''`);
   await pool.query(`
     CREATE TABLE IF NOT EXISTS products (
       id SERIAL PRIMARY KEY,
@@ -387,6 +394,7 @@ app.get('/api/clients', auth, async (req, res) => {
   try {
     const { rows } = await pool.query(`
       SELECT c.id, c.name, c.mazine_start_date,
+        c.meeting_notes, c.monthly_events,
         cc.mrr, cc.package, cc.status as contract_status, cc.hours_sold_per_month,
         (SELECT MAX(updated_at) FROM tiktok_overview WHERE client_id=c.id) as last_upload
       FROM clients c
@@ -409,11 +417,12 @@ app.post('/api/clients', auth, async (req, res) => {
 });
 
 app.put('/api/clients/:id', auth, async (req, res) => {
-  const { name, mazine_start_date } = req.body;
+  const { name, mazine_start_date, meeting_notes, monthly_events } = req.body;
   try {
     const { rows } = await pool.query(
-      'UPDATE clients SET name=$1, mazine_start_date=$2 WHERE id=$3 RETURNING id, name, mazine_start_date',
-      [name.trim(), mazine_start_date || null, req.params.id]
+      `UPDATE clients SET name=$1, mazine_start_date=$2, meeting_notes=$3, monthly_events=$4
+       WHERE id=$5 RETURNING id, name, mazine_start_date, meeting_notes, monthly_events`,
+      [name.trim(), mazine_start_date||null, meeting_notes||'', monthly_events||'', req.params.id]
     );
     if (!rows.length) return res.status(404).json({ error: 'Client introuvable.' });
     res.json({ client: rows[0] });
@@ -658,16 +667,21 @@ app.get('/api/content', auth, async (req, res) => {
 });
 
 app.post('/api/content', auth, async (req, res) => {
-  const { client_id, title, status, hook_type, objective, format, cta_type, shoot_date, post_date, assigned_to, notes } = req.body;
+  const { client_id, title, status, video_type, type_of_action, actors, voice_over,
+          hook_type, objective, format, cta_type, shoot_date, post_date, assigned_to, notes } = req.body;
   if (!client_id || !title?.trim()) return res.status(400).json({ error: 'client_id et title requis.' });
   const client = await pool.connect();
   try {
     await client.query('BEGIN');
-    // Create content item
     const { rows } = await client.query(`
-      INSERT INTO content_items (client_id,title,status,hook_type,objective,format,cta_type,shoot_date,post_date,assigned_to,notes)
-      VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11) RETURNING *`,
-      [client_id, title.trim(), status||'ideas', hook_type||null, objective||null, format||null, cta_type||null, shoot_date||null, post_date||null, assigned_to||null, notes||'']
+      INSERT INTO content_items
+        (client_id,title,status,video_type,type_of_action,actors,voice_over,
+         hook_type,objective,format,cta_type,shoot_date,post_date,assigned_to,notes)
+      VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15) RETURNING *`,
+      [client_id, title.trim(), status||'ideas',
+       video_type||'brand_universe', type_of_action||'awareness', actors||'', voice_over||'',
+       hook_type||null, objective||null, format||null, cta_type||null,
+       shoot_date||null, post_date||null, assigned_to||null, notes||'']
     );
     const item = rows[0];
     // Auto-create tasks from task_defaults
@@ -688,13 +702,24 @@ app.post('/api/content', auth, async (req, res) => {
 });
 
 app.put('/api/content/:id', auth, async (req, res) => {
-  const { title, status, hook_type, objective, format, cta_type, shoot_date, post_date, assigned_to, tiktok_views, tiktok_likes, tiktok_shares, performance_score, notes } = req.body;
+  const { title, status, video_type, type_of_action, actors, voice_over,
+          hook_type, objective, format, cta_type, shoot_date, post_date,
+          assigned_to, tiktok_views, tiktok_likes, tiktok_shares, performance_score, notes } = req.body;
   try {
     const { rows } = await pool.query(`
-      UPDATE content_items SET title=$1,status=$2,hook_type=$3,objective=$4,format=$5,cta_type=$6,
-      shoot_date=$7,post_date=$8,assigned_to=$9,tiktok_views=$10,tiktok_likes=$11,tiktok_shares=$12,
-      performance_score=$13,notes=$14,updated_at=NOW() WHERE id=$15 RETURNING *`,
-      [title, status, hook_type, objective, format, cta_type, shoot_date||null, post_date||null, assigned_to||null, tiktok_views||null, tiktok_likes||null, tiktok_shares||null, performance_score||null, notes, req.params.id]
+      UPDATE content_items SET
+        title=$1, status=$2, video_type=$3, type_of_action=$4, actors=$5, voice_over=$6,
+        hook_type=$7, objective=$8, format=$9, cta_type=$10,
+        shoot_date=$11, post_date=$12, assigned_to=$13,
+        tiktok_views=$14, tiktok_likes=$15, tiktok_shares=$16,
+        performance_score=$17, notes=$18, updated_at=NOW()
+      WHERE id=$19 RETURNING *`,
+      [title, status,
+       video_type||'brand_universe', type_of_action||'awareness', actors||'', voice_over||'',
+       hook_type, objective, format, cta_type,
+       shoot_date||null, post_date||null, assigned_to||null,
+       tiktok_views||null, tiktok_likes||null, tiktok_shares||null,
+       performance_score||null, notes, req.params.id]
     );
     res.json({ item: rows[0] });
   } catch (err) { res.status(500).json({ error: err.message }); }
@@ -716,7 +741,7 @@ app.get('/api/time', auth, async (req, res) => {
       te.hours * tm.hourly_rate as cost
       FROM time_entries te
       JOIN team_members tm ON tm.id = te.team_member_id
-      JOIN clients c ON c.id = te.client_id
+      LEFT JOIN clients c ON c.id = te.client_id
       LEFT JOIN content_items ci ON ci.id = te.content_item_id
       WHERE 1=1`;
     const params = [];
@@ -730,13 +755,16 @@ app.get('/api/time', auth, async (req, res) => {
 });
 
 app.post('/api/time', auth, async (req, res) => {
-  const { team_member_id, client_id, content_item_id, task_type, hours, date, notes } = req.body;
-  if (!team_member_id || !client_id || !hours || !task_type) return res.status(400).json({ error: 'Champs requis manquants.' });
+  const { team_member_id, client_id, content_item_id, task_type, hours, date, notes, content_type, internal_project } = req.body;
+  // For Mazine internal: client_id may be null, internal_project = 'mazine'
+  if (!team_member_id || !hours || !task_type) return res.status(400).json({ error: 'Champs requis manquants.' });
+  if (!client_id && !internal_project) return res.status(400).json({ error: 'Client ou projet interne requis.' });
   try {
     const { rows } = await pool.query(`
-      INSERT INTO time_entries (team_member_id,client_id,content_item_id,task_type,hours,date,notes)
-      VALUES ($1,$2,$3,$4,$5,$6,$7) RETURNING *`,
-      [team_member_id, client_id, content_item_id||null, task_type, hours, date||new Date().toISOString().split('T')[0], notes||'']
+      INSERT INTO time_entries (team_member_id,client_id,content_item_id,task_type,hours,date,notes,content_type,internal_project)
+      VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9) RETURNING *`,
+      [team_member_id, client_id||null, content_item_id||null, task_type, hours,
+       date||new Date().toISOString().split('T')[0], notes||'', content_type||'', internal_project||'']
     );
     res.json({ entry: rows[0] });
   } catch (err) { res.status(500).json({ error: err.message }); }

@@ -380,6 +380,9 @@ tbody tr:hover td { background: rgba(239,214,177,0.015); }
       <select class="filter-sel" id="cal-filter-client" onchange="loadCalendar()">
         <option value="">Tous les clients</option>
       </select>
+      <button class="btn-sm" id="cal-filter-all"   onclick="setCalFilter('all')"   style="background:var(--teal);color:#fff;border-color:var(--teal);">Tous</button>
+      <button class="btn-sm" id="cal-filter-shoot" onclick="setCalFilter('shoot')" >🎬 Tournages</button>
+      <button class="btn-sm" id="cal-filter-post"  onclick="setCalFilter('post')"  >📲 Publications</button>
     </div>
   </div>
   <div class="cal-legend">
@@ -565,37 +568,33 @@ tbody tr:hover td { background: rgba(239,214,177,0.015); }
           <option value="boosted">🔥 Boosted</option>
         </select>
       </div>
-      <div class="field"><label>Format</label>
-        <select id="content-format">
-          <option value="">—</option><option>UGC</option><option>FaceCam</option>
-          <option>Voiceover</option><option>Interview</option>
+      <div class="field"><label>Type d'action</label>
+        <select id="content-type-of-action">
+          <option value="awareness">🌱 Awareness</option>
+          <option value="consideration">🤔 Consideration</option>
+          <option value="conversion">⚡ Conversion</option>
         </select>
       </div>
     </div>
     <div class="field-row">
-      <div class="field"><label>Type de hook</label>
-        <select id="content-hook">
-          <option value="">—</option><option>Educational</option><option>Storytelling</option>
-          <option>Trend</option><option>Authority</option><option>Problem/Solution</option>
-          <option>Case Study</option><option>Offer</option>
+      <div class="field"><label>Voice Over</label>
+        <select id="content-voice-over">
+          <option value="">—</option>
+          <option value="none">Non</option>
+          <option value="internal">VO interne</option>
+          <option value="client">VO client</option>
+          <option value="external">VO externe</option>
         </select>
       </div>
-      <div class="field"><label>Objectif</label>
-        <select id="content-objective">
-          <option value="">—</option><option value="Brand">Brand Awareness</option>
-          <option value="Engagement">Engagement</option><option value="Lead">Lead Generation</option>
-          <option value="Conversion">Conversion</option><option value="Retargeting">Retargeting</option>
-        </select>
+      <div class="field"><label>Acteurs / Talent</label>
+        <input type="text" id="content-actors" placeholder="ex: Victor, Amberine...">
       </div>
     </div>
     <div class="field-row">
       <div class="field"><label>Date de tournage</label><input type="date" id="content-shoot-date"></div>
       <div class="field"><label>Date de publication</label><input type="date" id="content-post-date"></div>
     </div>
-    <div class="field-row">
-      <div class="field"><label>CTA</label><input type="text" id="content-cta" placeholder="ex: Lien en bio"></div>
-      <div class="field" id="perf-fields" style="display:none;"><label>Vues TikTok</label><input type="number" id="content-views" placeholder="0"></div>
-    </div>
+    <div class="field" id="perf-fields" style="display:none;"><label>Vues TikTok</label><input type="number" id="content-views" placeholder="0"></div>
     <div class="field"><label>Notes / Brief</label><textarea id="content-notes" placeholder="Contexte, script, consignes..."></textarea></div>
     <div class="modal-footer">
       <button class="btn-ghost" onclick="closeModal('modal-content')">Annuler</button>
@@ -625,6 +624,15 @@ tbody tr:hover td { background: rgba(239,214,177,0.015); }
       <div class="field"><label>Heures *</label><input type="number" id="time-hours" min="0.25" max="24" step="0.25" placeholder="ex: 2.5"></div>
     </div>
     <div class="field"><label>Date</label><input type="date" id="time-date"></div>
+    <div class="field"><label>Type de contenu <span style="color:var(--grey);font-size:0.8em;">(pour entrées créatives)</span></label>
+        <select id="time-content-type">
+          <option value="">— Sans type —</option>
+          <option value="aesthetic">🎨 Aesthetic</option>
+          <option value="authority_voice_over">🎤 Authority — Voice Over</option>
+          <option value="authority_live">📹 Authority — Live / FaceCam</option>
+          <option value="carousel">📊 Carousel</option>
+        </select>
+      </div>
     <div class="field"><label>Notes</label><textarea id="time-notes" placeholder="Optionnel..."></textarea></div>
     <div class="modal-footer">
       <button class="btn-ghost" onclick="closeModal('modal-time')">Annuler</button>
@@ -815,6 +823,26 @@ tbody tr:hover td { background: rgba(239,214,177,0.015); }
     <div class="modal-footer">
       <button class="btn-ghost" onclick="closeModal('modal-contract')">Annuler</button>
       <button class="btn-primary" onclick="saveContract()">Enregistrer</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: Notes client -->
+<div class="modal-bg" id="modal-client-notes">
+  <div class="modal" style="max-width:520px;">
+    <h3 id="modal-client-notes-title">Notes client</h3>
+    <input type="hidden" id="client-notes-id">
+    <div class="field">
+      <label>📅 Événements du mois</label>
+      <textarea id="client-monthly-events" rows="3" placeholder="ex: Lancement produit mars, Promotion Pâques, Tournage prévu le 15..."></textarea>
+    </div>
+    <div class="field">
+      <label>🗒 Notes de réunion</label>
+      <textarea id="client-meeting-notes" rows="4" placeholder="Points discutés, décisions, actions à prendre..."></textarea>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-ghost" onclick="closeModal('modal-client-notes')">Annuler</button>
+      <button class="btn-primary" onclick="saveClientNotes()">Enregistrer</button>
     </div>
   </div>
 </div>
@@ -1143,6 +1171,52 @@ async function deleteTeam(id) {
 // ═══════════════════════════════════════════════
 let contractsData = [];
 
+// ═══════════════════════════════════════════════
+// CLIENT NOTES
+// ═══════════════════════════════════════════════
+async function openClientNotes(clientId, clientName) {
+  document.getElementById('client-notes-id').value = clientId;
+  document.getElementById('modal-client-notes-title').textContent = '📝 ' + clientName;
+  document.getElementById('client-monthly-events').value = '';
+  document.getElementById('client-meeting-notes').value  = '';
+  // Load existing notes from clientsData
+  const c = clientsData.find(x => x.id === +clientId);
+  if (c) {
+    document.getElementById('client-monthly-events').value = c.monthly_events || '';
+    document.getElementById('client-meeting-notes').value  = c.meeting_notes  || '';
+  } else {
+    // Fetch fresh if not in cache
+    const d = await api('GET', '/api/clients');
+    if (d) {
+      const found = d.clients.find(x => x.id === +clientId);
+      if (found) {
+        document.getElementById('client-monthly-events').value = found.monthly_events || '';
+        document.getElementById('client-meeting-notes').value  = found.meeting_notes  || '';
+      }
+    }
+  }
+  openModal('modal-client-notes');
+}
+
+async function saveClientNotes() {
+  const id = document.getElementById('client-notes-id').value;
+  const c  = clientsData.find(x => x.id === +id);
+  if (!c) { showToast('Client introuvable', 'err'); return; }
+  const body = {
+    name:             c.name,
+    mazine_start_date: c.mazine_start_date ? c.mazine_start_date.split('T')[0] : null,
+    meeting_notes:    document.getElementById('client-meeting-notes').value,
+    monthly_events:   document.getElementById('client-monthly-events').value,
+  };
+  const d = await api('PUT', '/api/clients/' + id, body);
+  if (!d) return;
+  // Update local cache
+  const idx = clientsData.findIndex(x => x.id === +id);
+  if (idx >= 0) { clientsData[idx].meeting_notes = body.meeting_notes; clientsData[idx].monthly_events = body.monthly_events; }
+  closeModal('modal-client-notes');
+  showToast('Notes enregistrées ✓');
+}
+
 async function loadContracts() {
   const d = await api('GET', '/api/contracts');
   contractsData = d?.contracts || [];
@@ -1169,7 +1243,8 @@ function renderContractsTable() {
       <td style="color:rgba(239,214,177,0.4);font-size:0.72rem;">${c.contract_start ? fmtDate(c.contract_start) : '—'}</td>
       <td style="color:rgba(239,214,177,0.4);font-size:0.72rem;">${esc(c.contact_name||'—')}</td>
       <td><span class="badge badge-${c.status==='active'?'won':c.status==='paused'?'contacted':'lost'}" style="font-size:0.55rem;">${c.status==='active'?'Actif':c.status==='paused'?'Pause':'Churned'}</span></td>
-      <td><button class="action-btn" onclick="editContract(${c.id}, ${c.client_id})">✎</button></td>
+      <td><button class="action-btn" onclick="editContract(${c.id}, ${c.client_id})">✎</button>
+          <button class="action-btn" onclick="openClientNotes(${c.client_id},'${esc(c.client_name)}')" title="Notes" style="color:var(--teal);">📝</button></td>
     </tr>`).join('');
 
   // Clients without contracts — prompt to configure
@@ -1287,7 +1362,10 @@ async function loadClients() {
     const el=document.getElementById(id); if(el) el.innerHTML=blank;
   });
   ['content-client','time-client'].forEach(id=>{
-    const el=document.getElementById(id); if(el) el.innerHTML=opts;
+    const el=document.getElementById(id); if(!el) return;
+    el.innerHTML = id==='time-client'
+      ? opts + `<option value="__mazine__">⭐ Mazine (interne)</option>`
+      : opts;
   });
 }
 
@@ -1407,6 +1485,21 @@ async function loadRentabilite() {
 // ═══════════════════════════════════════════════
 // CALENDAR
 // ═══════════════════════════════════════════════
+let calStatusFilter = 'all';
+
+function setCalFilter(f) {
+  calStatusFilter = f;
+  ['all','shoot','post'].forEach(k => {
+    const btn = document.getElementById('cal-filter-'+k);
+    if (!btn) return;
+    const on = k===f;
+    btn.style.background  = on ? 'var(--teal)' : '';
+    btn.style.color       = on ? '#fff' : '';
+    btn.style.borderColor = on ? 'var(--teal)' : '';
+  });
+  loadCalendar();
+}
+
 function calNav(dir) {
   calMonth = new Date(calMonth.getFullYear(), calMonth.getMonth()+dir, 1);
   loadCalendar();
@@ -1446,12 +1539,12 @@ async function loadCalendar() {
     if (item.shoot_date) {
       const d = item.shoot_date.split('T')[0];
       if (!eventsByDate[d]) eventsByDate[d]=[];
-      eventsByDate[d].push({type:'shoot', label:'🎬 '+item.title.substring(0,20), color:'cal-event-shoot', id:item.id, clientName:item.client_name});
+      if(calStatusFilter!=='post') eventsByDate[d].push({type:'shoot', label:'🎬 '+item.title.substring(0,20), color:'cal-event-shoot', id:item.id, clientName:item.client_name});
     }
     if (item.post_date) {
       const d = item.post_date.split('T')[0];
       if (!eventsByDate[d]) eventsByDate[d]=[];
-      eventsByDate[d].push({type:'post', label:'📲 '+item.title.substring(0,20), color:'cal-event-post', id:item.id, clientName:item.client_name});
+      if(calStatusFilter!=='shoot') eventsByDate[d].push({type:'post', label:'📲 '+item.title.substring(0,20), color:'cal-event-post', id:item.id, clientName:item.client_name});
     }
   });
   tasks.forEach(task => {
@@ -1543,9 +1636,9 @@ function openContentModal() {
   document.getElementById('content-title').value='';
   if(document.getElementById('content-video-type')) document.getElementById('content-video-type').value='brand_universe';
   document.getElementById('content-status').value='ideas';
-  document.getElementById('content-format').value='';
-  document.getElementById('content-hook').value='';
-  document.getElementById('content-objective').value='';
+  if(document.getElementById('content-type-of-action')) document.getElementById('content-type-of-action').value='awareness';
+  if(document.getElementById('content-actors'))          document.getElementById('content-actors').value='';
+  if(document.getElementById('content-voice-over'))      document.getElementById('content-voice-over').value='';
   document.getElementById('content-shoot-date').value='';
   document.getElementById('content-post-date').value='';
   document.getElementById('content-assignee').value='';
@@ -1563,10 +1656,10 @@ async function saveContent() {
     client_id: document.getElementById('content-client').value,
     title: document.getElementById('content-title').value.trim(),
     video_type: document.getElementById('content-video-type')?.value || 'brand_universe',
+    type_of_action: document.getElementById('content-type-of-action')?.value || 'awareness',
+    actors: document.getElementById('content-actors')?.value || '',
+    voice_over: document.getElementById('content-voice-over')?.value || '',
     status: document.getElementById('content-status').value,
-    format: document.getElementById('content-format').value||null,
-    hook_type: document.getElementById('content-hook').value||null,
-    objective: document.getElementById('content-objective').value||null,
     cta_type: document.getElementById('content-cta').value||null,
     shoot_date: document.getElementById('content-shoot-date').value||null,
     post_date: document.getElementById('content-post-date').value||null,
@@ -1593,9 +1686,11 @@ async function editCurrentContent() {
   document.getElementById('content-title').value=v.title;
   if(document.getElementById('content-video-type')) document.getElementById('content-video-type').value=v.video_type||'brand_universe';
   document.getElementById('content-status').value=v.status;
-  document.getElementById('content-format').value=v.format||'';
-  document.getElementById('content-hook').value=v.hook_type||'';
-  document.getElementById('content-objective').value=v.objective||'';
+  if(document.getElementById('content-type-of-action')) document.getElementById('content-type-of-action').value=v.type_of_action||'awareness';
+  if(document.getElementById('content-actors'))          document.getElementById('content-actors').value=v.actors||'';
+  if(document.getElementById('content-voice-over'))      document.getElementById('content-voice-over').value=v.voice_over||'';
+
+
   document.getElementById('content-shoot-date').value=v.shoot_date?v.shoot_date.split('T')[0]:'';
   document.getElementById('content-post-date').value=v.post_date?v.post_date.split('T')[0]:'';
   document.getElementById('content-assignee').value=v.assigned_to||'';
@@ -1744,7 +1839,19 @@ function renderTimeLog(entries) {
 }
 
 async function saveTime() {
-  const body={team_member_id:document.getElementById('time-member').value,client_id:document.getElementById('time-client').value,content_item_id:document.getElementById('time-content-item').value||null,task_type:document.getElementById('time-task').value,hours:+document.getElementById('time-hours').value,date:document.getElementById('time-date').value,notes:document.getElementById('time-notes').value};
+  const rawClient=document.getElementById('time-client').value;
+  const isMazine=rawClient==='__mazine__';
+  const body={
+    team_member_id:document.getElementById('time-member').value,
+    client_id:isMazine?null:rawClient,
+    internal_project:isMazine?'mazine':'',
+    content_item_id:document.getElementById('time-content-item').value||null,
+    task_type:document.getElementById('time-task').value,
+    hours:+document.getElementById('time-hours').value,
+    date:document.getElementById('time-date').value,
+    notes:document.getElementById('time-notes').value,
+    content_type:document.getElementById('time-content-type')?.value||'',
+  };
   if(!body.team_member_id||!body.client_id||!body.hours){showToast('Membre, client et heures requis','err');return;}
   await api('POST','/api/time',body);
   closeModal('modal-time');

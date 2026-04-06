@@ -1642,8 +1642,8 @@ function openContentModal() {
   document.getElementById('content-shoot-date').value='';
   document.getElementById('content-post-date').value='';
   document.getElementById('content-assignee').value='';
-  document.getElementById('content-cta').value='';
-  document.getElementById('content-views').value='';
+  if(document.getElementById('content-cta')) document.getElementById('content-cta').value='';
+  if(document.getElementById('content-views')) document.getElementById('content-views').value='';
   document.getElementById('content-notes').value='';
   document.getElementById('modal-content-title').textContent='Nouvelle vidéo';
   document.getElementById('perf-fields').style.display='none';
@@ -1660,7 +1660,7 @@ async function saveContent() {
     actors: document.getElementById('content-actors')?.value || '',
     voice_over: document.getElementById('content-voice-over')?.value || '',
     status: document.getElementById('content-status').value,
-    cta_type: document.getElementById('content-cta').value||null,
+    cta_type: document.getElementById('content-cta')?.value||null,
     shoot_date: document.getElementById('content-shoot-date').value||null,
     post_date: document.getElementById('content-post-date').value||null,
     assigned_to: document.getElementById('content-assignee').value||null,
@@ -1694,7 +1694,7 @@ async function editCurrentContent() {
   document.getElementById('content-shoot-date').value=v.shoot_date?v.shoot_date.split('T')[0]:'';
   document.getElementById('content-post-date').value=v.post_date?v.post_date.split('T')[0]:'';
   document.getElementById('content-assignee').value=v.assigned_to||'';
-  document.getElementById('content-cta').value=v.cta_type||'';
+  if(document.getElementById('content-cta')) document.getElementById('content-cta').value=v.cta_type||'';
   document.getElementById('content-views').value=v.tiktok_views||'';
   document.getElementById('content-notes').value=v.notes||'';
   document.getElementById('modal-content-title').textContent='Modifier vidéo';

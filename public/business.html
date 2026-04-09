@@ -444,7 +444,10 @@ tbody tr:hover td { background: rgba(239,214,177,0.015); }
     <tbody id="team-table"></tbody></table>
   </div>
 
-  <p style="font-size:0.52rem;letter-spacing:0.15em;text-transform:uppercase;color:rgba(239,214,177,0.28);margin-bottom:0.75rem;">Contrats clients</p>
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.75rem;">
+    <p style="font-size:0.52rem;letter-spacing:0.15em;text-transform:uppercase;color:rgba(239,214,177,0.28);margin-bottom:0;">Contrats clients</p>
+    <button class="btn-primary" style="font-size:0.65rem;padding:0.35rem 1rem;" onclick="openNewClientModal()">+ Nouveau client</button>
+  </div>
   <div style="margin-bottom:1.5rem;">
     <p style="font-family:'Lora',serif;font-style:italic;font-size:0.78rem;color:var(--cream-dim);margin-bottom:0.85rem;">Configurez le MRR, les heures vendues et les informations de contact pour chaque client.</p>
     <div class="table-wrap">
@@ -565,6 +568,7 @@ tbody tr:hover td { background: rgba(239,214,177,0.015); }
           <option value="ideas">💡 Ideas</option><option value="script">✍ Script</option>
           <option value="shooting">🎬 Shooting</option><option value="editing">🎞 Editing</option>
           <option value="ready">📲 Ready to Post</option><option value="posted">📈 Posted</option>
+          <option value="boosted">🔥 Boosted</option>
         </select>
       </div>
       <div class="field"><label>Type d'action</label>
@@ -822,6 +826,25 @@ tbody tr:hover td { background: rgba(239,214,177,0.015); }
     <div class="modal-footer">
       <button class="btn-ghost" onclick="closeModal('modal-contract')">Annuler</button>
       <button class="btn-primary" onclick="saveContract()">Enregistrer</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: Nouveau client -->
+<div class="modal-bg" id="modal-new-client">
+  <div class="modal" style="max-width:420px;">
+    <h3>Nouveau client</h3>
+    <div class="field">
+      <label>Nom du client *</label>
+      <input type="text" id="new-client-name" placeholder="ex: Restaurant Jade">
+    </div>
+    <div class="field">
+      <label>Date début partenariat</label>
+      <input type="date" id="new-client-date">
+    </div>
+    <div class="modal-footer">
+      <button class="btn-ghost" onclick="closeModal('modal-new-client')">Annuler</button>
+      <button class="btn-primary" onclick="createClient()">Créer</button>
     </div>
   </div>
 </div>
@@ -1216,6 +1239,24 @@ async function saveClientNotes() {
   showToast('Notes enregistrées ✓');
 }
 
+function openNewClientModal() {
+  document.getElementById('new-client-name').value = '';
+  document.getElementById('new-client-date').value = '';
+  openModal('modal-new-client');
+}
+
+async function createClient() {
+  const name = document.getElementById('new-client-name').value.trim();
+  if (!name) { showToast('Nom du client requis', 'err'); return; }
+  const mazine_start_date = document.getElementById('new-client-date').value || null;
+  const d = await api('POST', '/api/clients', { name, mazine_start_date });
+  if (!d) return;
+  closeModal('modal-new-client');
+  showToast('Client créé ✓');
+  await loadClients();
+  loadContracts();
+}
+
 async function loadContracts() {
   const d = await api('GET', '/api/contracts');
   contractsData = d?.contracts || [];
@@ -1591,6 +1632,7 @@ const STAGES = [
   { key:'editing',  label:'🎞 Editing',        color:'rgba(150,100,200,0.08)' },
   { key:'ready',    label:'📲 Ready to Post',  color:'rgba(60,150,100,0.08)' },
   { key:'posted',   label:'📈 Posted',         color:'rgba(97,143,155,0.12)' },
+  { key:'boosted',  label:'🔥 Boosted',        color:'rgba(200,100,50,0.08)' },
 ];
 
 async function loadKanban() {

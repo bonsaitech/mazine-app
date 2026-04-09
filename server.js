@@ -223,7 +223,6 @@ async function initDB() {
       ('editing',  'Montage',        '🎞', 3.0, 4),
       ('ready',    'Ready to Post',  '📲', 0.5, 5),
       ('posted',   'Publication',    '📈', 0.5, 6),
-      ('boosted',  'Boost Ads',      '🔥', 1.0, 7)
     ON CONFLICT (stage) DO NOTHING;
 
     -- ═══════════════════════════════════════
@@ -335,6 +334,9 @@ async function initDB() {
   await pool.query(`ALTER TABLE clients         ADD COLUMN IF NOT EXISTS monthly_events    TEXT DEFAULT ''`);
   await pool.query(`ALTER TABLE time_entries    ADD COLUMN IF NOT EXISTS content_type      TEXT DEFAULT ''`);
   await pool.query(`ALTER TABLE time_entries    ADD COLUMN IF NOT EXISTS internal_project  TEXT DEFAULT ''`);
+  // AJOUTER ces 2 lignes
+  await pool.query(`DELETE FROM task_defaults WHERE stage='boosted'`);
+  await pool.query(`DELETE FROM content_tasks  WHERE stage='boosted'`);
   await pool.query(`
     CREATE TABLE IF NOT EXISTS products (
       id SERIAL PRIMARY KEY,

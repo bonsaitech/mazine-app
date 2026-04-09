@@ -35,10 +35,14 @@ header { display: flex; align-items: center; justify-content: space-between; pad
 .login-error { font-size: 0.75rem; color: #f0a0a0; margin-top: 0.5rem; min-height: 1rem; font-family: 'Lora', serif; font-style: italic; }
 /* ── CLIENTS ── */
 .client-wrap { max-width: 640px; margin: 0 auto; padding: 3rem 2rem; }
-.client-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 0.85rem; margin: 1.5rem 0 2rem; }
-.client-card { background: var(--cream-faint); border: 0.5px solid rgba(239,214,177,0.1); border-radius: 1rem; padding: 1.25rem 1.5rem; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; justify-content: space-between; gap: 1rem; }
+.client-search { width: 100%; box-sizing: border-box; background: rgba(239,214,177,0.04); border: 0.5px solid rgba(239,214,177,0.15); border-radius: 2rem; padding: 0.65rem 1.25rem; color: var(--cream); font-family: 'Plus Jakarta Sans', sans-serif; font-size: 0.82rem; outline: none; margin-bottom: 1rem; transition: border-color 0.2s; }
+.client-search::placeholder { color: rgba(239,214,177,0.3); }
+.client-search:focus { border-color: var(--teal); }
+.client-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 0.85rem; margin: 0 0 2rem; }
+.client-card { background: var(--cream-faint); border: 0.5px solid rgba(239,214,177,0.1); border-radius: 1rem; padding: 1.1rem 1.25rem; cursor: pointer; transition: all 0.2s; display: flex; flex-direction: column; gap: 0.75rem; }
 .client-card:hover { border-color: var(--teal); background: var(--teal-dim); }
-.client-name { font-size: 0.95rem; font-weight: 400; color: var(--cream); margin-bottom: 0.2rem; }
+.client-card-footer { display: flex; align-items: center; justify-content: space-between; }
+.client-name { font-size: 0.92rem; font-weight: 500; color: var(--cream); margin-bottom: 0.2rem; word-break: break-word; }
 .client-since { font-family: "Lora", serif; font-style: italic; font-size: 0.72rem; color: var(--teal); }
 .client-arrow { font-size: 1rem; color: rgba(239,214,177,0.2); flex-shrink: 0; }
 .client-card:hover .client-arrow { color: var(--teal); }
@@ -498,28 +502,16 @@ input[type="date"].field-input::-webkit-calendar-picker-indicator { filter: inve
   <div class="client-wrap">
     <p class="eyebrow" style="margin-bottom:0.5rem;">Sélectionner un client</p>
     <h2 style="font-weight:200;font-size:1.6rem;letter-spacing:0.1em;text-transform:uppercase;margin-bottom:0.25rem;">Clients</h2>
-    <p style="font-family:'Lora',serif;font-style:italic;font-size:0.82rem;color:var(--cream-dim);margin-bottom:0;">Choisissez un client pour accéder à son rapport.</p>
+    <p style="font-family:'Lora',serif;font-style:italic;font-size:0.82rem;color:var(--cream-dim);margin-bottom:1.25rem;">Choisissez un client pour accéder à son rapport.</p>
 
+    <input type="text" id="client-search" class="client-search" placeholder="🔍  Rechercher un client…" oninput="filterClients(this.value)">
     <div class="client-grid" id="client-grid">
       <p style="font-family:'Lora',serif;font-style:italic;font-size:0.82rem;color:rgba(239,214,177,0.3);">Chargement…</p>
     </div>
 
-    <div>
-      <p class="files-label">Nouveau client</p>
-      <div class="client-new-form">
-        <div class="form-row">
-          <div>
-            <label class="field-label" for="new-client-name">Nom du client</label>
-            <input type="text" id="new-client-name" class="field-input" placeholder="Ex: Restaurant Jade">
-          </div>
-          <div>
-            <label class="field-label" for="new-client-date">Date début partenariat</label>
-            <input type="date" id="new-client-date" class="field-input">
-          </div>
-        </div>
-        <button onclick="createClient()" style="background:var(--teal);color:var(--dark);border:none;padding:0.7rem 1.5rem;font-family:'Plus Jakarta Sans',sans-serif;font-size:0.78rem;letter-spacing:0.12em;text-transform:uppercase;border-radius:2rem;cursor:pointer;transition:all 0.2s;">Créer le client →</button>
-      </div>
-    </div>
+    <p style="font-family:'Lora',serif;font-style:italic;font-size:0.75rem;color:rgba(239,214,177,0.25);margin-top:0.5rem;">
+      Pour créer ou modifier un client, rendez-vous dans <strong style="font-style:normal;color:rgba(239,214,177,0.4);">Business → Réglages → Contrats clients</strong>.
+    </p>
   </div>
 </div>
 
@@ -787,6 +779,14 @@ async function goToClients() {
   await loadClients();
 }
 
+function filterClients(q) {
+  const term = q.toLowerCase().trim();
+  document.querySelectorAll('#client-grid .client-card').forEach(card => {
+    const name = card.dataset.name || '';
+    card.style.display = name.includes(term) ? '' : 'none';
+  });
+}
+
 async function loadClients() {
   const grid = document.getElementById('client-grid');
   grid.innerHTML = '<p style="font-family:Lora,serif;font-style:italic;font-size:0.82rem;color:rgba(239,214,177,0.3)">Chargement…</p>';
@@ -803,18 +803,9 @@ async function loadClients() {
     data.clients.forEach(c => window._clientsMap[c.id] = c);
 
     grid.innerHTML = data.clients.map(c => `
-      <div class="client-card" data-client-id="${c.id}">
-        <div>
-          <p class="client-name">${esc(c.name)}</p>
-          <p class="client-since">${c.mazine_start_date ? 'Depuis le '+formatClientDate(c.mazine_start_date) : 'Date partenariat non définie'}</p>
-        </div>
-        <div style="display:flex;align-items:center;gap:0.5rem;">
-          <div class="client-actions">
-            <button class="btn-client-edit" data-edit-id="${c.id}" title="Modifier">✎</button>
-            <button class="btn-client-del" data-del-id="${c.id}" title="Supprimer">✕</button>
-          </div>
-          <span class="client-arrow">→</span>
-        </div>
+      <div class="client-card" data-client-id="${c.id}" data-name="${esc(c.name.toLowerCase())}">
+        <p class="client-name">${esc(c.name)}</p>
+        <p class="client-since">${c.mazine_start_date ? 'Depuis le '+formatClientDate(c.mazine_start_date) : 'Date partenariat non définie'}</p>
       </div>`).join('');
 
     // Attach events safely after rendering

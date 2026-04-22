@@ -841,27 +841,38 @@ app.get('/api/rentabilite', auth, async (req, res) => {
         COALESCE(cc.mrr, 0)                  as mrr,
         COALESCE(cc.hours_sold_per_month, 0) as hours_sold,
         COALESCE(cc.package, '—')            as package,
-        COALESCE(SUM(te.hours), 0)                           as hours_spent,
-        COALESCE(SUM(te.hours * tm.hourly_rate), 0)          as total_cost,
-        COALESCE(cc.mrr, 0) - COALESCE(SUM(te.hours * tm.hourly_rate), 0) as margin,
-        COUNT(DISTINCT ci.id) FILTER (WHERE ci.status IN ('posted'))                                         as videos_total,
-        COUNT(DISTINCT ci.id) FILTER (WHERE ci.status IN ('posted') AND ci.video_type = 'brand_universe')    as videos_brand,
-        COUNT(DISTINCT ci.id) FILTER (WHERE ci.status IN ('posted') AND ci.video_type = 'carrousel')         as videos_carrousel,
-        COUNT(DISTINCT ci.id) FILTER (WHERE ci.status IN ('posted') AND ci.video_type = 'authority')         as videos_authority,
+        COALESCE(t.hours_spent, 0)           as hours_spent,
+        COALESCE(t.total_cost, 0)            as total_cost,
+        COALESCE(cc.mrr, 0) - COALESCE(t.total_cost, 0) as margin,
+        COALESCE(v.videos_brand, 0)      as videos_brand,
+        COALESCE(v.videos_carrousel, 0)  as videos_carrousel,
+        COALESCE(v.videos_authority, 0)  as videos_authority,
         COALESCE(cc.target_brand_universe, 0) as target_brand,
         COALESCE(cc.target_carrousel, 0)      as target_carrousel,
         COALESCE(cc.target_authority, 0)      as target_authority
       FROM clients c
       LEFT JOIN client_contracts cc ON cc.client_id = c.id AND cc.status = 'active'
-      LEFT JOIN time_entries te ON te.client_id = c.id
-        AND DATE_TRUNC('month', te.date) = DATE_TRUNC('month', ($1 || '-01')::date)
-        AND (te.internal_project IS NULL OR te.internal_project = '')
-      LEFT JOIN team_members tm ON tm.id = te.team_member_id
-      LEFT JOIN content_items ci ON ci.client_id = c.id
-        AND DATE_TRUNC('month', COALESCE(ci.post_date, ci.created_at)) = DATE_TRUNC('month', ($1 || '-01')::date)
+      LEFT JOIN (
+        SELECT te.client_id,
+          SUM(te.hours) as hours_spent,
+          SUM(te.hours * tm.hourly_rate) as total_cost
+        FROM time_entries te
+        JOIN team_members tm ON tm.id = te.team_member_id
+        WHERE DATE_TRUNC('month', te.date) = DATE_TRUNC('month', ($1 || '-01')::date)
+          AND te.client_id IS NOT NULL
+          AND (te.internal_project IS NULL OR te.internal_project = '')
+        GROUP BY te.client_id
+      ) t ON t.client_id = c.id
+      LEFT JOIN (
+        SELECT client_id,
+          COUNT(*) FILTER (WHERE status = 'posted' AND video_type = 'brand_universe') as videos_brand,
+          COUNT(*) FILTER (WHERE status = 'posted' AND video_type = 'carrousel')      as videos_carrousel,
+          COUNT(*) FILTER (WHERE status = 'posted' AND video_type = 'authority')      as videos_authority
+        FROM content_items
+        WHERE DATE_TRUNC('month', COALESCE(post_date, created_at)) = DATE_TRUNC('month', ($1 || '-01')::date)
+        GROUP BY client_id
+      ) v ON v.client_id = c.id
       WHERE cc.client_id IS NOT NULL
-      GROUP BY c.id, c.name, cc.id, cc.mrr, cc.hours_sold_per_month, cc.package,
-               cc.target_brand_universe, cc.target_carrousel, cc.target_authority
       ORDER BY cc.mrr DESC NULLS LAST`,
       [monthFilter]
     );

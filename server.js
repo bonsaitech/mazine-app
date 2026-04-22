@@ -855,6 +855,7 @@ app.get('/api/rentabilite', auth, async (req, res) => {
       LEFT JOIN client_contracts cc ON cc.client_id = c.id AND cc.status = 'active'
       LEFT JOIN time_entries te ON te.client_id = c.id
         AND DATE_TRUNC('month', te.date) = DATE_TRUNC('month', ($1 || '-01')::date)
+        AND (te.internal_project IS NULL OR te.internal_project = '')
       LEFT JOIN team_members tm ON tm.id = te.team_member_id
       LEFT JOIN content_items ci ON ci.client_id = c.id
         AND DATE_TRUNC('month', COALESCE(ci.post_date, ci.created_at)) = DATE_TRUNC('month', ($1 || '-01')::date)

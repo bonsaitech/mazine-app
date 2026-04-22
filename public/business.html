@@ -1892,7 +1892,7 @@ async function saveTime() {
     notes:document.getElementById('time-notes').value,
     content_type:document.getElementById('time-content-type')?.value||'',
   };
-  if(!body.team_member_id||!body.client_id||!body.hours){showToast('Membre, client et heures requis','err');return;}
+  if(!body.team_member_id||((!body.client_id)&&!body.internal_project)||!body.hours){showToast('Membre, client et heures requis','err');return;}
   await api('POST','/api/time',body);
   closeModal('modal-time');
   showToast('Heures enregistrées');

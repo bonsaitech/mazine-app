@@ -380,9 +380,10 @@ tbody tr:hover td { background: rgba(239,214,177,0.015); }
       <select class="filter-sel" id="cal-filter-client" onchange="loadCalendar()">
         <option value="">Tous les clients</option>
       </select>
-      <button class="btn-sm" id="cal-filter-all"   onclick="setCalFilter('all')"   style="background:var(--teal);color:#fff;border-color:var(--teal);">Tous</button>
-      <button class="btn-sm" id="cal-filter-shoot" onclick="setCalFilter('shoot')" >🎬 Tournages</button>
-      <button class="btn-sm" id="cal-filter-post"  onclick="setCalFilter('post')"  >📲 Publications</button>
+      <button class="btn-sm" id="cal-filter-upcoming" onclick="setCalFilter('upcoming')" style="background:var(--teal);color:#fff;border-color:var(--teal);">📅 À venir</button>
+      <button class="btn-sm" id="cal-filter-all"      onclick="setCalFilter('all')"      >🗂 Historique</button>
+      <button class="btn-sm" id="cal-filter-shoot"    onclick="setCalFilter('shoot')"    >🎬 Tournages</button>
+      <button class="btn-sm" id="cal-filter-post"     onclick="setCalFilter('post')"     >📲 Publications</button>
     </div>
   </div>
   <div class="cal-legend">
@@ -1522,11 +1523,11 @@ async function loadRentabilite() {
 // ═══════════════════════════════════════════════
 // CALENDAR
 // ═══════════════════════════════════════════════
-let calStatusFilter = 'all';
+let calStatusFilter = 'upcoming';
 
 function setCalFilter(f) {
   calStatusFilter = f;
-  ['all','shoot','post'].forEach(k => {
+  ['upcoming','all','shoot','post'].forEach(k => {
     const btn = document.getElementById('cal-filter-'+k);
     if (!btn) return;
     const on = k===f;
@@ -1555,6 +1556,9 @@ async function loadCalendar() {
   if (clientFilter) {
     items = items.filter(i=>String(i.client_id)===clientFilter);
     tasks = tasks.filter(t=>String(t.client_id)===clientFilter);
+  }
+  if (calStatusFilter !== 'all') {
+    items = items.filter(i => !['posted','boosted'].includes(i.status));
   }
 
   // Build calendar

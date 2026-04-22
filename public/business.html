@@ -1867,7 +1867,7 @@ function renderTimeLog(entries) {
         ${items.map(e=>`<div class="time-log-item">
           <div class="avatar" style="background:${e.color||'#618F9B'};width:22px;height:22px;">${e.member_name?.[0]||'?'}</div>
           <div style="flex:1;min-width:0;">
-            <p style="font-size:0.75rem;color:var(--cream);">${TASK_LABELS[e.task_type]||e.task_type} — <span style="color:rgba(239,214,177,0.45);">${esc(e.client_name)}</span></p>
+            <p style="font-size:0.75rem;color:var(--cream);">${TASK_LABELS[e.task_type]||e.task_type} — <span style="color:rgba(239,214,177,0.45);">${esc(e.internal_project === 'mazine' ? 'Mazine (Interne)' : e.client_name)}</span></p>
             ${e.content_title?`<p style="font-size:0.62rem;color:rgba(239,214,177,0.28);margin-top:0.1rem;">${esc(e.content_title.substring(0,40))}</p>`:''}
           </div>
           <p style="font-size:0.95rem;font-weight:200;color:var(--cream);white-space:nowrap;">${(+e.hours).toFixed(1)}h</p>

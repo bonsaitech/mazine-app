@@ -1057,10 +1057,6 @@ document.addEventListener('DOMContentLoaded', async () => {
   await Promise.all([loadTeam(), loadClients(), loadDefaults()]);
   await loadContracts();
 
-  // Populate dashboard member select
-  const dmSel = document.getElementById('dashboard-member');
-  teamData.forEach(m => dmSel.innerHTML += `<option value="${m.id}">${m.name}</option>`);
-
   // Populate finance client selects
   clientsData.forEach(c => {
     document.getElementById('quote-client').innerHTML += `<option value="${c.id}">${c.name}</option>`;

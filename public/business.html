@@ -753,6 +753,42 @@ tbody tr:hover td { background: rgba(239,214,177,0.015); }
   </div>
 </div>
 
+<!-- Modal: Stratégie mensuelle -->
+<div class="modal-bg" id="modal-strategy">
+  <div class="modal" style="max-width:600px;">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.1rem;">
+      <h3 style="margin-bottom:0;" id="modal-strategy-title">Stratégie mensuelle</h3>
+      <div style="display:flex;align-items:center;gap:0.5rem;">
+        <button onclick="strategyNavMonth(-1)" style="background:transparent;border:0.5px solid rgba(239,214,177,0.15);color:rgba(239,214,177,0.4);width:28px;height:28px;border-radius:50%;cursor:pointer;font-size:0.9rem;">‹</button>
+        <span id="strategy-period-label" style="font-size:0.7rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--teal);min-width:80px;text-align:center;"></span>
+        <button onclick="strategyNavMonth(1)" style="background:transparent;border:0.5px solid rgba(239,214,177,0.15);color:rgba(239,214,177,0.4);width:28px;height:28px;border-radius:50%;cursor:pointer;font-size:0.9rem;">›</button>
+      </div>
+    </div>
+    <input type="hidden" id="strategy-client-id">
+    <div class="field">
+      <label>🎯 Angle stratégique du mois</label>
+      <textarea id="strategy-angle" rows="2" placeholder="ex: Focus Authority — construire la crédibilité expert sur les process de fabrication"></textarea>
+    </div>
+    <div class="field">
+      <label>📅 Priorités du mois</label>
+      <textarea id="strategy-priorities" rows="2" placeholder="ex: Lancement nouvelle gamme eco, Fête de la musique, Ouverture nouveau showroom..."></textarea>
+    </div>
+    <div class="field">
+      <label>⚡ Actions spécifiques</label>
+      <textarea id="strategy-actions" rows="2" placeholder="ex: Série de 3 vidéos Behind The Scenes, Collaboration avec @influenceur, Campagne hashtag..."></textarea>
+    </div>
+    <div class="field">
+      <label>🗒 Notes</label>
+      <textarea id="strategy-notes" rows="3" placeholder="Contexte, contraintes, feedback client..."></textarea>
+    </div>
+    <div id="strategy-updated" style="font-size:0.6rem;color:rgba(239,214,177,0.25);font-family:'Lora',serif;font-style:italic;margin-top:0.25rem;"></div>
+    <div class="modal-footer">
+      <button class="btn-ghost" onclick="closeModal('modal-strategy')">Fermer</button>
+      <button class="btn-primary" onclick="saveStrategy()">Enregistrer</button>
+    </div>
+  </div>
+</div>
+
 <div class="toast" id="toast"></div>
 
 <!-- Modal: Contrat client -->
@@ -1283,7 +1319,8 @@ function renderContractsTable() {
       <td style="color:rgba(239,214,177,0.4);font-size:0.72rem;">${esc(c.contact_name||'—')}</td>
       <td><span class="badge badge-${c.status==='active'?'won':c.status==='paused'?'contacted':'lost'}" style="font-size:0.55rem;">${c.status==='active'?'Actif':c.status==='paused'?'Pause':'Churned'}</span></td>
       <td><button class="action-btn" onclick="editContract(${c.id}, ${c.client_id})">✎</button>
-          <button class="action-btn" onclick="openClientNotes(${c.client_id},'${esc(c.client_name)}')" title="Notes" style="color:var(--teal);">📝</button></td>
+          <button class="action-btn" onclick="openClientNotes(${c.client_id},'${esc(c.client_name)}')" title="Notes" style="color:var(--teal);">📝</button>
+          <button class="action-btn" onclick="openStrategyModal(${c.client_id},'${esc(c.client_name)}')" title="Stratégie mensuelle" style="color:var(--warn);">🎯</button></td>
     </tr>`).join('');
 
   // Clients without contracts — prompt to configure
@@ -2576,6 +2613,74 @@ function openConvertModal(leadId) {
   document.getElementById('convert-hours').value='';
   document.getElementById('convert-package').value='';
   openModal('modal-convert');
+}
+
+// ═══════════════════════════════════════════════
+// STRATÉGIE MENSUELLE
+// ═══════════════════════════════════════════════
+let strategyCurrentPeriod = '';
+
+function strategyPeriodLabel(period) {
+  if (!period) return '';
+  const [y, m] = period.split('-');
+  return new Date(+y, +m-1, 1).toLocaleDateString('fr-FR', {month:'long', year:'numeric'});
+}
+
+async function openStrategyModal(clientId, clientName) {
+  document.getElementById('strategy-client-id').value = clientId;
+  document.getElementById('modal-strategy-title').textContent = '🎯 ' + clientName;
+  // Default to current month
+  const now = new Date();
+  strategyCurrentPeriod = now.getFullYear() + '-' + String(now.getMonth()+1).padStart(2,'0');
+  await loadStrategyForPeriod(clientId, strategyCurrentPeriod);
+  openModal('modal-strategy');
+}
+
+async function loadStrategyForPeriod(clientId, period) {
+  strategyCurrentPeriod = period;
+  document.getElementById('strategy-period-label').textContent = strategyPeriodLabel(period);
+  // Clear fields
+  ['strategy-angle','strategy-priorities','strategy-actions','strategy-notes'].forEach(id => {
+    document.getElementById(id).value = '';
+  });
+  document.getElementById('strategy-updated').textContent = '';
+  const d = await api('GET', `/api/clients/${clientId}/strategy?period=${period}`);
+  if (d?.strategy) {
+    document.getElementById('strategy-angle').value      = d.strategy.strategic_angle || '';
+    document.getElementById('strategy-priorities').value = d.strategy.priorities || '';
+    document.getElementById('strategy-actions').value    = d.strategy.specific_actions || '';
+    document.getElementById('strategy-notes').value      = d.strategy.notes || '';
+    if (d.strategy.updated_at) {
+      document.getElementById('strategy-updated').textContent =
+        'Dernière mise à jour : ' + new Date(d.strategy.updated_at).toLocaleDateString('fr-FR', {day:'numeric', month:'long', year:'numeric'});
+    }
+  }
+}
+
+async function strategyNavMonth(dir) {
+  const [y, m] = strategyCurrentPeriod.split('-').map(Number);
+  const d = new Date(y, m - 1 + dir, 1);
+  const newPeriod = d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0');
+  const clientId = document.getElementById('strategy-client-id').value;
+  await loadStrategyForPeriod(clientId, newPeriod);
+}
+
+async function saveStrategy() {
+  const clientId = document.getElementById('strategy-client-id').value;
+  const body = {
+    period:           strategyCurrentPeriod,
+    strategic_angle:  document.getElementById('strategy-angle').value,
+    priorities:       document.getElementById('strategy-priorities').value,
+    specific_actions: document.getElementById('strategy-actions').value,
+    notes:            document.getElementById('strategy-notes').value,
+  };
+  const d = await api('POST', `/api/clients/${clientId}/strategy`, body);
+  if (!d) return;
+  showToast('Stratégie enregistrée ✓');
+  if (d.strategy?.updated_at) {
+    document.getElementById('strategy-updated').textContent =
+      'Dernière mise à jour : ' + new Date(d.strategy.updated_at).toLocaleDateString('fr-FR', {day:'numeric', month:'long', year:'numeric'});
+  }
 }
 
 async function convertLead() {

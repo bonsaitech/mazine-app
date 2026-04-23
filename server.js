@@ -334,6 +334,19 @@ async function initDB() {
   await pool.query(`ALTER TABLE clients         ADD COLUMN IF NOT EXISTS monthly_events    TEXT DEFAULT ''`);
   await pool.query(`ALTER TABLE time_entries    ADD COLUMN IF NOT EXISTS content_type      TEXT DEFAULT ''`);
   await pool.query(`ALTER TABLE time_entries    ADD COLUMN IF NOT EXISTS internal_project  TEXT DEFAULT ''`);
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS client_strategy (
+      id SERIAL PRIMARY KEY,
+      client_id INTEGER REFERENCES clients(id) ON DELETE CASCADE,
+      period TEXT NOT NULL,
+      strategic_angle TEXT DEFAULT '',
+      priorities TEXT DEFAULT '',
+      specific_actions TEXT DEFAULT '',
+      notes TEXT DEFAULT '',
+      updated_at TIMESTAMPTZ DEFAULT NOW(),
+      UNIQUE(client_id, period)
+    )
+  `);
   // AJOUTER ces 2 lignes
   await pool.query(`DELETE FROM task_defaults WHERE stage='boosted'`);
   await pool.query(`DELETE FROM content_tasks  WHERE stage='boosted'`);
@@ -1507,6 +1520,34 @@ app.delete('/api/products/:id', auth, async (req, res) => {
     await pool.query('UPDATE products SET active=false WHERE id=$1', [req.params.id]);
     res.json({ ok: true });
   } catch(err) { res.status(500).json({ error: err.message }); }
+});
+
+// ── CLIENT STRATEGY ───────────────────────────────────
+app.get('/api/clients/:id/strategy', auth, async (req, res) => {
+  const { period } = req.query;
+  try {
+    const { rows } = await pool.query(
+      `SELECT * FROM client_strategy WHERE client_id=$1 AND period=$2`,
+      [req.params.id, period]
+    );
+    res.json({ strategy: rows[0] || null });
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+app.post('/api/clients/:id/strategy', auth, async (req, res) => {
+  const { period, strategic_angle, priorities, specific_actions, notes } = req.body;
+  if (!period) return res.status(400).json({ error: 'period requis.' });
+  try {
+    const { rows } = await pool.query(`
+      INSERT INTO client_strategy (client_id, period, strategic_angle, priorities, specific_actions, notes, updated_at)
+      VALUES ($1,$2,$3,$4,$5,$6,NOW())
+      ON CONFLICT (client_id, period) DO UPDATE SET
+        strategic_angle=$3, priorities=$4, specific_actions=$5, notes=$6, updated_at=NOW()
+      RETURNING *`,
+      [req.params.id, period, strategic_angle||'', priorities||'', specific_actions||'', notes||'']
+    );
+    res.json({ strategy: rows[0] });
+  } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
 // ── CARBONE PDF (devis) ──────────────────────────────

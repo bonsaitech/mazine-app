@@ -346,19 +346,8 @@ async function initDB() {
   await pool.query(`ALTER TABLE clients         ADD COLUMN IF NOT EXISTS monthly_events    TEXT DEFAULT ''`);
   await pool.query(`ALTER TABLE time_entries    ADD COLUMN IF NOT EXISTS content_type      TEXT DEFAULT ''`);
   await pool.query(`ALTER TABLE time_entries    ADD COLUMN IF NOT EXISTS internal_project  TEXT DEFAULT ''`);
-  await pool.query(`
-    CREATE TABLE IF NOT EXISTS users (
-      id SERIAL PRIMARY KEY,
-      email TEXT UNIQUE NOT NULL,
-      name TEXT,
-      picture TEXT,
-      google_id TEXT UNIQUE,
-      role TEXT DEFAULT 'staff',
-      active BOOLEAN DEFAULT true,
-      last_login TIMESTAMPTZ,
-      created_at TIMESTAMPTZ DEFAULT NOW()
-    )
-  `);
+  await pool.query(`CREATE TABLE IF NOT EXISTS users (id SERIAL PRIMARY KEY, email TEXT UNIQUE NOT NULL, name TEXT, picture TEXT, google_id TEXT, role TEXT DEFAULT 'staff', active BOOLEAN DEFAULT true, last_login TIMESTAMPTZ, created_at TIMESTAMPTZ DEFAULT NOW())`);
+  await pool.query(`CREATE UNIQUE INDEX IF NOT EXISTS users_google_id_idx ON users(google_id) WHERE google_id IS NOT NULL`);
   await pool.query(`
     CREATE TABLE IF NOT EXISTS client_strategy (
       id SERIAL PRIMARY KEY,

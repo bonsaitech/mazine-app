@@ -761,6 +761,121 @@ tbody tr:hover td { background: rgba(239,214,177,0.015); }
   </div>
 </div>
 
+<!-- Modal: Onboarding client -->
+<div class="modal-bg" id="modal-onboarding">
+  <div class="modal modal-wide" style="max-width:780px;">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.25rem;">
+      <h3 style="margin-bottom:0;" id="modal-onboarding-title">📋 Fiche client</h3>
+      <div style="display:flex;align-items:center;gap:0.65rem;">
+        <label style="background:var(--teal-dim);border:0.5px solid var(--teal-border);color:var(--teal);padding:0.4rem 0.9rem;border-radius:2rem;font-size:0.65rem;letter-spacing:0.1em;text-transform:uppercase;cursor:pointer;">
+          ↑ Importer CSV
+          <input type="file" id="onboarding-csv-input" accept=".csv" style="display:none;" onchange="importOnboardingCSV(this)">
+        </label>
+        <button class="btn-ghost" onclick="closeModal('modal-onboarding')" style="padding:0.3rem 0.75rem;font-size:0.6rem;">✕</button>
+      </div>
+    </div>
+    <input type="hidden" id="onboarding-client-id">
+
+    <!-- Tabs -->
+    <div style="display:flex;gap:0.3rem;margin-bottom:1.25rem;flex-wrap:wrap;">
+      <button class="nav-tab active" id="otab-identity"  onclick="switchOnboardingTab('identity')">🏢 Identité</button>
+      <button class="nav-tab" id="otab-brand"     onclick="switchOnboardingTab('brand')">✨ Marque</button>
+      <button class="nav-tab" id="otab-audience"  onclick="switchOnboardingTab('audience')">🎯 Audience</button>
+      <button class="nav-tab" id="otab-content"   onclick="switchOnboardingTab('content')">🎬 Contenu</button>
+      <button class="nav-tab" id="otab-brands"    onclick="switchOnboardingTab('brands')">🏷 Marques</button>
+    </div>
+
+    <!-- Tab: Identité -->
+    <div id="otab-identity-content">
+      <div class="field-row">
+        <div class="field"><label>Secteur d'activité</label><input type="text" id="ob-sector" placeholder="ex: Bâtiment, Restauration..."></div>
+        <div class="field"><label>Type de structure</label>
+          <select id="ob-structure">
+            <option value="">—</option>
+            <option value="Entreprise unique">Entreprise unique</option>
+            <option value="Plusieurs marques">Plusieurs marques</option>
+            <option value="Groupe">Groupe</option>
+          </select>
+        </div>
+      </div>
+      <div class="field-row">
+        <div class="field"><label>Nom du contact</label><input type="text" id="ob-contact-name"></div>
+        <div class="field"><label>Titre / Fonction</label><input type="text" id="ob-contact-title"></div>
+      </div>
+      <div class="field-row">
+        <div class="field"><label>Email</label><input type="email" id="ob-contact-email"></div>
+        <div class="field"><label>Téléphone</label><input type="tel" id="ob-contact-phone"></div>
+      </div>
+      <div class="field-row">
+        <div class="field"><label>Comptes TikTok (noms + abonnés)</label><textarea id="ob-tiktok" rows="2" placeholder="ex: @polycolor — 5125 abonnés, 1x/sem"></textarea></div>
+        <div class="field"><label>Autres réseaux sociaux</label><input type="text" id="ob-social" placeholder="Instagram, Facebook..."></div>
+      </div>
+      <div class="field-row">
+        <div class="field"><label>Site web</label><input type="text" id="ob-website" placeholder="https://..."></div>
+        <div class="field"><label>Ressources disponibles</label><input type="text" id="ob-resources" placeholder="Charte graphique, brand book..."></div>
+      </div>
+    </div>
+
+    <!-- Tab: Marque -->
+    <div id="otab-brand-content" style="display:none;">
+      <div class="field"><label>3 mots qui décrivent la marque</label><input type="text" id="ob-words" placeholder="ex: Innovant, Durable, Local"></div>
+      <div class="field"><label>Personnalité de la marque</label><input type="text" id="ob-personality" placeholder="ex: Inspirant, Éducatif, Lifestyle"></div>
+      <div class="field"><label>Mission / Valeurs</label><textarea id="ob-mission" rows="2" placeholder="Ce qui vous anime..."></textarea></div>
+      <div class="field"><label>Objectifs marketing prioritaires</label><textarea id="ob-objectives" rows="2" placeholder="ex: Notoriété, recrutement talents, ventes..."></textarea></div>
+      <div class="field"><label>Différenciateurs concurrentiels</label><textarea id="ob-diff" rows="2" placeholder="Pourquoi vos clients vous choisissent..."></textarea></div>
+      <div class="field"><label>Principaux concurrents</label><input type="text" id="ob-competitors" placeholder="ex: Mauvillac, Sofap..."></div>
+    </div>
+
+    <!-- Tab: Audience -->
+    <div id="otab-audience-content" style="display:none;">
+      <p style="font-size:0.58rem;letter-spacing:0.15em;text-transform:uppercase;color:rgba(239,214,177,0.3);margin-bottom:0.85rem;">Cible B2C</p>
+      <div class="field-row">
+        <div class="field"><label>Tranche d'âge / profil</label><input type="text" id="ob-b2c-age" placeholder="ex: 25-40 ans, jeunes parents..."></div>
+        <div class="field"><label>Genre</label><input type="text" id="ob-b2c-gender" placeholder="Homme, Femme, les deux..."></div>
+      </div>
+      <div class="field-row">
+        <div class="field"><label>Localisation</label><input type="text" id="ob-b2c-location" placeholder="ex: Toutes régions, Port-Louis..."></div>
+        <div class="field"><label>Centres d'intérêt</label><input type="text" id="ob-b2c-interests" placeholder="ex: Rénovation, bricolage..."></div>
+      </div>
+      <div class="field"><label>Besoins & attentes</label><textarea id="ob-b2c-needs" rows="2"></textarea></div>
+      <div class="field"><label>Freins & objections</label><textarea id="ob-b2c-objections" rows="2"></textarea></div>
+
+      <p style="font-size:0.58rem;letter-spacing:0.15em;text-transform:uppercase;color:rgba(239,214,177,0.3);margin:1rem 0 0.85rem;">Cible B2B</p>
+      <div class="field-row">
+        <div class="field"><label>Type d'acteur</label><input type="text" id="ob-b2b-type" placeholder="ex: Architectes, distributeurs..."></div>
+        <div class="field"><label>Rôle dans la décision</label><input type="text" id="ob-b2b-role" placeholder="ex: Acheteur, prescripteur..."></div>
+      </div>
+      <div class="field"><label>Besoins B2B</label><textarea id="ob-b2b-needs" rows="2"></textarea></div>
+      <div class="field"><label>Freins B2B</label><textarea id="ob-b2b-objections" rows="2"></textarea></div>
+    </div>
+
+    <!-- Tab: Contenu -->
+    <div id="otab-content-content" style="display:none;">
+      <div class="field"><label>Best-sellers</label><textarea id="ob-bestsellers" rows="2" placeholder="Noms des produits / services les plus vendus..."></textarea></div>
+      <div class="field"><label>Moins bons performers</label><textarea id="ob-worst" rows="2"></textarea></div>
+      <div class="field"><label>Événements & campagnes prévus (12 mois)</label><textarea id="ob-events" rows="3" placeholder="ex: Octobre: Campagne Premium, Novembre: Fin d'année..."></textarea></div>
+      <div class="field"><label>Saisonnalité forte ?</label><input type="text" id="ob-seasonality" placeholder="ex: Oui, Octobre-Décembre"></div>
+      <div class="field"><label>Personnes disponibles pour le contenu</label><textarea id="ob-people" rows="2" placeholder="Noms, fonctions, disponibilités..."></textarea></div>
+      <div class="field"><label>Qui valide les contenus TikTok ?</label><input type="text" id="ob-validator" placeholder="Nom, fonction"></div>
+      <div class="field"><label>Résultats attendus</label><textarea id="ob-results" rows="2" placeholder="Objectifs chiffrables si possibles..."></textarea></div>
+    </div>
+
+    <!-- Tab: Marques (multi-marques) -->
+    <div id="otab-brands-content" style="display:none;">
+      <p style="font-family:'Lora',serif;font-style:italic;font-size:0.78rem;color:var(--cream-dim);margin-bottom:1rem;">Pour les structures multi-marques — importé automatiquement depuis le CSV.</p>
+      <div id="ob-brands-list"></div>
+    </div>
+
+    <div style="border-top:0.5px solid rgba(239,214,177,0.08);margin-top:1.25rem;padding-top:1rem;display:flex;align-items:center;justify-content:space-between;">
+      <p id="ob-updated" style="font-size:0.6rem;color:rgba(239,214,177,0.25);font-family:'Lora',serif;font-style:italic;"></p>
+      <div style="display:flex;gap:0.5rem;">
+        <button class="btn-ghost" onclick="closeModal('modal-onboarding')">Fermer</button>
+        <button class="btn-primary" onclick="saveOnboarding()">Enregistrer</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <!-- Modal: Inviter utilisateur -->
 <div class="modal-bg" id="modal-invite">
   <div class="modal" style="max-width:440px;">
@@ -1376,7 +1491,8 @@ function renderContractsTable() {
       <td><span class="badge badge-${c.status==='active'?'won':c.status==='paused'?'contacted':'lost'}" style="font-size:0.55rem;">${c.status==='active'?'Actif':c.status==='paused'?'Pause':'Churned'}</span></td>
       <td><button class="action-btn" onclick="editContract(${c.id}, ${c.client_id})">✎</button>
           <button class="action-btn" onclick="openClientNotes(${c.client_id},'${esc(c.client_name)}')" title="Notes" style="color:var(--teal);">📝</button>
-          <button class="action-btn" onclick="openStrategyModal(${c.client_id},'${esc(c.client_name)}')" title="Stratégie mensuelle" style="color:var(--warn);">🎯</button></td>
+          <button class="action-btn" onclick="openStrategyModal(${c.client_id},'${esc(c.client_name)}')" title="Stratégie mensuelle" style="color:var(--warn);">🎯</button>
+          <button class="action-btn" onclick="openOnboardingModal(${c.client_id},'${esc(c.client_name)}')" title="Fiche onboarding" style="color:#a0c4d8;">📋</button></td>
     </tr>`).join('');
 
   // Clients without contracts — prompt to configure
@@ -2741,6 +2857,247 @@ async function changeUserRole(id, role) {
   showToast('Rôle mis à jour');
   loadUsers();
 }
+
+// ═══════════════════════════════════════
+// ONBOARDING CLIENT
+// ═══════════════════════════════════════
+function switchOnboardingTab(tab) {
+  ['identity','brand','audience','content','brands'].forEach(t => {
+    document.getElementById('otab-'+t).classList.toggle('active', t===tab);
+    document.getElementById('otab-'+t+'-content').style.display = t===tab ? '' : 'none';
+  });
+}
+
+async function openOnboardingModal(clientId, clientName) {
+  document.getElementById('onboarding-client-id').value = clientId;
+  document.getElementById('modal-onboarding-title').textContent = '📋 ' + clientName;
+  clearOnboardingFields();
+  switchOnboardingTab('identity');
+  const d = await api('GET', `/api/clients/${clientId}/onboarding`);
+  if (d?.onboarding) fillOnboardingFields(d.onboarding);
+  openModal('modal-onboarding');
+}
+
+function clearOnboardingFields() {
+  const ids = ['ob-sector','ob-structure','ob-contact-name','ob-contact-title','ob-contact-email','ob-contact-phone',
+    'ob-tiktok','ob-social','ob-website','ob-resources','ob-words','ob-personality','ob-mission',
+    'ob-objectives','ob-diff','ob-competitors','ob-b2c-age','ob-b2c-gender','ob-b2c-location',
+    'ob-b2c-interests','ob-b2c-needs','ob-b2c-objections','ob-b2b-type','ob-b2b-role',
+    'ob-b2b-needs','ob-b2b-objections','ob-bestsellers','ob-worst','ob-events','ob-seasonality',
+    'ob-people','ob-validator','ob-results'];
+  ids.forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
+  document.getElementById('ob-updated').textContent = '';
+  document.getElementById('ob-brands-list').innerHTML = '';
+}
+
+function fillOnboardingFields(o) {
+  const set = (id, val) => { const el = document.getElementById(id); if (el) el.value = val || ''; };
+  set('ob-sector',        o.sector);
+  set('ob-structure',     o.structure_type);
+  set('ob-contact-name',  o.contact_name);
+  set('ob-contact-title', o.contact_title);
+  set('ob-contact-email', o.contact_email);
+  set('ob-contact-phone', o.contact_phone);
+  set('ob-tiktok',        o.tiktok_accounts);
+  set('ob-social',        o.social_networks);
+  set('ob-website',       o.website);
+  set('ob-resources',     o.resources_available);
+  set('ob-words',         o.brand_words);
+  set('ob-personality',   o.brand_personality);
+  set('ob-mission',       o.brand_mission);
+  set('ob-objectives',    o.marketing_objectives);
+  set('ob-diff',          o.differentiators);
+  set('ob-competitors',   o.competitors);
+  set('ob-bestsellers',   o.best_sellers);
+  set('ob-worst',         o.worst_sellers);
+  set('ob-events',        o.events_campaigns);
+  set('ob-seasonality',   o.seasonality);
+  set('ob-people',        o.available_people);
+  set('ob-validator',     o.content_validator);
+  set('ob-results',       o.expected_results);
+  // B2C
+  const b2c = typeof o.target_b2c === 'string' ? JSON.parse(o.target_b2c||'{}') : (o.target_b2c||{});
+  set('ob-b2c-age',        b2c.age_range);
+  set('ob-b2c-gender',     b2c.gender);
+  set('ob-b2c-location',   b2c.location);
+  set('ob-b2c-interests',  b2c.interests);
+  set('ob-b2c-needs',      b2c.needs);
+  set('ob-b2c-objections', b2c.objections);
+  // B2B
+  const b2b = typeof o.target_b2b === 'string' ? JSON.parse(o.target_b2b||'{}') : (o.target_b2b||{});
+  set('ob-b2b-type',        b2b.actor_type);
+  set('ob-b2b-role',        b2b.decision_role);
+  set('ob-b2b-needs',       b2b.needs);
+  set('ob-b2b-objections',  b2b.objections);
+  // Brands
+  const brands = typeof o.brands === 'string' ? JSON.parse(o.brands||'[]') : (o.brands||[]);
+  renderBrandsList(brands);
+  if (o.updated_at) {
+    document.getElementById('ob-updated').textContent =
+      'Dernière mise à jour : ' + new Date(o.updated_at).toLocaleDateString('fr-FR',{day:'numeric',month:'long',year:'numeric'});
+  }
+}
+
+function renderBrandsList(brands) {
+  const el = document.getElementById('ob-brands-list');
+  if (!brands?.length) { el.innerHTML = '<p style="font-family:Lora,serif;font-style:italic;font-size:0.78rem;color:rgba(239,214,177,0.28);">Aucune marque — importez un CSV pour remplir automatiquement.</p>'; return; }
+  el.innerHTML = brands.map((b,i) => `
+    <div style="background:var(--cream-faint);border:0.5px solid rgba(239,214,177,0.08);border-radius:0.75rem;padding:1rem;margin-bottom:0.75rem;">
+      <p style="font-size:0.75rem;font-weight:600;color:var(--teal);margin-bottom:0.6rem;">🏷 ${esc(b.name||'Marque '+(i+1))}</p>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.5rem;font-size:0.72rem;">
+        ${b.words?`<div><span style="color:rgba(239,214,177,0.35);">3 mots : </span>${esc(b.words)}</div>`:''}
+        ${b.personality?`<div><span style="color:rgba(239,214,177,0.35);">Personnalité : </span>${esc(b.personality)}</div>`:''}
+        ${b.differentiators?`<div><span style="color:rgba(239,214,177,0.35);">Différenciateurs : </span>${esc(b.differentiators)}</div>`:''}
+        ${b.competitors?`<div><span style="color:rgba(239,214,177,0.35);">Concurrents : </span>${esc(b.competitors)}</div>`:''}
+        ${b.best_sellers?`<div style="grid-column:span 2;"><span style="color:rgba(239,214,177,0.35);">Best-sellers : </span>${esc(b.best_sellers)}</div>`:''}
+        ${b.target_b2c?.age_range?`<div><span style="color:rgba(239,214,177,0.35);">Cible : </span>${esc(b.target_b2c.age_range)}</div>`:''}
+        ${b.events?`<div style="grid-column:span 2;"><span style="color:rgba(239,214,177,0.35);">Événements : </span>${esc(b.events)}</div>`:''}
+      </div>
+    </div>`).join('');
+}
+
+async function saveOnboarding() {
+  const clientId = document.getElementById('onboarding-client-id').value;
+  const g = id => document.getElementById(id)?.value || '';
+  const body = {
+    sector: g('ob-sector'), structure_type: g('ob-structure'),
+    contact_name: g('ob-contact-name'), contact_title: g('ob-contact-title'),
+    contact_email: g('ob-contact-email'), contact_phone: g('ob-contact-phone'),
+    tiktok_accounts: g('ob-tiktok'), social_networks: g('ob-social'),
+    website: g('ob-website'), resources_available: g('ob-resources'),
+    brand_words: g('ob-words'), brand_personality: g('ob-personality'),
+    brand_mission: g('ob-mission'), marketing_objectives: g('ob-objectives'),
+    differentiators: g('ob-diff'), competitors: g('ob-competitors'),
+    best_sellers: g('ob-bestsellers'), worst_sellers: g('ob-worst'),
+    events_campaigns: g('ob-events'), seasonality: g('ob-seasonality'),
+    available_people: g('ob-people'), content_validator: g('ob-validator'),
+    expected_results: g('ob-results'),
+    target_b2c: { age_range: g('ob-b2c-age'), gender: g('ob-b2c-gender'),
+      location: g('ob-b2c-location'), interests: g('ob-b2c-interests'),
+      needs: g('ob-b2c-needs'), objections: g('ob-b2c-objections') },
+    target_b2b: { actor_type: g('ob-b2b-type'), decision_role: g('ob-b2b-role'),
+      needs: g('ob-b2b-needs'), objections: g('ob-b2b-objections') },
+  };
+  const d = await api('POST', `/api/clients/${clientId}/onboarding`, body);
+  if (!d) return;
+  showToast('Fiche onboarding enregistrée ✓');
+  document.getElementById('ob-updated').textContent =
+    'Dernière mise à jour : ' + new Date().toLocaleDateString('fr-FR',{day:'numeric',month:'long',year:'numeric'});
+}
+
+// ── CSV IMPORT ─────────────────────────────────────────
+function importOnboardingCSV(input) {
+  const file = input.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    try {
+      const text = e.target.result;
+      const parsed = parseCSVSimple(text);
+      if (!parsed.length) { showToast('CSV vide ou illisible', 'err'); return; }
+      const row = parsed[0]; // First data row
+      const headers = Object.keys(row);
+
+      // Helper: find column containing keyword
+      const find = (...kws) => {
+        const key = headers.find(h => kws.every(kw => h.toLowerCase().includes(kw.toLowerCase())));
+        return key ? (row[key]||'').trim() : '';
+      };
+
+      // Map CSV columns to onboarding fields
+      const mapped = {
+        sector:              find('secteur'),
+        structure_type:      find('type de structure'),
+        contact_name:        find('nom & prénom') || find('nom &'),
+        contact_title:       find('titre'),
+        contact_email:       find('email') || find('e-mail'),
+        contact_phone:       find('téléphone'),
+        tiktok_accounts:     (find('nom de chaque compte') + ' — abonnés: ' + find('nombre d\'abonnés actuels (pour chaque')).trim().replace(/^—\s*abonnés:\s*$/, ''),
+        social_networks:     find('autres réseaux sociaux'),
+        website:             find('site web') || find('site internet') || find('site e-commerce'),
+        resources_available: find('ressources disponibles'),
+        brand_words:         find('trois mots qui décrivent votre marque') || find('trois mots qui décrivent le groupe'),
+        brand_personality:   find('personnalité de la marque') || find('personnalité du groupe'),
+        brand_mission:       find('valeurs / mission') || find('mission globale'),
+        marketing_objectives: find('objectifs marketing') || find('objectifs globaux'),
+        differentiators:     find('différencie') || find('pourquoi vos clients'),
+        competitors:         find('principaux concurrents'),
+        best_sellers:        find('best-sellers') || find('noms des best'),
+        worst_sellers:       find('vendent le moins'),
+        events_campaigns:    find('événements') || find('campagnes importants'),
+        seasonality:         find('saisonnalité'),
+        available_people:    find('noms, fonctions et disponibilités'),
+        content_validator:   find('qui valide'),
+        expected_results:    find('résultats attendus'),
+        target_b2c: {
+          age_range:   find('tranche d\'âge') || find('tranche d\'age'),
+          gender:      find('genre (si pertinent)'),
+          location:    find('localisation / zone de marché'),
+          interests:   find('centres d\'intérêt'),
+          needs:       find('besoins / attentes'),
+          objections:  find('freins / objections'),
+        },
+        target_b2b: {
+          actor_type:     find('type d\'acteur'),
+          decision_role:  find('rôle dans la décision'),
+          needs:          find('besoins / attentes principaux'),
+          objections:     find('freins ou objections fréquents'),
+        },
+        submitted_at: find('horodatage') || null,
+        raw_data: row,
+      };
+
+      // Multi-brand detection
+      const brands = [];
+      const brandNames = find('noms des marques incluses') || find('nom de la marque');
+      if (brandNames && brandNames.includes(',')) {
+        brandNames.split(',').forEach(name => {
+          if (name.trim()) brands.push({ name: name.trim() });
+        });
+      }
+      mapped.brands = brands;
+
+      // Fill form fields
+      fillOnboardingFields(mapped);
+      showToast('✓ CSV importé — vérifiez les données puis enregistrez');
+      // Reset file input
+      input.value = '';
+    } catch(err) {
+      showToast('Erreur import : ' + err.message, 'err');
+    }
+  };
+  reader.readAsText(file, 'UTF-8');
+}
+
+function parseCSVSimple(text) {
+  const lines = text.split('\n').filter(l => l.trim());
+  if (lines.length < 2) return [];
+  const parseRow = line => {
+    const result = [];
+    let current = '', inQuote = false;
+    for (let i = 0; i < line.length; i++) {
+      const ch = line[i];
+      if (ch === '"' && !inQuote) { inQuote = true; }
+      else if (ch === '"' && inQuote && line[i+1] === '"') { current += '"'; i++; }
+      else if (ch === '"' && inQuote) { inQuote = false; }
+      else if (ch === ',' && !inQuote) { result.push(current.trim()); current = ''; }
+      else { current += ch; }
+    }
+    result.push(current.trim());
+    return result;
+  };
+  const headers = parseRow(lines[0]).map(h => h.replace(/^"|"$/g,'').trim());
+  return lines.slice(1).filter(l => l.trim()).map(line => {
+    const vals = parseRow(line);
+    const obj = {};
+    headers.forEach((h,i) => { obj[h] = (vals[i]||'').replace(/^"|"$/g,''); });
+    return obj;
+  });
+}
+
+// ═══════════════════════════════════════
+// STRATÉGIE MENSUELLE
+// ═══════════════════════════════════════
 
 let strategyCurrentPeriod = '';
 

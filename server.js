@@ -349,6 +349,42 @@ async function initDB() {
   await pool.query(`CREATE TABLE IF NOT EXISTS users (id SERIAL PRIMARY KEY, email TEXT UNIQUE NOT NULL, name TEXT, picture TEXT, google_id TEXT, role TEXT DEFAULT 'staff', active BOOLEAN DEFAULT true, last_login TIMESTAMPTZ, created_at TIMESTAMPTZ DEFAULT NOW())`);
   await pool.query(`CREATE UNIQUE INDEX IF NOT EXISTS users_google_id_idx ON users(google_id) WHERE google_id IS NOT NULL`);
   await pool.query(`
+    CREATE TABLE IF NOT EXISTS client_onboarding (
+      id SERIAL PRIMARY KEY,
+      client_id INTEGER REFERENCES clients(id) ON DELETE CASCADE,
+      submitted_at TIMESTAMPTZ,
+      structure_type TEXT DEFAULT '',
+      contact_name TEXT DEFAULT '',
+      contact_title TEXT DEFAULT '',
+      contact_email TEXT DEFAULT '',
+      contact_phone TEXT DEFAULT '',
+      sector TEXT DEFAULT '',
+      tiktok_accounts TEXT DEFAULT '',
+      social_networks TEXT DEFAULT '',
+      website TEXT DEFAULT '',
+      brand_words TEXT DEFAULT '',
+      brand_personality TEXT DEFAULT '',
+      brand_mission TEXT DEFAULT '',
+      marketing_objectives TEXT DEFAULT '',
+      differentiators TEXT DEFAULT '',
+      competitors TEXT DEFAULT '',
+      target_b2c JSONB DEFAULT '{}',
+      target_b2b JSONB DEFAULT '{}',
+      best_sellers TEXT DEFAULT '',
+      worst_sellers TEXT DEFAULT '',
+      events_campaigns TEXT DEFAULT '',
+      seasonality TEXT DEFAULT '',
+      available_people TEXT DEFAULT '',
+      content_validator TEXT DEFAULT '',
+      expected_results TEXT DEFAULT '',
+      resources_available TEXT DEFAULT '',
+      brands JSONB DEFAULT '[]',
+      raw_data JSONB DEFAULT '{}',
+      updated_at TIMESTAMPTZ DEFAULT NOW(),
+      UNIQUE(client_id)
+    )
+  `);
+  await pool.query(`
     CREATE TABLE IF NOT EXISTS client_strategy (
       id SERIAL PRIMARY KEY,
       client_id INTEGER REFERENCES clients(id) ON DELETE CASCADE,
@@ -1648,6 +1684,46 @@ app.delete('/api/products/:id', auth, async (req, res) => {
     await pool.query('UPDATE products SET active=false WHERE id=$1', [req.params.id]);
     res.json({ ok: true });
   } catch(err) { res.status(500).json({ error: err.message }); }
+});
+
+// ── CLIENT ONBOARDING ─────────────────────────────────
+app.get('/api/clients/:id/onboarding', auth, async (req, res) => {
+  try {
+    const { rows } = await pool.query(`SELECT * FROM client_onboarding WHERE client_id=$1`, [req.params.id]);
+    res.json({ onboarding: rows[0] || null });
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+app.post('/api/clients/:id/onboarding', auth, async (req, res) => {
+  const d = req.body;
+  try {
+    const { rows } = await pool.query(`
+      INSERT INTO client_onboarding
+        (client_id, submitted_at, structure_type, contact_name, contact_title, contact_email, contact_phone,
+         sector, tiktok_accounts, social_networks, website, brand_words, brand_personality, brand_mission,
+         marketing_objectives, differentiators, competitors, target_b2c, target_b2b,
+         best_sellers, worst_sellers, events_campaigns, seasonality, available_people,
+         content_validator, expected_results, resources_available, brands, raw_data, updated_at)
+      VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21,$22,$23,$24,$25,$26,$27,$28,$29,NOW())
+      ON CONFLICT (client_id) DO UPDATE SET
+        submitted_at=$2, structure_type=$3, contact_name=$4, contact_title=$5, contact_email=$6, contact_phone=$7,
+        sector=$8, tiktok_accounts=$9, social_networks=$10, website=$11, brand_words=$12, brand_personality=$13,
+        brand_mission=$14, marketing_objectives=$15, differentiators=$16, competitors=$17, target_b2c=$18,
+        target_b2b=$19, best_sellers=$20, worst_sellers=$21, events_campaigns=$22, seasonality=$23,
+        available_people=$24, content_validator=$25, expected_results=$26, resources_available=$27, brands=$28,
+        raw_data=$29, updated_at=NOW()
+      RETURNING *`,
+      [req.params.id, d.submitted_at||null, d.structure_type||'', d.contact_name||'', d.contact_title||'',
+       d.contact_email||'', d.contact_phone||'', d.sector||'', d.tiktok_accounts||'', d.social_networks||'',
+       d.website||'', d.brand_words||'', d.brand_personality||'', d.brand_mission||'', d.marketing_objectives||'',
+       d.differentiators||'', d.competitors||'', JSON.stringify(d.target_b2c||{}), JSON.stringify(d.target_b2b||{}),
+       d.best_sellers||'', d.worst_sellers||'', d.events_campaigns||'', d.seasonality||'', d.available_people||'',
+       d.content_validator||'', d.expected_results||'', d.resources_available||'',
+       JSON.stringify(d.brands||[]), JSON.stringify(d.raw_data||{})
+      ]
+    );
+    res.json({ onboarding: rows[0] });
+  } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
 // ── CLIENT STRATEGY ───────────────────────────────────

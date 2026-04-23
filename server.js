@@ -2,6 +2,18 @@ const express = require('express');
 const path = require('path');
 const crypto = require('crypto');
 const { Pool } = require('pg');
+const { OAuth2Client } = require('google-auth-library');
+
+const GOOGLE_CLIENT_ID     = process.env.GOOGLE_CLIENT_ID;
+const GOOGLE_CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET;
+const ALLOWED_EMAILS       = (process.env.ALLOWED_EMAILS || '').split(',').map(e => e.trim().toLowerCase());
+const APP_URL              = process.env.APP_URL || 'https://mazine-app-production.up.railway.app';
+
+const googleClient = new OAuth2Client(
+  GOOGLE_CLIENT_ID,
+  GOOGLE_CLIENT_SECRET,
+  APP_URL + '/api/auth/google/callback'
+);
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -335,6 +347,19 @@ async function initDB() {
   await pool.query(`ALTER TABLE time_entries    ADD COLUMN IF NOT EXISTS content_type      TEXT DEFAULT ''`);
   await pool.query(`ALTER TABLE time_entries    ADD COLUMN IF NOT EXISTS internal_project  TEXT DEFAULT ''`);
   await pool.query(`
+    CREATE TABLE IF NOT EXISTS users (
+      id SERIAL PRIMARY KEY,
+      email TEXT UNIQUE NOT NULL,
+      name TEXT,
+      picture TEXT,
+      google_id TEXT UNIQUE,
+      role TEXT DEFAULT 'staff',
+      active BOOLEAN DEFAULT true,
+      last_login TIMESTAMPTZ,
+      created_at TIMESTAMPTZ DEFAULT NOW()
+    )
+  `);
+  await pool.query(`
     CREATE TABLE IF NOT EXISTS client_strategy (
       id SERIAL PRIMARY KEY,
       client_id INTEGER REFERENCES clients(id) ON DELETE CASCADE,
@@ -370,7 +395,7 @@ async function initDB() {
 initDB().catch(err => console.error('DB init error:', err));
 
 // ── SESSION ───────────────────────────────────────────
-const sessions = new Map();
+const sessions = new Map(); // token → { expiry, user }
 const SESSION_TTL = 8 * 60 * 60 * 1000;
 
 function createToken() { return crypto.randomBytes(32).toString('hex'); }
@@ -378,15 +403,74 @@ function createToken() { return crypto.randomBytes(32).toString('hex'); }
 function isAuthenticated(req) {
   const token = (req.headers['authorization'] || '').replace('Bearer ', '').trim();
   if (!token) return false;
-  const expiry = sessions.get(token);
-  if (!expiry || Date.now() > expiry) { sessions.delete(token); return false; }
+  const session = sessions.get(token);
+  if (!session) return false;
+  if (Date.now() > session.expiry) { sessions.delete(token); return false; }
   return true;
+}
+
+function getSessionUser(req) {
+  const token = (req.headers['authorization'] || '').replace('Bearer ', '').trim();
+  return sessions.get(token)?.user || null;
 }
 
 function auth(req, res, next) {
   if (!isAuthenticated(req)) return res.status(401).json({ error: 'Non authentifié.' });
   next();
 }
+
+// ── GOOGLE OAUTH ──────────────────────────────────────
+app.get('/api/auth/google', (req, res) => {
+  const url = googleClient.generateAuthUrl({
+    access_type: 'offline',
+    scope: ['profile', 'email'],
+    prompt: 'select_account',
+  });
+  res.redirect(url);
+});
+
+app.get('/api/auth/google/callback', async (req, res) => {
+  const { code } = req.query;
+  if (!code) return res.redirect('/?error=no_code');
+  try {
+    const { tokens } = await googleClient.getToken(code);
+    googleClient.setCredentials(tokens);
+    const ticket = await googleClient.verifyIdToken({
+      idToken: tokens.id_token,
+      audience: GOOGLE_CLIENT_ID,
+    });
+    const payload = ticket.getPayload();
+    const email   = payload.email.toLowerCase();
+    const name    = payload.name;
+    const picture = payload.picture;
+    const googleId = payload.sub;
+
+    // Check allowed emails
+    if (ALLOWED_EMAILS.length && !ALLOWED_EMAILS.includes(email)) {
+      return res.redirect('/?error=unauthorized');
+    }
+
+    // Upsert user
+    const { rows } = await pool.query(`
+      INSERT INTO users (email, name, picture, google_id, last_login)
+      VALUES ($1,$2,$3,$4,NOW())
+      ON CONFLICT (email) DO UPDATE SET
+        name=$2, picture=$3, google_id=$4, last_login=NOW()
+      RETURNING *`,
+      [email, name, picture, googleId]
+    );
+    const user = rows[0];
+
+    // Create session token
+    const token = createToken();
+    sessions.set(token, { expiry: Date.now() + SESSION_TTL, user });
+    // Redirect to app with token in URL (picked up by frontend)
+    res.redirect(`/business.html?sso_token=${token}`);
+  } catch (err) {
+    console.error('Google OAuth error:', err);
+    res.redirect('/?error=oauth_failed');
+  }
+});
 
 // ── AUTH ──────────────────────────────────────────────
 app.post('/api/login', (req, res) => {
@@ -395,13 +479,19 @@ app.post('/api/login', (req, res) => {
   if (!expected) return res.status(500).json({ error: 'APP_PASSWORD not configured.' });
   if (password !== expected) return res.status(401).json({ error: 'Mot de passe incorrect.' });
   const token = createToken();
-  sessions.set(token, Date.now() + SESSION_TTL);
+  sessions.set(token, { expiry: Date.now() + SESSION_TTL, user: { email: 'admin', role: 'admin', name: 'Victor' } });
   res.json({ token });
 });
 
 app.post('/api/logout', (req, res) => {
   sessions.delete((req.headers['authorization'] || '').replace('Bearer ', '').trim());
   res.json({ ok: true });
+});
+
+// ── ME ────────────────────────────────────────────────
+app.get('/api/me', auth, (req, res) => {
+  const user = getSessionUser(req);
+  res.json({ user });
 });
 
 // ── ANALYTICS CLIENTS ─────────────────────────────────

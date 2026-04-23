@@ -1087,6 +1087,27 @@ let currentContentId = null; // for task panel
 // INIT
 // ═══════════════════════════════════════════════
 document.addEventListener('DOMContentLoaded', async () => {
+  // Handle SSO redirect token
+  const urlParams = new URLSearchParams(window.location.search);
+  const ssoToken = urlParams.get('sso_token');
+  if (ssoToken) {
+    sessionStorage.setItem('mz_token', ssoToken);
+    window.history.replaceState({}, '', '/business.html');
+  }
+
+  // Load current user info
+  const meRes = await fetch('/api/me', { headers: { 'Authorization': 'Bearer ' + token } });
+  if (meRes.ok) {
+    const meData = await meRes.json();
+    if (meData.user?.picture) {
+      const avatar = document.createElement('img');
+      avatar.src = meData.user.picture;
+      avatar.style.cssText = 'width:28px;height:28px;border-radius:50%;border:1px solid rgba(97,143,155,0.4);cursor:pointer;';
+      avatar.title = meData.user.name || meData.user.email;
+      document.querySelector('header > div:last-child').prepend(avatar);
+    }
+  }
+
   const now = new Date().toISOString().slice(0,7);
   document.getElementById('month-picker').value = now;
   document.getElementById('time-filter-month').value = now;

@@ -2979,7 +2979,7 @@ async function saveOnboarding() {
       needs: g('ob-b2b-needs'), objections: g('ob-b2b-objections') },
   };
   const d = await api('POST', `/api/clients/${clientId}/onboarding`, body);
-  if (!d) return;
+  if (!d || d.error) { showToast(d?.error || 'Erreur serveur', 'err'); return; }
   showToast('Fiche onboarding enregistrée ✓');
   document.getElementById('ob-updated').textContent =
     'Dernière mise à jour : ' + new Date().toLocaleDateString('fr-FR',{day:'numeric',month:'long',year:'numeric'});

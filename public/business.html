@@ -447,6 +447,14 @@ tbody tr:hover td { background: rgba(239,214,177,0.015); }
   </div>
 
   <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.75rem;">
+    <div class="section-title">Équipe & Accès</div>
+<div class="section-block" id="users-section">
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;">
+    <p style="font-size:0.6rem;letter-spacing:0.2em;text-transform:uppercase;color:rgba(239,214,177,0.3);">Membres de l'équipe</p>
+    <button class="btn-primary" style="font-size:0.68rem;padding:0.4rem 1rem;" onclick="openInviteModal()">+ Inviter</button>
+  </div>
+  <div id="users-list"></div>
+</div>
     <p style="font-size:0.52rem;letter-spacing:0.15em;text-transform:uppercase;color:rgba(239,214,177,0.28);margin-bottom:0;">Contrats clients</p>
     <button class="btn-primary" style="font-size:0.65rem;padding:0.35rem 1rem;" onclick="openNewClientModal()">+ Nouveau client</button>
   </div>
@@ -753,7 +761,31 @@ tbody tr:hover td { background: rgba(239,214,177,0.015); }
   </div>
 </div>
 
-<!-- Modal: Stratégie mensuelle -->
+<!-- Modal: Inviter utilisateur -->
+<div class="modal-bg" id="modal-invite">
+  <div class="modal" style="max-width:440px;">
+    <h3 style="margin-bottom:1.25rem;">✉️ Inviter un membre</h3>
+    <div class="field">
+      <label>Email Google</label>
+      <input type="email" id="invite-email" class="field-input" placeholder="prenom@domaine.com">
+    </div>
+    <div class="field">
+      <label>Rôle</label>
+      <select id="invite-role" class="field-input">
+        <option value="director">Director</option>
+        <option value="staff">Staff</option>
+        <option value="admin">Admin</option>
+      </select>
+    </div>
+    <p style="font-family:'Lora',serif;font-style:italic;font-size:0.75rem;color:rgba(239,214,177,0.3);margin-top:0.5rem;">
+      La personne pourra se connecter via "Se connecter avec Google" dès que son email est ajouté.
+    </p>
+    <div class="modal-footer">
+      <button class="btn-ghost" onclick="closeModal('modal-invite')">Annuler</button>
+      <button class="btn-primary" onclick="inviteUser()">Ajouter →</button>
+    </div>
+  </div>
+</div>
 <div class="modal-bg" id="modal-strategy">
   <div class="modal" style="max-width:600px;">
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.1rem;">
@@ -1117,6 +1149,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   document.getElementById('header-month').textContent = fmtMonth(now);
   await Promise.all([loadTeam(), loadClients(), loadDefaults()]);
   await loadContracts();
+  loadUsers();
 
   // Populate finance client selects
   clientsData.forEach(c => {
@@ -2638,9 +2671,77 @@ function openConvertModal(leadId) {
   openModal('modal-convert');
 }
 
-// ═══════════════════════════════════════════════
-// STRATÉGIE MENSUELLE
-// ═══════════════════════════════════════════════
+// ═══════════════════════════════════════
+// TEAM & ACCÈS
+// ═══════════════════════════════════════
+const ROLE_CONFIG = {
+  admin:    { label: 'Admin',    color: '#c05a5a', bg: 'rgba(192,90,90,0.12)' },
+  director: { label: 'Director', color: 'var(--teal)', bg: 'var(--teal-dim)' },
+  staff:    { label: 'Staff',    color: 'rgba(239,214,177,0.6)', bg: 'rgba(239,214,177,0.06)' },
+  client:   { label: 'Client',   color: '#a0c4d8', bg: 'rgba(160,196,216,0.1)' },
+};
+
+async function loadUsers() {
+  const d = await api('GET', '/api/users');
+  if (!d?.users) return;
+  const el = document.getElementById('users-list');
+  if (!d.users.length) { el.innerHTML = '<p style="font-family:Lora,serif;font-style:italic;font-size:0.8rem;color:rgba(239,214,177,0.25);">Aucun membre encore.</p>'; return; }
+  el.innerHTML = d.users.map(u => {
+    const r = ROLE_CONFIG[u.role] || ROLE_CONFIG.staff;
+    const lastLogin = u.last_login ? new Date(u.last_login).toLocaleDateString('fr-FR', {day:'numeric', month:'short', year:'numeric'}) : 'Jamais connecté';
+    const initials = (u.name || u.email).split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2);
+    return `
+    <div style="display:flex;align-items:center;gap:0.85rem;padding:0.85rem 0;border-bottom:0.5px solid rgba(239,214,177,0.06);">
+      ${u.picture
+        ? `<img src="${u.picture}" style="width:36px;height:36px;border-radius:50%;border:1px solid rgba(97,143,155,0.3);flex-shrink:0;" onerror="this.style.display='none'">`
+        : `<div style="width:36px;height:36px;border-radius:50%;background:var(--teal-dim);border:1px solid var(--teal-border);display:flex;align-items:center;justify-content:center;font-size:0.7rem;color:var(--teal);flex-shrink:0;">${initials}</div>`
+      }
+      <div style="flex:1;min-width:0;">
+        <p style="font-size:0.85rem;color:var(--cream);font-weight:400;margin-bottom:0.1rem;">${u.name || '—'}</p>
+        <p style="font-size:0.7rem;color:rgba(239,214,177,0.4);">${u.email}</p>
+        <p style="font-size:0.6rem;color:rgba(239,214,177,0.2);font-family:'Lora',serif;font-style:italic;margin-top:0.15rem;">Dernière connexion : ${lastLogin}</p>
+      </div>
+      <div style="display:flex;align-items:center;gap:0.5rem;flex-shrink:0;">
+        <span style="font-size:0.58rem;letter-spacing:0.12em;text-transform:uppercase;padding:0.2rem 0.6rem;border-radius:2rem;background:${r.bg};color:${r.color};border:0.5px solid ${r.color};">${r.label}</span>
+        <button onclick="toggleUserActive(${u.id}, ${u.active})" style="background:transparent;border:0.5px solid ${u.active ? 'rgba(97,143,155,0.3)' : 'rgba(192,90,90,0.3)'};color:${u.active ? 'var(--teal)' : '#f0a0a0'};padding:0.2rem 0.55rem;border-radius:2rem;font-size:0.58rem;cursor:pointer;letter-spacing:0.08em;text-transform:uppercase;" title="${u.active ? 'Désactiver' : 'Activer'}">
+          ${u.active ? '● Actif' : '○ Inactif'}
+        </button>
+        <select onchange="changeUserRole(${u.id}, this.value)" style="background:var(--cream-faint);border:0.5px solid rgba(239,214,177,0.1);color:rgba(239,214,177,0.5);padding:0.2rem 0.4rem;border-radius:0.4rem;font-size:0.6rem;cursor:pointer;">
+          ${['admin','director','staff','client'].map(ro => `<option value="${ro}" ${u.role===ro?'selected':''}>${ROLE_CONFIG[ro].label}</option>`).join('')}
+        </select>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function openInviteModal() {
+  document.getElementById('invite-email').value = '';
+  document.getElementById('invite-role').value = 'director';
+  openModal('modal-invite');
+}
+
+async function inviteUser() {
+  const email = document.getElementById('invite-email').value.trim();
+  const role  = document.getElementById('invite-role').value;
+  if (!email) { showToast('Email requis', 'warn'); return; }
+  const d = await api('POST', '/api/users/invite', { email, role });
+  if (!d) return;
+  showToast('✓ ' + email + ' ajouté — peut se connecter via Google');
+  closeModal('modal-invite');
+  loadUsers();
+}
+
+async function toggleUserActive(id, currentActive) {
+  await api('PUT', '/api/users/' + id, { active: !currentActive });
+  loadUsers();
+}
+
+async function changeUserRole(id, role) {
+  await api('PUT', '/api/users/' + id, { role });
+  showToast('Rôle mis à jour');
+  loadUsers();
+}
+
 let strategyCurrentPeriod = '';
 
 function strategyPeriodLabel(period) {

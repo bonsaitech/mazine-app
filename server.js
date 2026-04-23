@@ -434,8 +434,12 @@ app.get('/api/auth/google/callback', async (req, res) => {
     const picture = payload.picture;
     const googleId = payload.sub;
 
-    // Check allowed emails
-    if (ALLOWED_EMAILS.length && !ALLOWED_EMAILS.includes(email)) {
+    // Check allowed emails — DB first, then env fallback
+    const existingUser = await pool.query(`SELECT * FROM users WHERE email=$1`, [email]);
+    if (existingUser.rows.length > 0 && !existingUser.rows[0].active) {
+      return res.redirect('/?error=unauthorized');
+    }
+    if (existingUser.rows.length === 0 && ALLOWED_EMAILS.length && !ALLOWED_EMAILS.includes(email)) {
       return res.redirect('/?error=unauthorized');
     }
 
@@ -475,6 +479,51 @@ app.post('/api/login', (req, res) => {
 app.post('/api/logout', (req, res) => {
   sessions.delete((req.headers['authorization'] || '').replace('Bearer ', '').trim());
   res.json({ ok: true });
+});
+
+// ── USERS (admin) ─────────────────────────────────────
+app.get('/api/users', auth, async (req, res) => {
+  try {
+    const { rows } = await pool.query(`SELECT id, email, name, picture, role, active, last_login, created_at FROM users ORDER BY created_at ASC`);
+    res.json({ users: rows });
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+app.post('/api/users/invite', auth, async (req, res) => {
+  const { email, role } = req.body;
+  if (!email) return res.status(400).json({ error: 'Email requis.' });
+  try {
+    const { rows } = await pool.query(`
+      INSERT INTO users (email, role, active, created_at)
+      VALUES ($1, $2, true, NOW())
+      ON CONFLICT (email) DO UPDATE SET role=$2, active=true
+      RETURNING *`,
+      [email.toLowerCase().trim(), role || 'staff']
+    );
+    res.json({ user: rows[0] });
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+app.put('/api/users/:id', auth, async (req, res) => {
+  const { role, active } = req.body;
+  try {
+    const fields = [];
+    const vals = [];
+    let i = 1;
+    if (role !== undefined) { fields.push(`role=$${i++}`); vals.push(role); }
+    if (active !== undefined) { fields.push(`active=$${i++}`); vals.push(active); }
+    if (!fields.length) return res.status(400).json({ error: 'Rien à mettre à jour.' });
+    vals.push(req.params.id);
+    const { rows } = await pool.query(`UPDATE users SET ${fields.join(',')} WHERE id=$${i} RETURNING *`, vals);
+    res.json({ user: rows[0] });
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+app.delete('/api/users/:id', auth, async (req, res) => {
+  try {
+    await pool.query(`DELETE FROM users WHERE id=$1`, [req.params.id]);
+    res.json({ ok: true });
+  } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
 // ── ME ────────────────────────────────────────────────
